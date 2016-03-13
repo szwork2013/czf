@@ -1,0 +1,9 @@
+{
+  "ignore": [
+    "test/*",
+    "client/**/*",
+    "views/*",
+    "test/*",
+    "public/*"
+  ]
+}
