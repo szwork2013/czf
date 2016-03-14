@@ -1,5 +1,7 @@
 'use strict';
 
+import log from '../utils/log'
+
 import config from '../../config'
 import React, { Component, PropTypes } from 'react';
 
@@ -10,10 +12,10 @@ export default class SignInForm extends Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    let mobile = this.refs.mobile.state.value;
-    let password = this.refs.password.state.value;
+    let mobile = this.refs.mobile.value;
+    let password = this.refs.password.value;
     let formData = {
-      mobile: mobile,
+      name: mobile,
       password: password,
     };
     this.props.signinSubmit(formData);
@@ -28,9 +30,9 @@ export default class SignInForm extends Component {
           <span>{config.name}</span>
         </div>
         <form onSubmit={this.handleSubmit.bind(this)} autoComplete="off">
-            <input s={12} label="手机号" validate  ref="mobile" required>
+            <input s={12} label="邮箱" validate  ref="mobile" required defaultValue=''>
             </input>
-            <input s={12} label="密码" validate  type="password" ref="password" required>
+            <input s={12} label="密码" validate  type="password" ref="password" required defaultValue=''>
             </input>
             <button
               label="登录"
@@ -38,7 +40,7 @@ export default class SignInForm extends Component {
               style={{ marginTop: '20' }}
               fullWidth={true}
               secondary={true}
-            />
+            >login</button>
         </form>
       </div>
     );

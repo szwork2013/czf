@@ -10,6 +10,7 @@ export const CLOSE_TOAST = 'CLOSE_TOAST';
 
 //signin
 export const SIGNIN_SUCCESS = 'SIGNIN_SUCCESS';
+export const SIGNIN_FAILURE = 'SIGNIN_FAILURE';
 
 
 

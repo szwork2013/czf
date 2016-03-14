@@ -7,8 +7,10 @@ import { CALL_API_V1 } from '../middleware/api';
 function requestSignIn(formData) {
   return {
     [CALL_API_V1]: {
-      types: [ types.REQUEST, types.SIGNIN_SUCCESS, types.FAILURE ],
-      url: '/api/signin',
+      actions: {
+         successType: types.SIGNIN_SUCCESS
+      },
+      url: '/signin/name',
       method: 'POST',
       data: formData
     }

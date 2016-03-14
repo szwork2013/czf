@@ -3,14 +3,14 @@
 import { OPEN_TOAST, CLOSE_TOAST } from '../constants/actionTypes';
 
 const initState = {
-  message: '',
+  msg: '',
   status: 200,
   isOpen: false,
   duration: 3000
 };
 
 export default function toast(toast = initState, action) {
-  let newToast = Object.assign({}, toast, action.toast);
+  let newToast = Object.assign({}, toast, action);
   delete newToast.type;
   switch (action.type) {
     case OPEN_TOAST:

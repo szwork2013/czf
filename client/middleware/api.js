@@ -1,19 +1,22 @@
 'use strict';
 
+import log from '../utils/log'
 import _ from 'lodash'
 import jquery from 'jquery'
 import fetch from 'isomorphic-fetch';
 
-import { loadingOn, loadOff } from '../actions/loading';
+import { loadingOn, loadingOff } from '../actions/loading';
 import { openToast } from '../actions/toast';
 import { Session } from '../utils/session';
+
+export const CALL_API = Symbol('Call API');
 export const CALL_API_V1 = Symbol('Call API V1');
 
 const toLowerCaseKeys = (obj, types = ['string'], isExclude = false) => {
   if (!obj) return obj;
   let retObj = {};
   types = Array.prototype.slice.apply(types);
-  isInclude = !isExcluder;
+  let isInclude = !isExclude;
   Object.getOwnPropertyNames(obj).forEach((key) => {
     var value = obj[key];
     var inType = types.indexOf(typeof value) > -1;
@@ -78,30 +81,34 @@ function callApi(url, method = 'POST', data = {}, headers = {}) {
  * 声明中间件
  */
 export default store => next => action => {
+  const callAPI = action[CALL_API];
   const callAPIV1 = action[CALL_API_V1];
-
-  if (!callAPIV1) {
-    return next(action);
-  };
+  var callSymbol = null
 
   //取参数
-  let { url, method, data, headers, actions, manualLoading, manualResponse } = callAPI;
+  if (callAPI) {
+    callSymbol = CALL_API;
+    var { url, method, data, headers, actions, manualLoading, manualResponse } = callAPI;
+  } else if (callAPIV1) {
+    callSymbol = CALL_API_V1;
+    var { url, method, data, headers, actions, manualLoading, manualResponse } = callAPIV1;
+    url = '/api/v1' + url;
+  } else {
+    return next(action);
+  }
   const { requestType, successType, failureType, responseType } = actions;
 
   //根据请求API为url加前缀
-  if (callAPIV1) {
-    url = '/api/v1' + url;
-  }
 
-  function actionWith(data) {
+  function actionWith(data, callSymbol = CALL_API) {
     const finalAction = Object.assign({}, action, data);
-    delete finalAction[CALL_API];
+    delete finalAction[callSymbol];
     return finalAction;
   }
 
   //prepare to require
   if (requestType) {
-    next(actionWith({ type: requestType }));
+    next(actionWith({ type: requestType }, callSymbol));
   }
 
   //auto loading on
@@ -117,11 +124,14 @@ export default store => next => action => {
     //treat response manual
     if (manualResponse) {
       resObj.type = responseType;
-      next(actionWith(resObj));
+      next(actionWith(resObj, callSymbol));
     } else {
       if (resObj.resStatus === 200) {
         resObj.type = successType;
-        next(actionWith(resObj));
+        next(actionWith(resObj, callSymbol));
+      } else if (failureType) {
+        resObj.type = failureType; 
+        next(actionWith(resObj, callSymbol));
       } else {
         let msg = 'unknow error!'
         let status = 500
@@ -131,18 +141,26 @@ export default store => next => action => {
       }
     }
   }).catch( error => {
+    log.info(error);
+    let resObj = {resType: 'error', resData: error, resStatus: 500}
     //auto loading off
     if (!manualLoading) {
       next(loadingOff());
     }
-    resObj.error = error
     if (manualResponse) {
       //treat response manual
       resObj.type = responseType;
-    } else {
+      next(actionWith(resObj, callSymbol));
+    } else if (failureType) {
       resObj.type = failureType; 
+      next(actionWith(resObj, callSymbol));
+    } else {
+      let msg = error.name + '[' + error.message + ']';
+      let status = 500
+      if (resObj.resData && resObj.resData.msg) msg = resObj.resData.msg;
+      if (resObj.resStatus) status = resObj.resStatus;
+      next(openToast({status: status, msg: msg}));
     }
-    next(actionWith(resObj));
   })
 
 };

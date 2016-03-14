@@ -19,9 +19,9 @@ import routes from './routers';
 
 
 //store
-// const composeCreateStore = compose(applyMiddleware(thunk, api, reduxLogger()))(createStore);
-// const store = composeCreateStore(rootReducer);
-const store = createStore(rootReducer)
+const composeCreateStore = compose(applyMiddleware(thunk, api, reduxLogger()))(createStore);
+const store = composeCreateStore(rootReducer);
+// const store = createStore(rootReducer)
 
 //history
 const history = syncHistoryWithStore(browserHistory, store);
@@ -40,6 +40,10 @@ class Root extends Component {
     );
   }
 }
+
+//css
+require('./styles/loading.css');
+
 
 render(
   <Root store={store} history={history} />,

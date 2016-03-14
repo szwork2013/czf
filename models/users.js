@@ -74,6 +74,7 @@ let users = [{
     email: '546113328@qq.com',
     password: '',
     confirmed: true,
+    confirmedEmail: true,
     available: true,
   }, {
     firstName: '黄Manager',
@@ -82,6 +83,7 @@ let users = [{
     email: '372057124@qq.com',
     password: '',
     confirmed: true,
+    confirmedEmail: true,
     available: true,
   },
 ];

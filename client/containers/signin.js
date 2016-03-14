@@ -1,10 +1,12 @@
 'use strict';
+import log from '../utils/log'
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { browserHistory } from 'react-router';
 import * as SignActions from '../actions/signin';
+import * as ToastActions from '../actions/toast';
 
 import SignInForm from '../components/signin_form';
 import Loading from '../components/loading';
@@ -50,7 +52,7 @@ class SignIn extends Component {
 
 function mapStateToProps(state) {
   return {
-    isLoading: state.loader,
+    isLoading: state.loading,
     data: state.signin.data,
     success: state.signin.success,
   };
@@ -58,7 +60,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: {}
+    actions: bindActionCreators(Object.assign({}, SignActions, ToastActions), dispatch)
   };
 }
 

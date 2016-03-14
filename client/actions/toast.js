@@ -7,7 +7,7 @@ export function openToast(obj) {
   return {
     type: OPEN_TOAST,
     status: obj.status,
-    message: obj.msg
+    msg: obj.msg
   };
 }
 

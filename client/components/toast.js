@@ -1,5 +1,5 @@
 'use strict';
-
+import log from '../utils/log'
 import React, { Component, PropTypes } from 'react';
 import { connect,  } from 'react-redux';
 import Snackbar from 'material-ui/lib/snackbar';
@@ -12,11 +12,11 @@ class Toast extends Component {
   }
 
   render() {
-    const { message, status, isOpen, duration } = this.props.toast;
+    const { msg, status, isOpen, duration } = this.props.toast;
     return (
       <Snackbar
         open={isOpen}
-        message={message}
+        message={msg}
         autoHideDuration={duration}
         onRequestClose={this.handleRequestClose.bind(this)}
         />

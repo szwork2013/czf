@@ -66,13 +66,11 @@ var config = {
 
 };
 
-var fs = require('fs');
-if(fs.existsSync('./config_e.js')){
-    try {
-        var relConfig = require('./config_e.js');
-        Object.assign(config, relConfig);
-    } catch (e) {
-    }
+try {
+    var relConfig = require('./config_e.js');
+    Object.assign(config, relConfig);
+} catch (e) {
 }
+
 
 module.exports = config;
