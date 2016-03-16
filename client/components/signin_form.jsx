@@ -13,7 +13,10 @@ import utils from '../utils'
 export default class SignInForm extends Component {
   constructor(props, context) {
     super(props, context);
-    this.state = {'signinType': 'authCode'};
+    let user = props.user
+    this.state = {
+      signinType: 'password'
+    };
   }
 
   /*
@@ -100,7 +103,7 @@ export default class SignInForm extends Component {
       <div>
         <div style={styles.group}>
           <FontIcon className="material-icons" style={styles.icon}>face</FontIcon>
-          <TextField hintText="手机号 / 邮箱" floatingLabelText="手机号 / 邮箱" ref='name' style={styles.input} value={this.props.user.mobile}/>
+          <TextField hintText="手机号 / 邮箱" floatingLabelText="手机号 / 邮箱" ref='name' style={styles.input} defaultValue={this.getUserSigninName()}/>
         </div>
         <div style={styles.group}>
           <FontIcon className="material-icons" style={styles.icon}>lock_outline</FontIcon>
@@ -114,7 +117,7 @@ export default class SignInForm extends Component {
       <div>
         <div style={styles.group}>
           <FontIcon className="material-icons" style={styles.icon}>local_phone</FontIcon>
-          <TextField hintText="手机号" floatingLabelText="手机号" ref='mobile' style={styles.input} value={this.props.user.mobile}/>
+          <TextField hintText="手机号" floatingLabelText="手机号" ref='mobile' style={styles.input} defaultValue={this.getUserMobile()}/>
         </div>
         <div style={styles.group}>
           <FontIcon className="material-icons" style={styles.icon}>textsms</FontIcon>
