@@ -141,7 +141,6 @@ export default store => next => action => {
       }
     }
   }).catch( error => {
-    log.info(error);
     let resObj = {resType: 'error', resData: error, resStatus: 500}
     //auto loading off
     if (!manualLoading) {

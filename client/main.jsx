@@ -16,10 +16,12 @@ import { syncHistoryWithStore } from 'react-router-redux';
 
 import routes from './routers';
 
+import MUIMaster from './containers/mui_master'
 
 
+var showReduxLogger = true;
 //store
-const composeCreateStore = compose(applyMiddleware(thunk, api, reduxLogger()))(createStore);
+var composeCreateStore = showReduxLogger? compose(applyMiddleware(thunk, api, reduxLogger()))(createStore): compose(applyMiddleware(thunk, api))(createStore);
 const store = composeCreateStore(rootReducer);
 // const store = createStore(rootReducer)
 
@@ -35,7 +37,9 @@ class Root extends Component {
     const { store, history } = this.props;
     return (
       <Provider store={store}>
-        <Router history={history} routes={routes} />
+        <MUIMaster>
+          <Router history={history} routes={routes} />
+        </MUIMaster>
       </Provider>
     );
   }

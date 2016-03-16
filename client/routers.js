@@ -19,10 +19,9 @@ function isSignin(nextState, replace) {
 
 
 const routes = (
-  <Router>
-    <Route path="/" component={SignIn} />
-    <Route onEnter={isSignin} path="/signin" component={SignIn} />
-  </Router>
+  <Route path="/" >
+    <Route onEnter={isSignin} path="signin" component={SignIn} />
+  </Route>
 );
 
 export default routes;
