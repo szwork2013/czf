@@ -144,44 +144,45 @@ export default class SignInForm extends Component {
       );
     }
     return (
-      <div style={styles.container}>
-      <div style={styles.tableContainer}>
-      <div style={styles.cellContainer}>
-      <Paper zDepth={3} style={styles.paper}>
-        <div style={styles.photo}>
-        {
-          this.props.user && this.props.user.photo ?
-            <Avatar url={this.props.user.photo} size={150} style={styles.avatar}/> : 
-            <Avatar size={150} icon={defaultAvatar()} style={styles.avatar}/>
-          // <img src={this.props.user &&  this.props.user.photo ? this.props.user.photo : ''} style={styles.image} />
-        }
-        </div>
-        {
-          this.getSiginView(styles)
-        }
+      <div>
+        <div style={styles.background}></div>
+        <div style={styles.tableContainer}>
+          <div style={styles.cellContainer}>
+            <Paper zDepth={3} style={styles.paper}>
+              <div style={styles.photo}>
+              {
+                this.props.user && this.props.user.photo ?
+                  <Avatar url={this.props.user.photo} size={150} style={styles.avatar}/> : 
+                  <Avatar size={150} icon={defaultAvatar()} style={styles.avatar}/>
+                // <img src={this.props.user &&  this.props.user.photo ? this.props.user.photo : ''} style={styles.image} />
+              }
+              </div>
+              {
+                this.getSiginView(styles)
+              }
 
-        <div style={styles.group}>
-          <Checkbox label="记住用户名" defaultChecked={this.props.isRememberMe} style={styles.checkBox} iconStyle={styles.checkBoxIconStyle}
-            onCheck={(e) => this.checkBoxChecked(this.props.isRememberMe, this.props.rememberMe)} />
-          <Checkbox label="自动登录" defaultChecked={this.props.isAutoSignin}  style={styles.checkBox} iconStyle={styles.checkBoxIconStyle}
-            onCheck={(e) => this.checkBoxChecked(this.props.isAutoSignin, this.props.autoSignin)} />
-        </div>
-        <div style={styles.group}>
-          <FlatButton label="&nbsp;登录" style={styles.commitBtn} onClick={this.signinSubmit.bind(this)}/>
-        </div>
+              <div style={styles.group}>
+                <Checkbox label="记住用户名" defaultChecked={this.props.isRememberMe} style={styles.checkBox} iconStyle={styles.checkBoxIconStyle}
+                  onCheck={(e) => this.checkBoxChecked(this.props.isRememberMe, this.props.rememberMe)} />
+                <Checkbox label="自动登录" defaultChecked={this.props.isAutoSignin}  style={styles.checkBox} iconStyle={styles.checkBoxIconStyle}
+                  onCheck={(e) => this.checkBoxChecked(this.props.isAutoSignin, this.props.autoSignin)} />
+              </div>
+              <div style={styles.group}>
+                <FlatButton label="&nbsp;登录" style={styles.commitBtn} onClick={this.signinSubmit.bind(this)}/>
+              </div>
 
-        <div style={Object.assign({}, styles.group, {marginTop: '20px', textAlign: 'center'})}>
-          {
-            this.state.signinType==='authCode' ?
-              <a style={styles.a} onClick={(e) => this.setState({'signinType': 'password'})} >密码登录</a>:
-              <a style={styles.a} onClick={(e) => this.setState({'signinType': 'authCode'})} >单次登录</a>
-          }
-          <span style={styles.aDivider}>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span> 
-          <a style={styles.a}>&nbsp;&nbsp;注&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;册&nbsp;&nbsp;</a>
+              <div style={Object.assign({}, styles.group, {marginTop: '20px', textAlign: 'center'})}>
+                {
+                  this.state.signinType==='authCode' ?
+                    <a style={styles.a} onClick={(e) => this.setState({'signinType': 'password'})} >密码登录</a>:
+                    <a style={styles.a} onClick={(e) => this.setState({'signinType': 'authCode'})} >单次登录</a>
+                }
+                <span style={styles.aDivider}>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span> 
+                <a style={styles.a}>&nbsp;&nbsp;注&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;册&nbsp;&nbsp;</a>
+              </div>
+            </Paper>
+          </div>
         </div>
-      </Paper>
-      </div>
-      </div>
       </div>
     );
   }
@@ -197,9 +198,12 @@ export default class SignInForm extends Component {
     const textColor = palette.textColor;
     const disabledColor = palette.disabledColor;
     const styles = {
-      container: {
+      background: {
         backgroundColor: backgroundColor,
         height: '100vh',
+        position: 'fixed',
+        width: '100%',
+        zIndex: '-1000'
       },
       tableContainer: {
         display: 'table',
