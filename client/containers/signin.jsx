@@ -15,7 +15,7 @@ import Toast from '../components/toast';
 import { Session } from '../utils/session';
 import { Storage } from '../utils/storage';
 
-import { SIGNIN, GET_AUTH_CODE } from '../constants/actionTypes';
+import { SIGNIN, GET_AUTH_CODE, GET_SELF } from '../constants/actionTypes';
 
 
 class SignIn extends Component {
@@ -60,6 +60,7 @@ class SignIn extends Component {
     this.props.actions.clearSigin()
   }
 
+
   /*
    * 登陆结果
    */
@@ -68,6 +69,7 @@ class SignIn extends Component {
     data = data.data;
     let user = data.user
     let token = data.token
+    let expiresIn = data.expiresIn
     let actions = this.props.actions
     if (status===200) {
       if (signin.isRememberMe) {
@@ -77,27 +79,72 @@ class SignIn extends Component {
       }
       if (signin.isAutoSignin) {
         Storage.set('token', token);
+        Storage.set('expiresIn', expiresIn);
       } else {
         Storage.remove('token');
+        Storage.remove('expiresIn');
       }
-      actions.saveUserToRedux(data)
+      actions.saveUserToRedux({resData: {data: data}})
+      Session.set('user', user);
+      Session.set('token', token);
+      browserHistory.push('/');
     }
     this.cleanAuthCode()
     // this.props.actions.clearSigin()
+  }
+
+  getSelfCallback(user, token, expiresIn) {
+    // log.info('.............', user, token)
+    let signin = this.props.signin
+    if (token) {
+      if (signin.isRememberMe) {
+        Storage.set('user', user);
+      } else {
+        Storage.remove('user');
+      }
+      if (signin.isAutoSignin) {
+        Storage.set('token', token);
+        Storage.set('expiresIn', expiresIn);
+      } else {
+        Storage.remove('token');
+        Storage.remove('expiresIn');
+      }
+      Session.set('user', user);
+      Session.set('token', token);
+      browserHistory.push('/');
+    }
   }
 
   /*
    * react 组件生命周期
    */
   componentWillReceiveProps(nextProps) {
-    // log.info('SignInForm', nextProps.signin)
-    const { type, status, data } = nextProps.signin;
-    switch (type) {
+    // log.info(nextProps)
+    const { status, data } = nextProps.signin;
+    let signinType = nextProps.signin.type
+    switch (signinType) {
       case GET_AUTH_CODE: 
         return this.getAuthCodeCallback(status, data)
       case SIGNIN:
         return this.signinCallback(status, data)
     }
+    const { user, token, expiresIn } = nextProps.user;
+    let userType = nextProps.user.type;
+    switch (userType) {
+      case GET_SELF:
+        return this.getSelfCallback(user, token, expiresIn)
+    }
+  }
+
+  componentWillMount() {
+    // log.info('componentWillMount')
+    let token = this.props.user.token
+    if (token) {
+      this.props.actions.requestSelfClick(token);
+      // Session.set('token', token);
+      // browserHistory.push('/');
+    }
+    
   }
 
   componentWillUnmount() {
@@ -112,12 +159,13 @@ class SignIn extends Component {
         <SignInForm
           theme={theme}
           deviceSize={deviceSize}
-          user={user}
+          user={user.user}
           authCodeCounter={authCodeCounter}
           isRememberMe={signin.isRememberMe}
           rememberMe={actions.rememberMe}
           isAutoSignin={signin.isAutoSignin}
           autoSignin={actions.autoSignin}
+          signinType={this.state.signinType}
           openToast={actions.openToast}
           signinNameSubmit={actions.signinNameSubmit}
           signinAuthCodeSubmit={actions.signinAuthCodeSubmit}
@@ -138,8 +186,7 @@ function mapStateToProps(state) {
     theme: state.mui.theme,
     deviceSize: state.mui.deviceSize,
     isLoading: state.loading,
-    user: state.user.user,
-    token: state.user.token,
+    user: state.user,
     signin: state.signin
   };
 }

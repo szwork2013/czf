@@ -3,6 +3,8 @@
 import React from 'react';
 import { Router, Route, IndexRoute } from 'react-router';
 import SignIn from './containers/signin';
+import Desktop from './containers/desktop';
+import DashBoard from './containers/dashboard'
 import { Session } from './utils/session';
 
 function requireAuth(nextState, replace) {
@@ -19,9 +21,12 @@ function isSignin(nextState, replace) {
 
 
 const routes = (
-  <Route path="/" >
+  <Router>
     <Route onEnter={isSignin} path="signin" component={SignIn} />
-  </Route>
+    <Route onEnter={requireAuth} path="/" component={Desktop} >
+      <IndexRoute component={DashBoard} />
+    </Route>
+  </Router>
 );
 
 export default routes;

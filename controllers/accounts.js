@@ -106,7 +106,7 @@ const createAccount = async (req, res) => {
     }, config.jwtConfirm.jwtSecret, {
       expiresIn: config.jwtConfirm.jwtTimeout
     });
-    return res.handleResponse(200, {token: token, user: retUser});
+    return res.handleResponse(200, {token: token, user: retUser, expiresIn: config.jwtConfirm.jwtTimeout});
   } else {
     if (user.email) {
       try {
@@ -193,7 +193,7 @@ const signinMobileWithAuthCode = async (req, res) => {
     expiresIn: config.jwt.jwtTimeout
   });
   let retUser = _.omit(user.toJSON(), UsersOmit);
-  return res.handleResponse(200, {token: token, user: retUser});
+  return res.handleResponse(200, {token: token, user: retUser, expiresIn: config.jwtConfirm.jwtTimeout});
 };
 exports.signinMobileWithAuthCode = signinMobileWithAuthCode;
 
@@ -255,7 +255,7 @@ var signinWithPwd = async (req, res) => {
       expiresIn: config.jwt.jwtTimeout
     });
     let retUser = _.omit(user.toJSON(), UsersOmit);
-    return res.handleResponse(200, {token: token, user: retUser});
+    return res.handleResponse(200, {token: token, user: retUser, expiresIn: config.jwtConfirm.jwtTimeout});
   } else {
     return res.handleResponse(401, {}, 'incorrect password');
   }

@@ -6,9 +6,6 @@ const router = express.Router();
 
 import { createAccount, confirmEmail, signinMobileWithAuthCode, signinWithPwd } from '../controllers/accounts';
 
-/*
- * 生成验证码
- */
 router.post('/account', createAccount);
 
 router.get('/mail/confirm', confirmEmail);

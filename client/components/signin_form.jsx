@@ -2,7 +2,6 @@
 
 import log from '../utils/log'
 
-import config from '../../config'
 import React, { Component, PropTypes } from 'react';
 
 import Colors from 'material-ui/lib/styles/colors';
@@ -15,7 +14,7 @@ export default class SignInForm extends Component {
     super(props, context);
     let user = props.user
     this.state = {
-      signinType: 'password'
+      signinType: props.signinType || 'password'
     };
   }
 
@@ -74,6 +73,16 @@ export default class SignInForm extends Component {
         this.props.openToast({status: 400, msg: `name format wrong`});
         return;
       }
+    }
+  }
+
+  /*
+   * react 组件生命周期
+   */
+  componentWillReceiveProps(nextProps) {
+    const { signinType } = nextProps;
+    if (signinType) {
+      this.setState({signinType: signinType})
     }
   }
 

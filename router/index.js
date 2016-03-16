@@ -10,8 +10,9 @@ router.get('/', (req, res) => {
 
 import authCodes from './auth_codes';
 import accounts from './accounts';
+import users from './users';
 
-router.use('/api/v1', [authCodes, accounts]);
+router.use('/api/v1', [authCodes, accounts, users]);
 
 
 module.exports = router;
