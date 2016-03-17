@@ -29,14 +29,10 @@ export const REMEMBER_ME = 'REMEMBER_ME';
 //auto signin
 export const AUTO_SIGNIN = 'AUTO_SIGNIN';
 
-
 //user
 export const USER_RESTORE = 'USER_RESTORE'
 export const USER_TYPE_CLEAN = 'USER_TYPE_CLEAN';
 
-// export const GET_SELF = 'GET_SELF';
-// export const GET_SELF_SUCCESS = 'GET_SELF_SUCCESS';
-// export const GET_SELF_FAILURE = 'GET_SELF_FAILURE';
 
 
 

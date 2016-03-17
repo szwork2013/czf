@@ -5,11 +5,8 @@ import { Router, Route, IndexRoute } from 'react-router';
 import SignIn from './containers/signin';
 import Desktop from './containers/desktop';
 import DashBoard from './containers/dashboard'
-import { Session } from './utils/session';
-
 
 import store from './store'
-// console.log(store)
 
 function requireAuth(nextState, replace) {
   let state = store.getState() || {};

@@ -1,6 +1,6 @@
 'use strict';
 
-import { LOADING_ON, LOADING_OFF} from '../constants/actionTypes';
+import { LOADING_ON, LOADING_OFF} from '../../constants/actionTypes';
 
 export default (state = false, action) => {
   switch (action.type) {

@@ -21,18 +21,10 @@ export function signin(state=initialState, action) {
   switch (action.type) {
     //记住用户名
     case REMEMBER_ME:
-      // Storage.set('isRememberMe', action.isRememberMe);
-      // if (!action.isRememberMe) {
-      //   Storage.remove('user')
-      // }
       return _.assign({}, state, {
         isRememberMe: action.isRememberMe
       });
     case AUTO_SIGNIN:
-      // Storage.set('isAutoSignin', action.isAutoSignin);
-      // if (!action.isAutoSignin) {
-      //   Storage.remove('token')
-      // }
       return _.assign({}, state, {
         isAutoSignin: action.isAutoSignin
       });

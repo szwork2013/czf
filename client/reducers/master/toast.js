@@ -1,6 +1,6 @@
 'use strict';
 
-import { OPEN_TOAST, CLOSE_TOAST } from '../constants/actionTypes';
+import { OPEN_TOAST, CLOSE_TOAST } from '../../constants/actionTypes';
 import _ from 'lodash'
 
 

@@ -1,5 +1,6 @@
-'use strict'
-import _ from 'lodash'
+'use strict';
+
+var _ = require('lodash');
 
 
 var config = {

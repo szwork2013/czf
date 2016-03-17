@@ -13,24 +13,6 @@ export function userRestore(obj) {
   return _.assign({type: USER_RESTORE}, obj);
 };
 
-
-// function requestSelf(token) {
-//   return {
-//     [CALL_API_V1]: {
-//       actions: {
-//          successType: GET_SELF_SUCCESS,
-//          failureType: GET_SELF_FAILURE
-//       },
-//       url: '/user/self',
-//       headers: {'authorization': token},
-//       method: 'GET'
-//     }
-//   };
-// }
-// export function requestSelfClick(token) {
-//   return dispatch => dispatch(requestSelf(token));
-// }
-
 export function userTypeClean() {
   return {
     type: USER_TYPE_CLEAN,

@@ -74,37 +74,3 @@ export default connect(
 )(MUIMaster);
 
 
-// class DAAAAAD extends Component {
-
-//   constructor(props, context) {
-//     super(props, context);
-//   }
-
-//   componentWillUpdate(nextProps) {
-//     const { success, data } = nextProps;
-
-//     if (success) {
-//       const { token, user } = data;
-//       Session.set('token', token);
-//       Session.set('user', user);
-//       browserHistory.push('/');
-//     };
-//   }
-
-//   render() {
-//     const { isLoading, actions, toast } = this.props;
-//     return (
-//       <div>
-//         <SignInForm
-//           openToast={actions.openToast}
-//           signinSubmit={actions.signinSubmit}
-//         />
-//         {isLoading &&
-//           <Loading />
-//         }
-//         <Toast />
-//       </div>
-//     );
-//   }
-// }
-

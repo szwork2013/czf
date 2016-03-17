@@ -39,17 +39,6 @@ export default function user(state=initialState, action) {
       delete newState.type
       return newState
 
-    // case GET_SELF_SUCCESS:
-    //   newState = _.assign({}, state, {type: GET_SELF})
-    //   var data = action.resData.data
-    //   if (data.user) newState.user = data.user
-    //   if (data.token) newState.token = data.token
-    //   if (data.expiresIn) newState.expiresIn = data.expiresIn
-    //   return newState;
-
-    // case GET_SELF_FAILURE:
-    //   return _.assign({}, state, {type: GET_SELF, token: ''});
-
     default:
       return state;
   }

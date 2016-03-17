@@ -1,7 +1,7 @@
 'use strict';
 
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
-import { SET_THEME, SET_DEVICE_SIZE } from '../constants/actionTypes';
+import { SET_THEME, SET_DEVICE_SIZE } from '../../constants/actionTypes';
 import _ from 'lodash'
 
 
