@@ -1,5 +1,7 @@
 'use strict';
 import log from '../utils/log'
+import _ from 'lodash'
+import moment from 'moment'
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -7,11 +9,10 @@ import { bindActionCreators } from 'redux';
 import { browserHistory } from 'react-router';
 import * as UserActions from '../actions/user'
 import * as SignActions from '../actions/signin';
-import * as ToastActions from '../actions/toast';
+import * as ToastActions from '../actions/master/toast';
 
 import SignInForm from '../components/signin_form';
-import Loading from '../components/loading';
-import Toast from '../components/toast';
+
 import { Session } from '../utils/session';
 import { Storage } from '../utils/storage';
 
@@ -31,7 +32,8 @@ class SignIn extends Component {
   /*
    * 获限验证码结果
    */
-  getAuthCodeCallback(status, data) {
+  getAuthCodeCallback(nextProps) {
+    const { status, data } = nextProps.signin;
     if (status===200) {
       this.setState({authCodeCounter: 60})
       if (!this.state.authCodeTimer) {
@@ -45,10 +47,11 @@ class SignIn extends Component {
           }
         }, 1000);
       }
+      this.props.actions.signinClean()
     } else {
       this.cleanAuthCode()
     }
-    this.props.actions.clearSigin()
+    
   }
   //清除store中的验证码信息
   cleanAuthCode() {
@@ -57,61 +60,45 @@ class SignIn extends Component {
     }
     this.setState({authCodeTimer:null})
     this.setState({authCodeCounter: 0});
-    this.props.actions.clearSigin()
+    this.props.actions.signinClean()
   }
 
 
   /*
    * 登陆结果
    */
-  signinCallback(status, data) {
-    let signin = this.props.signin
-    data = data.data;
+  signinCallback(nextProps) {
+    // log.error(nextProps.signin)
+    let signin = nextProps.signin;
+    let status = signin.status;
+    let data = signin.data.data;
     let user = data.user
     let token = data.token
-    let expiresIn = data.expiresIn
+    let expiresIn = moment().add(Number(data.expiresIn), 'seconds').toDate();
     let actions = this.props.actions
     if (status===200) {
       if (signin.isRememberMe) {
+        Storage.set('isRememberMe', true);
         Storage.set('user', user);
       } else {
+        Storage.remove('isRememberMe');
         Storage.remove('user');
       }
       if (signin.isAutoSignin) {
+        Storage.set('isAutoSignin', true);
         Storage.set('token', token);
         Storage.set('expiresIn', expiresIn);
       } else {
+        Storage.remove('isAutoSignin');
         Storage.remove('token');
         Storage.remove('expiresIn');
       }
-      actions.saveUserToRedux({resData: {data: data}})
-      Session.set('user', user);
-      Session.set('token', token);
-      browserHistory.push('/');
-    }
-    this.cleanAuthCode()
-    // this.props.actions.clearSigin()
-  }
-
-  getSelfCallback(user, token, expiresIn) {
-    // log.info('.............', user, token)
-    let signin = this.props.signin
-    if (token) {
-      if (signin.isRememberMe) {
-        Storage.set('user', user);
-      } else {
-        Storage.remove('user');
-      }
-      if (signin.isAutoSignin) {
-        Storage.set('token', token);
-        Storage.set('expiresIn', expiresIn);
-      } else {
-        Storage.remove('token');
-        Storage.remove('expiresIn');
-      }
-      Session.set('user', user);
-      Session.set('token', token);
-      browserHistory.push('/');
+      actions.userRestore(_.assign({}, data, {expiresIn}));
+      // actions.userTypeClean();
+      this.cleanAuthCode();
+      // Session.set('user', user);
+      // Session.set('token', token);
+      // browserHistory.push('/');
     }
   }
 
@@ -119,32 +106,13 @@ class SignIn extends Component {
    * react 组件生命周期
    */
   componentWillReceiveProps(nextProps) {
-    // log.info(nextProps)
-    const { status, data } = nextProps.signin;
     let signinType = nextProps.signin.type
     switch (signinType) {
       case GET_AUTH_CODE: 
-        return this.getAuthCodeCallback(status, data)
+        return this.getAuthCodeCallback(nextProps)
       case SIGNIN:
-        return this.signinCallback(status, data)
+        return this.signinCallback(nextProps)
     }
-    const { user, token, expiresIn } = nextProps.user;
-    let userType = nextProps.user.type;
-    switch (userType) {
-      case GET_SELF:
-        return this.getSelfCallback(user, token, expiresIn)
-    }
-  }
-
-  componentWillMount() {
-    // log.info('componentWillMount')
-    let token = this.props.user.token
-    if (token) {
-      this.props.actions.requestSelfClick(token);
-      // Session.set('token', token);
-      // browserHistory.push('/');
-    }
-    
   }
 
   componentWillUnmount() {
@@ -165,16 +133,12 @@ class SignIn extends Component {
           rememberMe={actions.rememberMe}
           isAutoSignin={signin.isAutoSignin}
           autoSignin={actions.autoSignin}
-          signinType={this.state.signinType}
+          signinType={signin.signinType}
           openToast={actions.openToast}
           signinNameSubmit={actions.signinNameSubmit}
           signinAuthCodeSubmit={actions.signinAuthCodeSubmit}
           authCodeClick={actions.authCodeClick}
         />
-        {isLoading &&
-          <Loading />
-        }
-        <Toast />
       </div>
     );
   }
@@ -192,7 +156,7 @@ function mapStateToProps(state) {
 }
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(Object.assign({}, SignActions, ToastActions, UserActions), dispatch)
+    actions: bindActionCreators(_.assign({}, SignActions, ToastActions, UserActions), dispatch)
   };
 }
 export default connect(

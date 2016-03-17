@@ -7,22 +7,33 @@ import Desktop from './containers/desktop';
 import DashBoard from './containers/dashboard'
 import { Session } from './utils/session';
 
+
+import store from './store'
+// console.log(store)
+
 function requireAuth(nextState, replace) {
-  if (!Session.get('token')) {
+  let state = store.getState() || {};
+  let user = state.user;
+  if (user && user.token && user.expiresIn && user.expiresIn > new Date()) {
+    return;
+  } else {
     replace('/signin');
   }
 }
 
-function isSignin(nextState, replace) {
-  if (Session.get('token')) {
+function autoSignin(nextState, replace) {
+  let state = store.getState() || {};
+  let user = state.user;
+  if (user && user.token && user.expiresIn && user.expiresIn > new Date()) {
     replace('/');
+  } else {
+    return;
   }
 }
 
-
 const routes = (
   <Router>
-    <Route onEnter={isSignin} path="signin" component={SignIn} />
+    <Route onEnter={autoSignin} path="signin" component={SignIn} />
     <Route onEnter={requireAuth} path="/" component={Desktop} >
       <IndexRoute component={DashBoard} />
     </Route>

@@ -5,25 +5,24 @@ import log from './utils/log'
 import React, { Component }  from 'react';
 import { render } from 'react-dom';
 import { Router, browserHistory } from 'react-router';
-
-import { createStore, applyMiddleware, compose } from 'redux';
 import { Provider } from 'react-redux';
-import thunk from 'redux-thunk';
-import reduxLogger from 'redux-logger';
-import rootReducer from './reducers/root';
-import api from './middleware/api';
+// import { createStore, applyMiddleware, compose } from 'redux';
+
+// import thunk from 'redux-thunk';
+// import reduxLogger from 'redux-logger';
+// import rootReducer from './reducers/root';
+// import api from './middleware/api';
 import { syncHistoryWithStore } from 'react-router-redux';
 
 import routes from './routers';
 
-import MUIMaster from './containers/mui_master'
 
 
-var showReduxLogger = true;
+import MUIMaster from './containers/master/mui_master';
+import APPMaster from './containers/master/app_master';
+
 //store
-var composeCreateStore = showReduxLogger? compose(applyMiddleware(thunk, api, reduxLogger()))(createStore): compose(applyMiddleware(thunk, api))(createStore);
-const store = composeCreateStore(rootReducer);
-// const store = createStore(rootReducer)
+import store from './store';
 
 //history
 const history = syncHistoryWithStore(browserHistory, store);
@@ -38,18 +37,21 @@ class Root extends Component {
     return (
       <Provider store={store}>
         <MUIMaster>
-          <Router history={history} routes={routes} />
+          <APPMaster>
+            <Router history={history} routes={routes} />
+          </APPMaster>
         </MUIMaster>
       </Provider>
     );
   }
 }
 
-//css
-require('./styles/loading.css');
-
 
 render(
   <Root store={store} history={history} />,
   root
 );
+
+
+import Perf from 'react-addons-perf';
+window.Perf = Perf;

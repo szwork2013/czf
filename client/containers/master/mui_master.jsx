@@ -1,11 +1,11 @@
 'use strict';
-import log from '../utils/log'
+import log from '../../utils/log'
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import {StyleResizable} from 'material-ui/lib/mixins';
-import { setDeviceSize } from '../actions/mui';
+import { setDeviceSize } from '../../actions/master/mui';
 import Events from 'material-ui/lib/utils/events'
 
 const MUIMaster = React.createClass({

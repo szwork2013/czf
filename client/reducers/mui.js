@@ -2,6 +2,8 @@
 
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 import { SET_THEME, SET_DEVICE_SIZE } from '../constants/actionTypes';
+import _ from 'lodash'
+
 
 import {StyleResizable} from 'material-ui/lib/mixins';
 
@@ -15,11 +17,11 @@ const initialState = {
 export default (state = initialState, action) => {
   switch (action.type) {
     case SET_THEME:
-      return Object.assign({}, state, {
+      return _.assign({}, state, {
         theme: action.theme
       });
     case SET_DEVICE_SIZE: 
-      return Object.assign({}, state, {
+      return _.assign({}, state, {
         deviceSize: action.deviceSize
       });
     default:

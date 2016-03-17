@@ -18,11 +18,12 @@ const getSelf = async (req, res) => {
   let user = req.user;
   let token = jwt.sign({
     id: user._id
-  }, config.jwtConfirm.jwtSecret, {
-    expiresIn: config.jwtConfirm.jwtTimeout
+  }, config.jwt.jwtSecret, {
+    expiresIn: config.jwt.jwtTimeout
   });
   let retUser = _.omit(user.toJSON(), UsersOmit);
-  return res.handleResponse(200, {user: retUser, token: token, expiresIn: config.jwtConfirm.jwtTimeout});
+  // return res.handleResponse(200, {user: retUser, token: token, expiresIn: config.jwt.jwtTimeout});
+  return res.handleResponse(500);
 }
 exports.getSelf = getSelf;
 

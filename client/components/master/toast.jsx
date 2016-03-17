@@ -1,9 +1,9 @@
 'use strict';
-import log from '../utils/log'
+import log from '../../utils/log'
 import React, { Component, PropTypes } from 'react';
 import { connect,  } from 'react-redux';
 import Snackbar from 'material-ui/lib/snackbar';
-import { closeToast } from '../actions/toast';
+import { closeToast } from '../../actions/master/toast';
 
 class Toast extends Component {
   handleRequestClose() {

@@ -4,7 +4,7 @@ var config = require('./config');
 
 module.exports = {
   entry: [
-    'webpack-dev-server/client?http://localhost:6100',
+    'webpack-dev-server/client?http://0.0.0.0:6100',
     'webpack/hot/only-dev-server',
     './client/main.jsx'
   ],

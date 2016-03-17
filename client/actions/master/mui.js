@@ -1,6 +1,6 @@
 'use strict';
 
-import { SET_THEME, SET_DEVICE_SIZE } from '../constants/actionTypes';
+import { SET_THEME, SET_DEVICE_SIZE } from '../../constants/actionTypes';
 
 export function setTheme(theme) {
   return {

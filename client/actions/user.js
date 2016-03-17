@@ -1,34 +1,42 @@
 'use strict';
 
-import { SAVE_USER_TO_REDUX, GET_SELF, GET_SELF_SUCCESS, GET_SELF_FAILURE, USER_CLEAR_TYPE } from '../constants/actionTypes';
+import { GET_SELF, GET_SELF_SUCCESS, GET_SELF_FAILURE, 
+  USER_RESTORE, USER_TYPE_CLEAN } from '../constants/actionTypes';
 import { CALL_API_V1 } from '../middleware/api';
+import { APP_STATE } from '../constants/const';
+import _ from 'lodash'
 
-
-export function saveUserToRedux(obj) {
-  return Object.assign({type: SAVE_USER_TO_REDUX}, obj);
+/*
+ * obj格式为{user , token, expiresIn}
+ */
+export function userRestore(obj) {
+  return _.assign({type: USER_RESTORE}, obj);
 };
 
 
-function requestSelf(token) {
-  return {
-    [CALL_API_V1]: {
-      actions: {
-         successType: GET_SELF_SUCCESS,
-         failureType: GET_SELF_FAILURE
-      },
-      url: '/user/self',
-      headers: {'authorization': token, 'content-type': 'application/x-www-form-urlencoded'},
-      method: 'GET'
-    }
-  };
-}
-export function requestSelfClick(token) {
-  return dispatch => dispatch(requestSelf(token));
-}
+// function requestSelf(token) {
+//   return {
+//     [CALL_API_V1]: {
+//       actions: {
+//          successType: GET_SELF_SUCCESS,
+//          failureType: GET_SELF_FAILURE
+//       },
+//       url: '/user/self',
+//       headers: {'authorization': token},
+//       method: 'GET'
+//     }
+//   };
+// }
+// export function requestSelfClick(token) {
+//   return dispatch => dispatch(requestSelf(token));
+// }
 
-export function userClearType() {
+export function userTypeClean() {
   return {
-    type: USER_CLEAR_TYPE
+    type: USER_TYPE_CLEAN,
+    [APP_STATE]: {
+      reflush: false
+    }
   }
 }
 

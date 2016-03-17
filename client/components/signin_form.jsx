@@ -1,6 +1,7 @@
 'use strict';
 
 import log from '../utils/log'
+import _ from 'lodash'
 
 import React, { Component, PropTypes } from 'react';
 
@@ -147,6 +148,7 @@ export default class SignInForm extends Component {
 
   render() {
     const styles = this.getStyles();
+    // log.error('render signin form')
     function defaultAvatar() {
       return (
         <FontIcon className="material-icons" style={styles.avatarIcon}>account_circle</FontIcon>
@@ -180,7 +182,7 @@ export default class SignInForm extends Component {
                 <FlatButton label="&nbsp;登录" style={styles.commitBtn} onClick={this.signinSubmit.bind(this)}/>
               </div>
 
-              <div style={Object.assign({}, styles.group, {marginTop: '20px', textAlign: 'center'})}>
+              <div style={_.assign({}, styles.group, {marginTop: '20px', textAlign: 'center'})}>
                 {
                   this.state.signinType==='authCode' ?
                     <a style={styles.a} onClick={(e) => this.setState({'signinType': 'password'})} >密码登录</a>:

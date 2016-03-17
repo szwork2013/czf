@@ -1,4 +1,6 @@
 'use strict'
+import _ from 'lodash'
+
 
 var config = {
     // for app description
@@ -68,7 +70,7 @@ var config = {
 
 try {
     var relConfig = require('./config_e.js');
-    Object.assign(config, relConfig);
+    _.assign(config, relConfig);
 } catch (e) {
 }
 

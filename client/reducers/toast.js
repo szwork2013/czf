@@ -1,6 +1,8 @@
 'use strict';
 
 import { OPEN_TOAST, CLOSE_TOAST } from '../constants/actionTypes';
+import _ from 'lodash'
+
 
 const initState = {
   msg: '',
@@ -10,7 +12,7 @@ const initState = {
 };
 
 export default function toast(toast = initState, action) {
-  let newToast = Object.assign({}, toast, action);
+  let newToast = _.assign({}, toast, action);
   delete newToast.type;
   switch (action.type) {
     case OPEN_TOAST:

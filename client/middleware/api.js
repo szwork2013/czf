@@ -5,8 +5,8 @@ import _ from 'lodash'
 import jquery from 'jquery'
 import fetch from 'isomorphic-fetch';
 
-import { loadingOn, loadingOff } from '../actions/loading';
-import { openToast } from '../actions/toast';
+import { loadingOn, loadingOff } from '../actions/master/loading';
+import { openToast } from '../actions/master/toast';
 import { Session } from '../utils/session';
 
 export const CALL_API = Symbol('Call API');
@@ -33,12 +33,12 @@ const toLowerCaseKeys = (obj, types = ['string'], isExclude = false) => {
  * method : it is a byte-case-insensitive match for `DELETE`, `GET`, `HEAD`, `OPTIONS`, `POST`, or `PUT`, byte-uppercase it.
  */
 function callApi(url, method = 'POST', data = {}, headers = {}) {
-  headers = Object.assign({
+  let defaultHeaders = {
       'accept': 'application/json',
-      'content-type': 'application/json',
+      'content-type': method.toUpperCase() === 'GET'? 'application/x-www-form-urlencoded': 'application/json',
       'authorization': Session.get('token')
-    }, toLowerCaseKeys(headers));
-
+    };
+  headers = _.assign(defaultHeaders, toLowerCaseKeys(headers));
   let options = {
     method,
     headers
@@ -101,7 +101,7 @@ export default store => next => action => {
   //根据请求API为url加前缀
 
   function actionWith(data, callSymbol = CALL_API) {
-    const finalAction = Object.assign({}, action, data);
+    const finalAction = _.assign({}, action, data);
     delete finalAction[callSymbol];
     return finalAction;
   }

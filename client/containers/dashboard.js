@@ -1,5 +1,7 @@
 'use strict';
 import log from '../utils/log'
+import _ from 'lodash'
+
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -7,10 +9,8 @@ import { bindActionCreators } from 'redux';
 import { browserHistory } from 'react-router';
 
 import * as UserActions from '../actions/user'
-import * as ToastActions from '../actions/toast';
+import * as ToastActions from '../actions/master/toast';
 
-import Loading from '../components/loading';
-import Toast from '../components/toast';
 
 class Dashboard extends Component {
 
@@ -39,7 +39,7 @@ function mapStateToProps(state) {
 }
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(Object.assign({}, ToastActions, UserActions), dispatch)
+    actions: bindActionCreators(_.assign({}, ToastActions, UserActions), dispatch)
   };
 }
 export default connect(
