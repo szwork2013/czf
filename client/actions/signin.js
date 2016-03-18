@@ -3,7 +3,8 @@
 import { SIGNIN_SUCCESS, GET_AUTH_CODE_SUCCESS, 
   SIGNIN_CLEAN, SIGNIN_TYPE_CLEAN, 
   REMEMBER_ME,  AUTO_SIGNIN} from '../constants/actionTypes';
-import { CALL_API_V1, APP_STATE } from '../constants/const';
+import { CALL_API_V1 } from '../middleware/api';
+import { APP_STATE } from '../reducers/master/app_state'
 
 /*
  * 发送验证码

@@ -96,9 +96,7 @@ class SignIn extends Component {
       actions.userRestore(_.assign({}, data, {expiresIn}));
       // actions.userTypeClean();
       this.cleanAuthCode();
-      // Session.set('user', user);
-      // Session.set('token', token);
-      // browserHistory.push('/');
+      browserHistory.push('/');
     }
   }
 

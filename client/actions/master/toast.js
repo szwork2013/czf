@@ -1,7 +1,7 @@
 'use strict';
 
 import { OPEN_TOAST, CLOSE_TOAST } from '../../constants/actionTypes';
-import { APP_STATE } from '../../constants/const'
+import { APP_STATE } from '../../reducers/master/app_state'
 
 
 export function openToast(obj) {

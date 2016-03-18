@@ -15,7 +15,7 @@ exports.isMobileNumber = function isMobileNumber(mobileNumber) {
  * @function
  * @param {string} mobile - 手机号码
  */
-exports.isAuthCode = function isMobileNumber(authCode) {
+exports.isAuthCode = function isAuthCode(authCode) {
   var re = /^\d{6}$/;
   return re.test(authCode);
 }

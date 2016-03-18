@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import log from '../../utils/log'
 
-export const APP_STATE = 'APP_STATE_00000'//Symbol('App State')
+export const APP_STATE = '__APP_STATE_00000__'//Symbol('App State')
 
 const initialState = {
   reflush: true
