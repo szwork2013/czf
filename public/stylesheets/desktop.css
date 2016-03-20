@@ -1,0 +1,17 @@
+.side-bar:before {
+  content: "";
+  display: block;
+  width: 256px;
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  z-index: -1;
+  background-color: #f2f2f2;
+  border-right: 1px solid #ccc;
+}
+
+.side-bar:after {
+  content: "";
+  display: block;
+  clear: both;
+}

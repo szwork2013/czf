@@ -11,9 +11,28 @@
     <link rel="stylesheet" type='text/css' href="/public/fonts/RobotoTTF/roboto-font.css">
     <title>Demo</title>
 
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet'/>
-
+<!--     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet'/> -->
+    <style type="text/css">
+      body > #root {
+        opacity: 0;
+      }
+      body.pg-loaded > #root {
+        opacity: 1;
+        animation-duration: 1.2s;/*动画持续时间*/  
+        -webkit-animation:root-fade-in 1.2s;/*针对webkit内核*/  
+      }
+      @keyframes root-fade-in {  
+          0% {opacity: 0;}/*初始状态 透明度为0*/  
+          40% {opacity: 0.1;}/*过渡状态 透明度为0*/  
+          100% {opacity: 1;}/*结束状态 透明度为1*/  
+      }  
+      @-webkit-keyframes root-fade-in {/*针对webkit内核*/  
+          0% {opacity: 0;}  
+          40% {opacity: 0.1;}  
+          100% {opacity: 1;}  
+      }  
+    </style>
   </head>
   <body style='margin: 0px;'>
 
@@ -24,21 +43,22 @@
         <div class="loader-section section-right"></div>
       </div>
     </div>
-
+    <div id="root"></div>
     <script type="text/javascript">
       function onload()
     　{
+        document.body.className += 'pg-loaded';
         document.getElementById('loader-master').className += ' loaded';
         var interval = setInterval(function() {
-            var e = document.getElementById('loader-master')
-            e.parentElement.removeChild(e)
-            clearInterval(interval)
+            var e = document.getElementById('loader-master');
+            e.parentElement.removeChild(e);
+            clearInterval(interval);
           }, 2000)
     　}
       window.addEventListener ? window.addEventListener("load",onload,false) : window.attachEvent && window.attachEvent("onload",onload);
     </script>
 
-    <div id="root"></div>
+    
 
     <script src="/public/bundle.js"></script>
   </body>

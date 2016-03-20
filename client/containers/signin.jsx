@@ -16,7 +16,7 @@ import SignInForm from '../components/signin_form';
 import { Session } from '../utils/session';
 import { Storage } from '../utils/storage';
 
-import { SIGNIN, GET_AUTH_CODE, GET_SELF } from '../constants/actionTypes';
+import { SIGNIN, GET_AUTH_CODE } from '../constants/actionTypes';
 
 
 class SignIn extends Component {
@@ -118,7 +118,7 @@ class SignIn extends Component {
   }
 
   render() {
-    const { theme, deviceSize, isLoading, user, signin, actions } = this.props;
+    const { theme, deviceSize, user, signin, actions } = this.props;
     const { authCodeCounter } = this.state;
     return (
       <div>

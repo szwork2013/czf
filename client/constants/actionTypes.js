@@ -35,5 +35,7 @@ export const USER_TYPE_CLEAN = 'USER_TYPE_CLEAN';
 
 
 
-
+//side_bar
+export const SIDE_BAR_SHOW = 'SIDE_BAR_SHOW';
+export const SIDE_BAR_HIDE = 'SIDE_BAR_HIDE';
 

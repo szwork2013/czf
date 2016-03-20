@@ -8,6 +8,8 @@ import mui from './master/mui';
 import loading from './master/loading';
 import toast from './master/toast';
 
+import sideBar from './side_bar'
+
 import user from './user';
 import { signin } from './sign';
 
@@ -16,10 +18,11 @@ const rootReducer = combineReducers({
   //add other reducer here,
   [APP_STATE]: appState,
   mui,
-  user,
+  sideBar,
   routing,
   loading,
   toast,
+  user,
   signin
 });
 
