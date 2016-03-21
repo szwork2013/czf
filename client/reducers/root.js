@@ -9,6 +9,7 @@ import loading from './master/loading';
 import toast from './master/toast';
 
 import sideBar from './side_bar'
+import menus from './menus'
 
 import user from './user';
 import { signin } from './sign';
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   [APP_STATE]: appState,
   mui,
   sideBar,
+  menus,
   routing,
   loading,
   toast,

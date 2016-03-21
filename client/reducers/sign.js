@@ -5,7 +5,7 @@ import _ from 'lodash'
 
 import { SIGNIN, SIGNIN_SUCCESS, SIGNIN_FAILURE, 
         GET_AUTH_CODE, GET_AUTH_CODE_SUCCESS, GET_AUTH_CODE_FAILURE, 
-        SIGNIN_CLEAN, SIGNIN_TYPE_CLEAN, REMEMBER_ME, AUTO_SIGNIN } from '../constants/actionTypes';
+        SIGNIN_CLEAN, SIGNIN_TYPE_CLEAN, REMEMBER_ME, AUTO_SIGNIN, SIGNOUT } from '../constants/actionTypes';
 
 import { Storage } from '../utils/storage'; 
 
@@ -51,6 +51,14 @@ export function signin(state=initialState, action) {
     case SIGNIN_TYPE_CLEAN:
       return _.assign({}, state, {type: ''});
 
+    case SIGNOUT:
+      Storage.remove('token');
+      Storage.remove('expiresIn');
+      if (!state.isRememberMe) {
+        Storage.remove('user');
+      }
+      return _.assign({}, state, {type: '', status: 200, data: {}});
+      
     default:
       return state;
   }

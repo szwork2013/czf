@@ -22,7 +22,6 @@ class NavBar extends Component {
   }
 
   leftIconButtonTouchTap(e) {
-    log.info(this.props)
     if (this.props.sideBar.isShow) {
       this.props.actions.sideBarHide()
     } else {
@@ -43,7 +42,7 @@ class NavBar extends Component {
   render() {
     const styles = this.getStyles();
     return (
-      <AppBar showMenuIconButton={true}
+      <AppBar style={this.props.navBarStyle} showMenuIconButton={true}
               title={ this.getTitle(styles) } 
               onLeftIconButtonTouchTap={this.leftIconButtonTouchTap.bind(this)}/>
     )

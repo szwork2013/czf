@@ -2,7 +2,7 @@
 
 import _ from 'lodash'
 
-import { USER_RESTORE, GET_SELF, GET_SELF_SUCCESS, GET_SELF_FAILURE, USER_TYPE_CLEAN } from '../constants/actionTypes';
+import { USER_RESTORE, GET_SELF, GET_SELF_SUCCESS, GET_SELF_FAILURE, USER_TYPE_CLEAN, SIGNOUT } from '../constants/actionTypes';
 import { Storage } from '../utils/storage'; 
 import { Session } from '../utils/session'; 
 
@@ -38,6 +38,10 @@ export default function user(state=initialState, action) {
       newState = _.assign({}, state)
       delete newState.type
       return newState
+
+    case SIGNOUT:
+      return _.assign({}, state, {token: null, expiresIn: null});
+
 
     default:
       return state;

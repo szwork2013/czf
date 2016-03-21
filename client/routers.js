@@ -5,6 +5,7 @@ import { Router, Route, IndexRoute } from 'react-router';
 import SignIn from './containers/signin';
 import Desktop from './containers/desktop';
 import DashBoard from './containers/dashboard'
+import Profile from './containers/profile'
 
 import store from './store'
 
@@ -33,6 +34,8 @@ const routes = (
     <Route onEnter={autoSignin} path="signin" component={SignIn} />
     <Route onEnter={requireAuth} path="/" component={Desktop} >
       <IndexRoute component={DashBoard} />
+      <Route path='dashboard' component={DashBoard} />
+      <Route path='profile' component={Profile} />
     </Route>
   </Router>
 );

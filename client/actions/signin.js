@@ -2,7 +2,7 @@
 
 import { SIGNIN_SUCCESS, GET_AUTH_CODE_SUCCESS, 
   SIGNIN_CLEAN, SIGNIN_TYPE_CLEAN, 
-  REMEMBER_ME,  AUTO_SIGNIN} from '../constants/actionTypes';
+  REMEMBER_ME,  AUTO_SIGNIN, SIGNOUT} from '../constants/actionTypes';
 import { CALL_API_V1 } from '../middleware/api';
 import { APP_STATE } from '../reducers/master/app_state'
 
@@ -85,4 +85,11 @@ export function signinAuthCodeSubmit(formData) {
   return dispatch => dispatch(requestSignin(formData, '/signin/mobile'));
 }
 
-
+/*
+ * 退出
+ */
+export function requestSignout() {
+  return {
+    type: SIGNOUT
+  }
+}

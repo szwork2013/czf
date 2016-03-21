@@ -28,7 +28,7 @@ class Desktop extends Component {
     const styles = this.getStyles();
     return (
       <div>
-        <NavBar />
+        <NavBar navBarStyle={styles.navBarStyle}/>
         <SideBar sideBarStyle={styles.sideBarStyle}/>
         <div style={styles.containerFluid}>
           <div style={styles.breadcrumbs}>
@@ -45,13 +45,17 @@ class Desktop extends Component {
 
   getStyles() {
     const styles = {
+      navBarStyle: {
+        position: 'fixed',
+      },
       sideBarStyle: {
         backgroundColor: '#f2f2f2',
         borderRight: '1px solid #ccc',        
         top: '64px',
         width: '256px',
         boxShadow: 'none',
-        zIndex: '-1'
+        zIndex: '-1',
+        height: 'calc(100% - 64px)'
       },
       containerFluid: {
         position: 'fixed',
@@ -78,9 +82,11 @@ class Desktop extends Component {
     if (this.props.sideBar.isShow) {
       styles.containerFluid.transform = 'translate3d(0px, 0, 0)'
       styles.containerFluid.width = 'calc(100% - 256px)'
+      styles.containerFluid.animation = 'sideBarToShow 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
     } else {
       styles.containerFluid.transform = 'translate3d(-256px, 0, 0)'
       styles.containerFluid.width = '100%'
+      styles.containerFluid.animation = 'sideBarToHide 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
     }
     return styles;
   }

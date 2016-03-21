@@ -23,6 +23,11 @@ export const SIGNIN_SUCCESS = 'SIGNIN_SUCCESS';
 export const SIGNIN_FAILURE = 'SIGNIN_FAILURE';
 export const SIGNIN_CLEAN = 'SIGNIN_CLEAN';
 export const SIGNIN_TYPE_CLEAN = 'SIGNIN_TYPE_CLEAN';
+//signout
+export const SIGNOUT = 'SIGNOUT';
+
+//menus
+// export const MENU_CHANGE = 'MENU_CHANGE';
 
 //remember me
 export const REMEMBER_ME = 'REMEMBER_ME';
