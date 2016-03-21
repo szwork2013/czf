@@ -15,7 +15,7 @@ import * as SignActions from '../actions/signin';
 import * as ToastActions from '../actions/master/toast';
 import * as MenusActions from '../actions/menus';
 
-import { SIGNIN } from '../constants/actionTypes';
+import { } from '../constants/actionTypes';
 
 class SideBar extends Component {
 
@@ -177,13 +177,13 @@ class SideBar extends Component {
 
 
   getStyles() {
-    const palette = this.props.theme.baseTheme.palette
-    const backgroundColor = palette.primary1Color;
-    const buttom1Color = palette.primary1Color;
-    const buttom2Color = Colors.pinkA200;
-    const borderColor = palette.borderColor;
-    const textColor = palette.textColor;
-    const disabledColor = palette.disabledColor;
+    // const palette = this.props.theme.baseTheme.palette
+    // const backgroundColor = palette.primary1Color;
+    // const buttom1Color = palette.primary1Color;
+    // const buttom2Color = Colors.pinkA200;
+    // const borderColor = palette.borderColor;
+    // const textColor = palette.textColor;
+    // const disabledColor = palette.disabledColor;
     const styles = {
       userDetails: {
         background: 'url(/public/images/user-bg.jpg) no-repeat center center',
@@ -259,9 +259,9 @@ class SideBar extends Component {
 
 function mapStateToProps(state) {
   return {
-    theme: state.mui.theme,
-    deviceSize: state.mui.deviceSize,
-    isLoading: state.loading,
+    // theme: state.mui.theme,
+    // deviceSize: state.mui.deviceSize,
+    // isLoading: state.loading,
     user: state.user,
     sideBar: state.sideBar,
     menus: state.menus

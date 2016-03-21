@@ -22,7 +22,7 @@ class Dashboard extends Component {
   render() {
     return (
       <div>
-        <div>Dashboard</div>
+        <div><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>Dashboard</div>
       </div>
     )
   }

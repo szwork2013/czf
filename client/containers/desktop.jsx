@@ -14,6 +14,7 @@ import * as ToastActions from '../actions/master/toast';
 import NavBar from './nav_bar'
 import SideBar from './side_bar'
 import Breadcrumbs from './breadcrumbs'
+import Footer from './footer'
 
 
 class Desktop extends Component {
@@ -31,19 +32,20 @@ class Desktop extends Component {
         <NavBar navBarStyle={styles.navBarStyle}/>
         <SideBar sideBarStyle={styles.sideBarStyle}/>
         <div style={styles.containerFluid}>
-          <div style={styles.breadcrumbs}>
-            <Breadcrumbs />
+          <Breadcrumbs breadcrumbsStyle={styles.breadcrumbsStyle}/>
+          <div style={styles.children}>
+            { children }
           </div>
-          { children }
-          <div style={styles.footer}>
-            Healgoo
-          </div>
+          <Footer footerStyle={styles.footerStyle}/>
         </div>
       </div>
     )
   }
 
   getStyles() {
+    const palette = this.props.theme.baseTheme.palette
+    const backgroundColor = palette.primary1Color;
+
     const styles = {
       navBarStyle: {
         position: 'fixed',
@@ -62,21 +64,33 @@ class Desktop extends Component {
         left: '256px',
         top: '64px',
         bottom: '0px',
-        transition: 'transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
+        transition: 'transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
+        overflow: 'auto'
       },
-      breadcrumbs: {
+      breadcrumbsStyle: {
         position: 'relative',
         zIndex: 13,
         borderBottom: '1px solid #e5e5e5',
         backgroundColor: '#f5f5f5',
         minHeight: '40px',
         lineHeight: '39px',
-        padding: '0 12px 0 0',
+        padding: '0px 12px',
+        fontSize: '14px',
+        verticalAlign: 'middle',
         display: 'block',
         width: '100%'
       },
-      footer: {
+      children: {
+        position: 'relative',
+        padding: '12px 12px',
+      },
+      footerStyle: {
+        position: 'relative',
+        padding: '0px 12px',
+        paddingTop: '0px',
         textAlign: 'center',
+        backgroundColor: backgroundColor,
+        bottom: '0px',
       }
     }
     if (this.props.sideBar.isShow) {
