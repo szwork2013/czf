@@ -11,6 +11,9 @@ import { bindActionCreators } from 'redux';
 import * as UserActions from '../../actions/user'
 import * as ToastActions from '../../actions/master/toast';
 
+import { COMPANY_NAME, ICP_NUMBER } from '../../constants/const'
+
+
 
 class Footer extends Component {
 
@@ -30,10 +33,10 @@ class Footer extends Component {
       <div style={this.props.footerStyle}>
         <div style={styles.copyright}>
           <div>
-            Copyright © 2016 <a href="http://healgoo.com" target="_blank" style={styles.company}>河谷互动医疗科技有限公司</a> - all rights reserved. 
+            Copyright © 2016 <a href="http://healgoo.com" target="_blank" style={styles.company}>{COMPANY_NAME}</a> - all rights reserved. 
           </div>
           <div>
-            <a href="http://www.miitbeian.gov.cn" target="_blank" style={styles.icp}>粤ICP备14011674号</a>
+            <a href="http://www.miitbeian.gov.cn" target="_blank" style={styles.icp}>粤ICP备{ICP_NUMBER}号</a>
           </div>
         </div>
       </div>

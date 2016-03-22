@@ -1,13 +1,16 @@
 'use strict';
 
 import React from 'react';
-import { Router, Route, IndexRoute } from 'react-router';
+import { Router, Route, IndexRoute, NotFoundRoute } from 'react-router';
 import SignIn from './containers/signin';
 import Desktop from './containers/desktop/desktop';
 import DashBoard from './containers/dashboard'
 import Profile from './containers/profile'
+import NoFound from './containers/no_found'
 
 import store from './store'
+
+console.log(NotFoundRoute)
 
 function requireAuth(nextState, replace) {
   let state = store.getState() || {};
@@ -37,6 +40,7 @@ const routes = (
       <Route path='dashboard' component={DashBoard} />
       <Route path='profile' component={Profile} />
     </Route>
+    <Route path="*" component={NoFound}/>
   </Router>
 );
 

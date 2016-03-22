@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import Colors from 'material-ui/lib/styles/colors';
 import { Paper, Avatar, FontIcon, TextField, FlatButton, Divider, ClearFix, AppBar } from 'material-ui/lib'
+import { APP_NAME } from '../../constants/const'
 
 import * as UserActions from '../../actions/user'
 import * as SideBarActions from '../../actions/side_bar';
@@ -31,8 +32,8 @@ class NavBar extends Component {
   getTitle(styles) {
     return (
       <span style={styles.title}>
-        <FontIcon className="material-icons" style={styles.titleIcon}>visibility</FontIcon>
-        Eyegrader
+        <FontIcon className="material-icons" style={styles.titleIcon}>location_city</FontIcon>
+        {APP_NAME}
       </span>
     )
   }
