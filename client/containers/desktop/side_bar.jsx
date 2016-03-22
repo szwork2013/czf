@@ -1,5 +1,5 @@
 'use strict';
-import log from '../utils/log'
+import log from '../../utils/log'
 import _ from 'lodash'
 
 import React, { Component } from 'react';
@@ -10,12 +10,11 @@ import { Paper, Avatar, FontIcon, RaisedButton, Menu, Popover, MenuItem, Divider
 import { browserHistory } from 'react-router';
 
 
-import * as UserActions from '../actions/user';
-import * as SignActions from '../actions/signin';
-import * as ToastActions from '../actions/master/toast';
-import * as MenusActions from '../actions/menus';
+import * as UserActions from '../../actions/user';
+import * as SignActions from '../../actions/signin';
+import * as ToastActions from '../../actions/master/toast';
 
-import { } from '../constants/actionTypes';
+import { } from '../../constants/actionTypes';
 
 class SideBar extends Component {
 
@@ -269,7 +268,7 @@ function mapStateToProps(state) {
 }
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(_.assign({}, ToastActions, UserActions, SignActions, MenusActions), dispatch)
+    actions: bindActionCreators(_.assign({}, ToastActions, UserActions, SignActions), dispatch)
   };
 }
 export default connect(

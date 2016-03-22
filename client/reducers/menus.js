@@ -54,7 +54,7 @@ const menus = [
 
 const initialState = {
   menus,
-  selectedKey: 'dashboard'
+  selectedKey: '/dashboard'
 };
 
 export default (state = initialState, action) => {

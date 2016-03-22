@@ -1,5 +1,5 @@
 'use strict';
-import log from '../utils/log'
+import log from '../../utils/log'
 import _ from 'lodash'
 
 import React, { Component } from 'react';
@@ -8,9 +8,9 @@ import { bindActionCreators } from 'redux';
 import Colors from 'material-ui/lib/styles/colors';
 import { Paper, Avatar, FontIcon, TextField, FlatButton, Divider, ClearFix, AppBar } from 'material-ui/lib'
 
-import * as UserActions from '../actions/user'
-import * as SideBarActions from '../actions/side_bar';
-import * as ToastActions from '../actions/master/toast';
+import * as UserActions from '../../actions/user'
+import * as SideBarActions from '../../actions/side_bar';
+import * as ToastActions from '../../actions/master/toast';
 
 
 class NavBar extends Component {
@@ -60,7 +60,6 @@ class NavBar extends Component {
     const styles = {
       title: {
         fontWeight: '800',
-
       },
       titleIcon: {
         fontSize: '38px', 

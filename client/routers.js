@@ -3,7 +3,7 @@
 import React from 'react';
 import { Router, Route, IndexRoute } from 'react-router';
 import SignIn from './containers/signin';
-import Desktop from './containers/desktop';
+import Desktop from './containers/desktop/desktop';
 import DashBoard from './containers/dashboard'
 import Profile from './containers/profile'
 

@@ -1,5 +1,5 @@
 'use strict';
-import log from '../utils/log'
+import log from '../../utils/log'
 import _ from 'lodash'
 
 
@@ -9,10 +9,10 @@ import { bindActionCreators } from 'redux';
 import { Paper, Avatar, FontIcon, RaisedButton, Menu, Popover, MenuItem, Divider, ClearFix, LeftNav, List, ListItem } from 'material-ui/lib'
 
 
-import * as UserActions from '../actions/user'
-import * as ToastActions from '../actions/master/toast';
+import * as UserActions from '../../actions/user'
+import * as ToastActions from '../../actions/master/toast';
 
-import { getMenusLinkByKey } from '../utils/menus'
+import { getMenusLinkByKey } from '../../utils/menus'
 
 class Breadcrumbs extends Component {
 
@@ -23,11 +23,10 @@ class Breadcrumbs extends Component {
 
   getMenusLink(styles) {
     const menusLink = getMenusLinkByKey(null, this.props.menus.menus, this.props.menus.selectedKey)
-    log.info(menusLink)
     let menusLinkString = ''
     let menu = menusLink
     while (menu) {
-      menusLinkString += '  /  ' + menu.name
+      menusLinkString += ' / ' + menu.name
       menu = menu._child_
     }
     return menusLinkString;
@@ -66,7 +65,7 @@ class Breadcrumbs extends Component {
         display: 'inline-block',
         position: 'relative',
         verticalAlign: 'bottom',
-        lineHeight: '30px',
+        lineHeight: '32px',
         color: disabledColor,
       }
     }

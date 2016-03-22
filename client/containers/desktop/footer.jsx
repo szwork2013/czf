@@ -1,5 +1,5 @@
 'use strict';
-import log from '../utils/log'
+import log from '../../utils/log'
 import _ from 'lodash'
 
 
@@ -8,8 +8,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 
-import * as UserActions from '../actions/user'
-import * as ToastActions from '../actions/master/toast';
+import * as UserActions from '../../actions/user'
+import * as ToastActions from '../../actions/master/toast';
 
 
 class Footer extends Component {
