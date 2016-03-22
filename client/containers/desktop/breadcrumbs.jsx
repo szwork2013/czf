@@ -46,12 +46,14 @@ class Breadcrumbs extends Component {
         </ToolbarGroup>
         <ToolbarGroup float="right">
           <ToolbarSeparator style={styles.toolbarSeparator}/>
-          <FontIcon className="material-icons" style={styles.icon}>fullscreen</FontIcon>
+          <FontIcon className="material-icons" style={styles.icon}>open_with</FontIcon>
           <IconMenu iconButtonElement={
               <IconButton style={styles.icon}  touch={true}>
                 <NavigationExpandMoreIcon />
               </IconButton>
             }
+            targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
+            anchorOrigin={{horizontal: 'right', vertical: 'top'}}
           >
             <MenuItem primaryText="More Info" />
           </IconMenu>

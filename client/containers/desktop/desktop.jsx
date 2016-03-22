@@ -83,7 +83,7 @@ class Desktop extends Component {
       children: {
         position: 'relative',
         padding: '12px 12px',
-        minHeight: 'calc(100% - 147px)',
+        minHeight: 'calc(100% - 131px)',
       },
       footerStyle: {
         position: 'relative',

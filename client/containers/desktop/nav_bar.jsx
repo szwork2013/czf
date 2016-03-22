@@ -6,7 +6,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import Colors from 'material-ui/lib/styles/colors';
-import { Paper, Avatar, FontIcon, TextField, FlatButton, Divider, ClearFix, AppBar } from 'material-ui/lib'
+import { Paper, Avatar, FontIcon, TextField, FlatButton, Divider, ClearFix, AppBar, IconMenu, IconButton, MenuItem } from 'material-ui/lib'
+import MoreVertIcon from 'material-ui/lib/svg-icons/navigation/more-vert';
 import { APP_NAME } from '../../constants/const'
 
 import * as UserActions from '../../actions/user'
@@ -45,7 +46,19 @@ class NavBar extends Component {
     return (
       <AppBar style={this.props.navBarStyle} showMenuIconButton={true}
               title={ this.getTitle(styles) } 
-              onLeftIconButtonTouchTap={this.leftIconButtonTouchTap.bind(this)}/>
+              onLeftIconButtonTouchTap={this.leftIconButtonTouchTap.bind(this)}
+              iconElementRight={
+                <div>
+                  <IconMenu iconButtonElement={
+                      <IconButton><MoreVertIcon color='white'/></IconButton>
+                    }
+                    targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
+                    anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+                  >
+                    <MenuItem primaryText="Help" />
+                  </IconMenu>
+                </div>
+              }/>
     )
   }
 
@@ -68,6 +81,14 @@ class NavBar extends Component {
         top: '10px',
         marginRight: '4px'
       },
+      icon: {
+        color: 'white',
+        paddingTop: '0px',
+        paddingBottom: '0px',
+        position: 'relative',
+        // lineHeight: '40px',
+        fontSize: '32px',
+      }
     }
     return styles;
   }
