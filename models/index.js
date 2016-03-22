@@ -81,10 +81,13 @@ exports.init = async (clean, rebuiltRelationships) => {
   //init relationships
   if (process.env.NODE_ENV === 'test' && (clean || rebuiltRelationships)) {
     log.info('mongo -- init relationship for all collections')
+    let owner = await Users.findOne({email: '546113328@qq.com'}).exec();
     let mansion = await Mansions.findOne().exec();
     mansion.houseServicesChargesForLayoutPerMonth = {};
     mansion.houseOverdueFineForLayoutPerDay = {};
-    let mansionId = mansion._id.toString();
+
+    mansion.ownerId = owner._id;
+    mansion.managerIds = [owner._id];
 
     //为mansion绑定户型
     await HouseLayouts.update({}, {$set: {mansionsId: mansion._id}}).exec();

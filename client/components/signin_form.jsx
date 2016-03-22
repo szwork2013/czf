@@ -9,6 +9,8 @@ import Colors from 'material-ui/lib/styles/colors';
 import { Paper, Avatar, FontIcon, TextField, FlatButton, Checkbox, Divider, ClearFix } from 'material-ui/lib'
 
 import utils from '../utils'
+import { CryptoJS } from '../utils/crypto'
+
 
 export default class SignInForm extends Component {
   constructor(props, context) {
@@ -49,7 +51,7 @@ export default class SignInForm extends Component {
     e.preventDefault();
     var formData = {}
     if (this.refs.mobile) {
-      //用户名密码登陆
+      //验证码
       let mobile = this.refs.mobile.getValue();
       let authCode = this.refs.authCode.getValue();
       if (this.checkParam(mobile, utils.isMobileNumber, 'mobile') && this.checkParam(authCode, utils.isAuthCode, 'authCode')) {
@@ -59,12 +61,14 @@ export default class SignInForm extends Component {
         return;
       }
     } else if (this.refs.name) {
-      //手机号登陆
+      //用户名密码登陆
       let name = this.refs.name.getValue();
       let password = this.refs.password.getValue();
+      
       if ((this.checkParam(name, utils.isMobileNumber) || this.checkParam(name, utils.isEmail))){
         if (this.checkParam(password, null, 'password')) {
-          formData = {name, password}
+          password = CryptoJS.SHA256(password).toString();
+          formData = {name, password: {algorithm: 'sha-256', digest: password}}
           this.props.signinNameSubmit(formData);
         } else {
           // this.props.openToast({status: 400, msg: `password is required`});

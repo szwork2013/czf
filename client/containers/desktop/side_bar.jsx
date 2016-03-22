@@ -91,7 +91,11 @@ class SideBar extends Component {
       // this.props.actions.menuChange(key);
       browserHistory.push(key);
     }
-    function getMenus(menus, selectedKey) {
+    function getMenus(menus, selectedKey, level = 0) {
+      let mainMenusItemStyle = _.assign({}, styles.mainMenusItem);
+      mainMenusItemStyle.backgroundColor = 'rgba(255, 255, 255,' + (level * 0.5) + ')';
+      mainMenusItemStyle.fontSize = (16 - level) + 'px';
+      mainMenusItemStyle.lineHeight = (16 - level) + 'px';
       let retMenus = menus.map((menu) => {
         // log.info(menu.key, selectedKey, menu.key==selectedKey)
         switch (menu.type) {
@@ -104,17 +108,19 @@ class SideBar extends Component {
                 <FontIcon className="material-icons">{menu.leftIcon}</FontIcon>
               );
             }
+
             if (menu.menus) {
-              let nestedItems = getMenus.bind(this)(menu.menus, selectedKey)
+              let nestedItems = getMenus.bind(this)(menu.menus, selectedKey, level+1)
               return (
                 <ListItem key={menu.key} primaryText={menu.name} value={menu.key} leftIcon={leftIcon} 
                   nestedListStyle={styles.mainMenusNestedStyle}
+                  style={mainMenusItemStyle} 
                   primaryTogglesNestedList={true} nestedItems={nestedItems}/>
               )
             } else {
               return (
                 <ListItem key={menu.key} primaryText={menu.name} value={menu.key} leftIcon={leftIcon} 
-                  style={menu.key===selectedKey? styles.mainMenusItemSelected: styles.mainMenusItem} 
+                  style={menu.key===selectedKey? styles.mainMenusItemSelected: mainMenusItemStyle} 
                   onTouchTap={onTouchTap.bind(this, menu.key)}/>
               )
             }
@@ -239,14 +245,16 @@ class SideBar extends Component {
 
       },
       mainMenusNestedStyle: {
-        backgroundColor: 'rgba(0,0,0,0)',
-        padding: '0px 0px',
+        backgroundColor: 'rgba(255, 255, 255, 0)',
+        padding: '0px 0px 0px 0px',
+        paddingTop: '0px',
+        paddingBottom: '0px',
       },
       mainMenusItem: {
-        backgroundColor: '#f2f2f2'
+        backgroundColor: 'rgba(255, 255, 255, 0)',
       },
       mainMenusItemSelected: {
-        backgroundColor: 'rgba(0, 0, 0, 0.1)'
+        backgroundColor: 'rgba(0, 0, 0, 0.2)'
       },
       mainMenusDivider: {
         marginTop: '0px'

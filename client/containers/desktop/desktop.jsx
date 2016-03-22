@@ -51,7 +51,7 @@ class Desktop extends Component {
         position: 'fixed',
       },
       sideBarStyle: {
-        backgroundColor: '#f2f2f2',
+        backgroundColor: '#f0f0f0',
         borderRight: '1px solid #ccc',        
         top: '64px',
         width: '256px',

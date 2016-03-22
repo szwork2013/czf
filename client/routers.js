@@ -8,9 +8,10 @@ import DashBoard from './containers/dashboard'
 import Profile from './containers/profile'
 import NoFound from './containers/no_found'
 
-import store from './store'
+//Mansion
+import Mansions from './containers/mansion/mansions'
 
-console.log(NotFoundRoute)
+import store from './store'
 
 function requireAuth(nextState, replace) {
   let state = store.getState() || {};
@@ -39,6 +40,8 @@ const routes = (
       <IndexRoute component={DashBoard} />
       <Route path='dashboard' component={DashBoard} />
       <Route path='profile' component={Profile} />
+
+      <Route path='mansions' component={Mansions} />
     </Route>
     <Route path="*" component={NoFound}/>
   </Router>

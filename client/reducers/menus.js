@@ -16,7 +16,7 @@ const menus = [
     type: 'DIVIDER',
   }, {
     type: 'MENU',
-    name: '设置',
+    name: '配置',
     leftIcon: 'settings',
     key: '/settings',
     menus: [{
@@ -24,6 +24,11 @@ const menus = [
       name: '用户信息',
       leftIcon: 'account_circle',
       key: '/profile',
+    },{
+      type: 'MENU',
+      name: '资产',
+      leftIcon: 'location_city',
+      key: '/mansions',
     }]
   }, {
     type: 'DIVIDER',

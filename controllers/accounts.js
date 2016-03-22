@@ -206,6 +206,7 @@ var signinWithPwd = async (req, res) => {
   let name = body.name || '';
   name = name.toString().trim();
   let password = body.password || '';
+  // log.info(body)
   if (!name) {
     return res.handleResponse(400, {}, 'login name is require');
   }
@@ -216,11 +217,17 @@ var signinWithPwd = async (req, res) => {
   try {
     if (utils.isMobileNumber(name)) {
       user = await Users.findOne({mobile: name}).exec();
+      if (!user) {
+        return res.handleResponse(404, {});
+      }
       if (!user.confirmedMobile) {
         return res.handleResponse(403, {}, 'not confirmed');
       }
     } else if (utils.isEmail(name)) {
       user = await Users.findOne({email: name}).exec();
+      if (!user) {
+        return res.handleResponse(404, {});
+      }
       if (!user.confirmedEmail) {
         return res.handleResponse(403, {}, 'not confirmed');
       }
