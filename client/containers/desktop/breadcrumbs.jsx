@@ -6,8 +6,8 @@ import _ from 'lodash'
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Paper, Avatar, FontIcon, RaisedButton, Menu, Popover, MenuItem, Divider, ClearFix, LeftNav, List, ListItem } from 'material-ui/lib'
-
+import { Paper, Avatar, FontIcon, RaisedButton, Menu, Popover, MenuItem, Divider, ClearFix, LeftNav, List, ListItem, Toolbar, ToolbarGroup, ToolbarSeparator, IconMenu, IconButton } from 'material-ui/lib'
+import NavigationExpandMoreIcon from 'material-ui/lib/svg-icons/navigation/expand-more'
 
 import * as UserActions from '../../actions/user'
 import * as ToastActions from '../../actions/master/toast';
@@ -40,9 +40,23 @@ class Breadcrumbs extends Component {
       );
     }
     return (
-      <div style={this.props.breadcrumbsStyle}>
-        {homeIcon(styles)}<span style={styles.menusLink}>{this.getMenusLink(styles)}</span>
-      </div>
+      <Toolbar style={this.props.breadcrumbsStyle}>
+        <ToolbarGroup firstChild={true} float="left">
+          {homeIcon(styles)}<span style={styles.menusLink}>{this.getMenusLink(styles)}</span>
+        </ToolbarGroup>
+        <ToolbarGroup float="right">
+          <ToolbarSeparator style={styles.toolbarSeparator}/>
+          <FontIcon className="material-icons" style={styles.icon}>fullscreen</FontIcon>
+          <IconMenu iconButtonElement={
+              <IconButton style={styles.icon}  touch={true}>
+                <NavigationExpandMoreIcon />
+              </IconButton>
+            }
+          >
+            <MenuItem primaryText="More Info" />
+          </IconMenu>
+        </ToolbarGroup>
+      </Toolbar>
     )
   }
 
@@ -52,21 +66,36 @@ class Breadcrumbs extends Component {
     // const buttom1Color = palette.primary1Color;
     // const buttom2Color = Colors.pinkA200;
     // const borderColor = palette.borderColor;
-    // const textColor = palette.textColor;
+    const textColor = palette.textColor;
     const disabledColor = palette.disabledColor;
     const styles = {
 
       homeIcon: {
         verticalAlign: 'middle',
         paddingRight: '8px',
+        fontSize: '24px',
+        lineHeight: '40px',
+        verticalAlign: 'middle',
         color: disabledColor,
       },
       menusLink: {
         display: 'inline-block',
         position: 'relative',
-        verticalAlign: 'bottom',
-        lineHeight: '32px',
+        verticalAlign: 'middle',
+        fontSize: '12px',
+        lineHeight: '44px',
         color: disabledColor,
+      },
+      toolbarSeparator: {
+        top: '5px',
+        height: '30px'
+      },
+      icon: {
+        paddingTop: '0px',
+        paddingBottom: '0px',
+        position: 'relative',
+        lineHeight: '40px',
+        fontSize: '24px',
       }
     }
     return styles;

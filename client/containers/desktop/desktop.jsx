@@ -72,7 +72,7 @@ class Desktop extends Component {
         zIndex: 13,
         borderBottom: '1px solid #e5e5e5',
         backgroundColor: '#f5f5f5',
-        minHeight: '40px',
+        height: '40px',
         lineHeight: '39px',
         padding: '0px 12px',
         fontSize: '14px',
@@ -83,7 +83,7 @@ class Desktop extends Component {
       children: {
         position: 'relative',
         padding: '12px 12px',
-        minHeight: 'calc(100% - 132px)',
+        minHeight: 'calc(100% - 147px)',
       },
       footerStyle: {
         position: 'relative',
