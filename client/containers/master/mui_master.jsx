@@ -8,6 +8,7 @@ import {StyleResizable} from 'material-ui/lib/mixins';
 import { setDeviceSize } from '../../actions/master/mui';
 import Events from 'material-ui/lib/utils/events'
 
+
 const MUIMaster = React.createClass({
   manuallyBindResize: true,
 

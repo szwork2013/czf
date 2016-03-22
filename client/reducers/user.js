@@ -29,9 +29,9 @@ export default function user(state=initialState, action) {
   switch (action.type) {
     case USER_RESTORE:
       newState = _.assign({}, state);
-      if (action.user) newState.user = action.user
-      if (action.token) newState.token = action.token
-      if (action.expiresIn) newState.expiresIn = action.expiresIn
+      if (action.user!==undefined) newState.user = action.user
+      if (action.token!==undefined) newState.token = action.token
+      if (action.expiresIn!==undefined) newState.expiresIn = action.expiresIn
       return newState;
 
     case USER_TYPE_CLEAN:

@@ -14,6 +14,8 @@ import menus from './menus'
 import user from './user';
 import { signin } from './sign';
 
+//mansion
+import houseLayoutPatterns from './mansion/house_layout_patterns'
 
 const rootReducer = combineReducers({
   //add other reducer here,
@@ -25,7 +27,9 @@ const rootReducer = combineReducers({
   loading,
   toast,
   user,
-  signin
+  signin,
+
+  houseLayoutPatterns,
 });
 
 export default rootReducer;

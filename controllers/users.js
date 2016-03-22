@@ -13,7 +13,7 @@ import utils from '../utils';
 /*
  * 取得用户
  */
-const getSelf = async (req, res) => {
+const refreshToken = async (req, res) => {
   let query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
   let user = req.user;
   let token = jwt.sign({
@@ -25,7 +25,7 @@ const getSelf = async (req, res) => {
   // return res.handleResponse(200, {user: retUser, token: token, expiresIn: config.jwt.jwtTimeout});
   return res.handleResponse(500);
 }
-exports.getSelf = getSelf;
+exports.refreshToken = refreshToken;
 
 
 

@@ -7,7 +7,12 @@ import fetch from 'isomorphic-fetch';
 
 import { loadingOn, loadingOff } from '../actions/master/loading';
 import { openToast } from '../actions/master/toast';
-import { Session } from '../utils/session';
+import { Storage } from '../utils/storage';
+
+import { browserHistory } from 'react-router';
+
+
+import { USER_RESTORE } from '../constants/actionTypes';
 
 export const CALL_API = Symbol('Call API');
 export const CALL_API_V1 = Symbol('Call API V1');
@@ -33,10 +38,13 @@ const toLowerCaseKeys = (obj, types = ['string'], isExclude = false) => {
  * method : it is a byte-case-insensitive match for `DELETE`, `GET`, `HEAD`, `OPTIONS`, `POST`, or `PUT`, byte-uppercase it.
  */
 function callApi(url, method = 'POST', data = {}, headers = {}) {
+  let state = window.defaultStore.getState() || {};
+  let user = state.user || {};
+  let token = user.token;
   let defaultHeaders = {
       'accept': 'application/json',
       'content-type': method.toUpperCase() === 'GET'? 'application/x-www-form-urlencoded': 'application/json',
-      'authorization': Session.get('token')
+      'authorization': token
     };
   headers = _.assign(defaultHeaders, toLowerCaseKeys(headers));
   let options = {
@@ -126,7 +134,14 @@ export default store => next => action => {
       resObj.type = responseType;
       next(actionWith(resObj, callSymbol));
     } else {
-      if (resObj.resStatus === 200) {
+      if (resObj.resStatus === 401) {
+        window.defaultStore.dispatch({type: USER_RESTORE, token: '', expiresIn: new Date()})
+        Storage.remove('token');
+        Storage.remove('expiresIn');
+        browserHistory.push('/signin');
+        return
+      }
+      else if (resObj.resStatus === 200) {
         resObj.type = successType;
         next(actionWith(resObj, callSymbol));
       } else if (failureType) {

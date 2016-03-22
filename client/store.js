@@ -18,3 +18,4 @@ const store = composeCreateStore(rootReducer);
 
 export default store;
 
+window.defaultStore = store;

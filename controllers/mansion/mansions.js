@@ -1,12 +1,12 @@
 'use strict';
 
-import log from '../../utils/log';
+import log from '../utils/log';
 import _ from 'lodash';
-import utils from '../../utils';
-import config from '../../config';
+import utils from '../utils';
+import config from '../config';
 
 
-import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts } from '../../models';
+import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts } from '../models';
 
 
 /*

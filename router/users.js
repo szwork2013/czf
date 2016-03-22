@@ -5,10 +5,10 @@ import express from 'express';
 const router = express.Router();
 
 import { jwtVerify } from '../middlewares/jwt_verify'
-import { getSelf } from '../controllers/users';
+import { refreshToken } from '../controllers/users';
 
 
-router.get('/user/self', jwtVerify, getSelf);
+router.put('/user/refreshToken', jwtVerify, refreshToken);
 
 export default router;
 

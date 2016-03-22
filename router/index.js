@@ -12,7 +12,9 @@ import authCodes from './auth_codes';
 import accounts from './accounts';
 import users from './users';
 
-router.use('/api/v1', [authCodes, accounts, users]);
+import mansions from './mansions';
+
+router.use('/api/v1', [authCodes, accounts, users, mansions]);
 
 
 module.exports = router;
