@@ -20,13 +20,19 @@ import * as HouseLayoutPatternsAction from '../../actions/mansion/house_layout_p
 import * as MansionsAction from '../../actions/mansion/mansions'
 import * as ToastActions from '../../actions/master/toast';
 
+import MansionsBase from '../../components/mansion/mansions_base'
+import MansionsHouseLayouts from '../../components/mansion/mansions_house_layouts'
+
 
 class Mansions extends Component {
 
   constructor(props, context) {
     super(props, context);
     this.state = {
-      mansion: {}
+      mansion: {},
+      houseLayouts: [],
+      houses: [],
+      shops: []
     }
   }
 
@@ -43,14 +49,7 @@ class Mansions extends Component {
       this.props.actions.requestMansionsClick();
     } else {
       //物业单位默认选择第一个
-      if (_.isEmpty(this.state.mansion)) {
-        for (let idx in this.props.mansions) {
-          let mansion = _.cloneDeep(this.props.mansions[idx]);
-          this.setState({mansion})
-          this.getMansionAllInfo(mansion)
-          return
-        }
-      }
+      this.selectDefaultMansion(this.props)
     }
   }
 
@@ -59,16 +58,38 @@ class Mansions extends Component {
    */
   componentWillReceiveProps(nextProps) {
     //物业单位默认选择第一个
-    if (nextProps.mansions && nextProps.mansions.length>0 && _.isEmpty(this.state.mansion)) {
-      for (let idx in nextProps.mansions) {
-        let mansion = _.cloneDeep(nextProps.mansions[idx]);
-        this.setState({mansion})
-        this.getMansionAllInfo(mansion)
+    this.selectDefaultMansion(nextProps)
+  }
+
+  /* 
+   * 当state中的Mansion为空时，设置为第一个
+   */
+  selectDefaultMansion(props) {
+    let mansions = props.mansions
+    if (_.isEmpty(this.state.mansion) && mansions && mansions.length>0) {
+      for (let key in mansions) {
+        this.selectMansion(mansions[key])
         return
       }
     }
   }
-
+  selectMansion(mansion) {
+    mansion = _.cloneDeep(mansion);
+    let houseLayouts = mansion.houseLayouts;
+    mansion.houseLayouts = true;
+    let houses = []
+    if (mansion.houses) {
+      houses = mansion.houses
+      mansion.houses = true;
+    } 
+    let shops = []
+    if (mansion.shops) {
+      shops = mansion.shops
+      mansion.houses = true
+    }
+    this.setState({mansion, houseLayouts, houses, shops})
+    this.getMansionAllInfo(mansion)
+  }
   /*
    * 取得物业的出租房、商铺信息
    */
@@ -76,10 +97,7 @@ class Mansions extends Component {
     let formData = {}
     if (!mansion.houses) {
       formData.houses = true
-    }
-    // if (!mansion.houseLayouts) {
-    //   formData.houseLayouts = true
-    // }
+    } 
     if (!mansion.shops) {
       formData.shops = true
     }
@@ -88,6 +106,11 @@ class Mansions extends Component {
       this.props.actions.requestMansionInfoClick(formData);
     }
   }
+
+  updateState(obj) {
+    this.setState(obj)
+  }
+
 
   /*
    * 取得所有物业
@@ -103,202 +126,37 @@ class Mansions extends Component {
     }
     return retMansions;
   }
-  handleMansionsChange(e, idx, value) {
-    let mansion = _.cloneDeep(this.props.mansions[value])
-    this.setState({mansion});
-    this.getMansionAllInfo(mansion)
+  handleMansionsChange(e, idx, key) {
+    this.selectMansion(this.props.mansions[key])
   }
 
-  /*
-   * 基础信息Tab
-   */
-  getMansionTab(styles) {
-    let mansion = this.state.mansion
-    function mansionChange(key) {
-      return function (e, idx, value) {
-        let mansion = this.state.mansion
-        if (value)
-          mansion[key] = value
-        else if (this.refs[key].getValue)
-          mansion[key] = this.refs[key].getValue()
-        this.setState({mansion})
-      }
-    }
-    function getProvinces() {
-      var provinces = []
-      for (var province of provinceAndCityAndArea) {
-        provinces.push(<MenuItem value={province.name} primaryText={province.name} key={province.name}/>)
-      }
-      return provinces;
-    }
-    function getCity() {
-      var cityArray = getCityByProvince(this.state.mansion.province)
-      var retCity = []
-      for (var city of cityArray) {
-        retCity.push(<MenuItem value={city.name} primaryText={city.name} key={city.name}/>)
-      }
-      return retCity;
-    }
-    function getArea() {
-      var areaArray = getAreaByProvinceAndCity(this.state.mansion.province, this.state.mansion.city)
-      var retArea = []
-      for (var area of areaArray) {
-        retArea.push(<MenuItem value={area} primaryText={area} key={area}/>)
-      }
-      return retArea;
-    }
-    function counter(array) {
-      var retValue = 0;
-      for (i in array) {
-        retValue += array[i]
-      }
-      return retValue
-    }
-    return (
-      <Tab label="基础信息" >
-        <div style={styles.tab}>
-          <TextField hintText="单位名称" floatingLabelText="单位名称" ref='name' style={styles.marginRight} value={mansion.name} onChange={mansionChange('name').bind(this)}/>
-          <TextField hintText="发票抬头" floatingLabelText="发票抬头" ref='invoiceTitle' style={styles.marginRight} value={mansion.invoiceTitle} onChange={mansionChange('invoiceTitle').bind(this)}/>
-          <br />
-          <SelectField value={mansion.province} floatingLabelText='省份' ref='province' style={styles.marginRight}  onChange={mansionChange('province').bind(this)}>
-            { getProvinces.bind(this)() }
-          </SelectField>
-          <SelectField value={mansion.city} floatingLabelText='地市' ref='city' style={styles.marginRight} onChange={mansionChange('city').bind(this)}>
-            { getCity.bind(this)() }
-          </SelectField>
-          <SelectField value={mansion.area} floatingLabelText='区' ref='area' style={styles.marginRight} onChange={mansionChange('area').bind(this)}>
-            { getArea.bind(this)() }
-          </SelectField>
-          <br />
-          <TextField hintText="详细地址" floatingLabelText="详细地址" ref='address' style={styles.marginRight} value={mansion.address} onChange={mansionChange('address').bind(this)} fullWidth={true}/>
-          <br />
-          <TextField hintText="楼层总数" floatingLabelText="楼层总数" ref='floorCount' style={styles.marginRight} value={mansion.floorCount} disabled={true}/>
-          <TextField hintText="出租房总数" floatingLabelText="出租房总数" ref='housesAvailableCount' style={styles.marginRight} value={counter(mansion.housesAvailableCount)} disabled={true}/>
-          <TextField hintText="商铺总数" floatingLabelText="商铺总数" ref='shopsAvailableCount' style={styles.marginRight} value={counter(mansion.shopsAvailableCount)} disabled={true}/>
-          <br />
-          <TextField hintText="楼层显示前缀" floatingLabelText="楼层显示前缀" ref='floorDesPrefix' style={styles.marginRight} value={mansion.floorDesPrefix || ' '} disabled={true}/>
-          <TextField hintText="楼层显示长度" floatingLabelText="楼层显示长度" ref='housesAvailableCount' style={styles.marginRight} value={mansion.floorDesLength} disabled={true}/>
-          <br />
-          <TextField hintText="出租房显示长度" floatingLabelText="出租房显示长度" ref='housesDesLength' style={styles.marginRight} value={mansion.housesDesLength} disabled={true}/>
-          <TextField hintText="商铺显示长度" floatingLabelText="商铺显示长度" ref='shopsDesLength' style={styles.marginRight} value={mansion.shopsDesLength} disabled={true}/>
-        </div>
-      </Tab>
-    )
-  }
 
-  /*
-   * 户型Tab
-   */
-  getHouseLayoutsTab(styles) {
-    function houseLayoutChange(idx, key, isNumber) {
-      return function (e, line, value) {
-        let houseLayouts = this.state.mansion.houseLayouts
-        let relKey = 'houseLayout:'+idx+':'+key
-        if (this.refs && this.refs[relKey] && this.refs[relKey].getValue)
-          value = this.refs[relKey].getValue()
-        if (isNumber) {
-          value = Number(value)
-          log.info(value, value===NaN)
-          if (isNaN(value)) 
-            value = 0
-        }  
-        houseLayouts[idx][key] = value
-        this.setState({mansion})
-      }
-    }
-    function getPatterns(code) {
-      var houseLayoutPatterns = this.props.houseLayoutPatterns;
-      var pattern = {items: []}
-      for (var i in houseLayoutPatterns) {
-        pattern = houseLayoutPatterns[i]
-        if (pattern.code === code) break;
-      }
-      return pattern.items.map( item => (
-        <MenuItem value={item.code} primaryText={item.description} key={item.code+item.description}/>
-      ))
-    }
-    function getLayoutPatterns(styles, idx, houseLayout, code, description) {
-      return (
-        <SelectField value={houseLayout[code]} floatingLabelText={description} ref={'houseLayout:'+idx+':'+code} style={styles.tableCellSelect} onChange={houseLayoutChange(idx, code).bind(this)}>
-          { getPatterns.bind(this)(code) }
-        </SelectField>
-      )
-    }
-    let mansion = this.state.mansion
-    let houseLayouts = mansion.houseLayouts || []
-    return (
-      <Tab label="户型（出租房）">
-        <div style={styles.tab}>
-          <Table selectable={false} fixedHeader={true}>
-            <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
-              <TableRow>
-                <TableHeaderColumn style={{width: '12%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>户型名</TableHeaderColumn>
-                <TableHeaderColumn>属性</TableHeaderColumn>
-                <TableHeaderColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>默认押金</TableHeaderColumn>
-                <TableHeaderColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>默认租金</TableHeaderColumn>
-                <TableHeaderColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>默认定金</TableHeaderColumn>
-                <TableHeaderColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>物业费/月</TableHeaderColumn>
-                <TableHeaderColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>逾期罚款/天</TableHeaderColumn>
-              </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} deselectOnClickaway={false} showRowHover={true} stripedRows={true}>
-            {houseLayouts.map((houseLayout, idx) => (
-              <TableRow key={'houseLayout:'+idx} >
-                <TableRowColumn style={{width: '12%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                  <TextField ref={'houseLayout:'+idx+':description'} value={houseLayout.description} onChange={houseLayoutChange(idx, 'description').bind(this)} style={styles.tableCellTextField}/>
-                </TableRowColumn>
-                <TableRowColumn>
-                  { getLayoutPatterns.bind(this)(styles, idx, houseLayout, 'bedroom', '房间数') }
-                  { getLayoutPatterns.bind(this)(styles, idx, houseLayout, 'livingroom', '客厅数') }
-                  { getLayoutPatterns.bind(this)(styles, idx, houseLayout, 'brightness', '光线') }
-                  <br />
-                </TableRowColumn>
-                <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                  <TextField ref={'houseLayout:'+idx+':defaultDeposit'} value={houseLayout.defaultDeposit} onChange={houseLayoutChange(idx, 'defaultDeposit', true).bind(this)} style={styles.tableCellTextField}/>
-                </TableRowColumn>
-                <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                  <TextField ref={'houseLayout:'+idx+':defaultRental'} value={houseLayout.defaultRental} onChange={houseLayoutChange(idx, 'defaultRental', true).bind(this)} style={styles.tableCellTextField}/>
-                </TableRowColumn>
-                <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                  <TextField ref={'houseLayout:'+idx+':defaultSubscription'} value={houseLayout.defaultSubscription} onChange={houseLayoutChange(idx, 'defaultSubscription', true).bind(this)} style={styles.tableCellTextField}/>
-                </TableRowColumn>
-                <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                  <TextField ref={'houseLayout:'+idx+':servicesCharges'} value={houseLayout.servicesCharges} onChange={houseLayoutChange(idx, 'servicesCharges', true).bind(this)} style={styles.tableCellTextField}/>
-                </TableRowColumn>
-                <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                  <TextField ref={'houseLayout:'+idx+':overdueFine'} value={houseLayout.overdueFine} onChange={houseLayoutChange(idx, 'overdueFine', true).bind(this)} style={styles.tableCellTextField}/>
-                </TableRowColumn>
-              </TableRow>
-            ))}
-            </TableBody>
-          </Table>
-          
-        </div>
-      </Tab>
-    )
-  }
 
-  /*
-   * 出租房Tab
-   */
-  getHousesTab(styles) {
-    return (
-      <Tab label="出租房">
+  // /*
+  //  * 出租房Tab
+  //  */
+  // getHousesTab(styles) {
+  //   return (
+  //     <Tab label="出租房">
         
-      </Tab>
-    )
-  }
-  getShopsTab(styles) {
-    return (
-      <Tab label="商铺">
-      2
-      </Tab>
-    )
-  }
+  //     </Tab>
+  //   )
+  // }
+  // getShopsTab(styles) {
+  //   return (
+  //     <Tab label="商铺">
+  //     2
+  //     </Tab>
+  //   )
+  // }
 
   render() {
     let styles = this.getStyles()
     let mansion = this.state.mansion;
+    let houseLayouts = this.state.houseLayouts;
+    let houseLayoutPatterns = this.props.houseLayoutPatterns;
+    //          
+
     return (
       <div>
         <SelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)} 
@@ -308,10 +166,8 @@ class Mansions extends Component {
         <span></span>
         <br/>
         <Tabs initialSelectedIndex={0} >
-          { this.getMansionTab(styles) }
-          { this.getHouseLayoutsTab(styles) }
-          { this.getHousesTab(styles, mansion) }
-          { this.getShopsTab(styles, mansion) }
+          <Tab label="基础信息" ><MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} /></Tab>
+          <Tab label="户型（出租房）"><MansionsHouseLayouts houseLayouts={houseLayouts} houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} /></Tab>
         </Tabs>
       </div>
     )

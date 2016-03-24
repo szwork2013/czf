@@ -81,6 +81,7 @@ class Desktop extends Component {
         width: '100%'
       },
       children: {
+        // backgroundColor: 'white',
         position: 'relative',
         padding: '12px 12px',
         minHeight: 'calc(100% - 131px)',
@@ -110,7 +111,6 @@ class Desktop extends Component {
 function mapStateToProps(state) {
   return {
     theme: state.mui.theme,
-    deviceSize: state.mui.deviceSize,
     isLoading: state.loading,
     sideBar: state.sideBar,
     user: state.user.user,

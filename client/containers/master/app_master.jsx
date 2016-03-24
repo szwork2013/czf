@@ -9,7 +9,7 @@ import Toast from '../../components/master/toast';
 import { Session } from '../../utils/session';
 import { Storage } from '../../utils/storage';
 
-import { APP_STATE } from '../../constants/const'
+import { APP_STATE } from '../../reducers/master/app_state'
 
 
 /*
@@ -61,7 +61,7 @@ const APPMaster = React.createClass({
 
 
   shouldComponentUpdate(nextProps, nextState) {
-    return true;
+    return true
   },
 
   render() {
@@ -80,8 +80,6 @@ const APPMaster = React.createClass({
 function mapStateToProps(state) {
   return {
     appState: state[APP_STATE],
-    theme: state.mui.theme,
-    deviceSize: state.mui.deviceSize,
     isLoading: state.loading,
   };
 }

@@ -21,6 +21,10 @@ class Footer extends Component {
     super(props, context);
     this.state = {}
   }
+  
+  shouldComponentUpdate(nextProps, nextState) {
+    return false;
+  }
 
   render() {
     const styles = this.getStyles();

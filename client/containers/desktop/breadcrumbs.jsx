@@ -21,6 +21,13 @@ class Breadcrumbs extends Component {
     this.state = {}
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.menus.selectedKey === this.props.menus.selectedKey) {
+      return false;
+    }
+    return true;
+  }
+
   getMenusLink(styles) {
     const menusLink = getMenusLinkByKey(null, this.props.menus.menus, this.props.menus.selectedKey)
     let menusLinkString = ''
@@ -110,13 +117,13 @@ function mapStateToProps(state) {
     theme: state.mui.theme,
     // deviceSize: state.mui.deviceSize,
     // isLoading: state.loading,
-    user: state.user.user,
+    // user: state.user.user,
     menus: state.menus
   };
 }
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(_.assign({}, ToastActions, UserActions), dispatch)
+    actions: bindActionCreators(_.assign({}, ToastActions), dispatch)
   };
 }
 export default connect(

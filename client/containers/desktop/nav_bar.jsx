@@ -22,6 +22,10 @@ class NavBar extends Component {
     this.state = {
     }
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return false;
+  }
+
 
   leftIconButtonTouchTap(e) {
     if (this.props.sideBar.isShow) {
@@ -45,20 +49,20 @@ class NavBar extends Component {
     const styles = this.getStyles();
     return (
       <AppBar style={this.props.navBarStyle} showMenuIconButton={true}
-              title={ this.getTitle(styles) } 
-              onLeftIconButtonTouchTap={this.leftIconButtonTouchTap.bind(this)}
-              iconElementRight={
-                <div>
-                  <IconMenu iconButtonElement={
-                      <IconButton><MoreVertIcon color='white'/></IconButton>
-                    }
-                    targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
-                    anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-                  >
-                    <MenuItem primaryText="Help" />
-                  </IconMenu>
-                </div>
-              }/>
+        title={ this.getTitle(styles) } 
+        onLeftIconButtonTouchTap={this.leftIconButtonTouchTap.bind(this)}
+        iconElementRight={
+          <div>
+            <IconMenu iconButtonElement={
+                <IconButton><MoreVertIcon color='white'/></IconButton>
+              }
+              targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
+              anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+            >
+              <MenuItem primaryText="Help" />
+            </IconMenu>
+          </div>
+        }/>
     )
   }
 

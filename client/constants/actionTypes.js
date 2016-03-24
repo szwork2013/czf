@@ -12,6 +12,12 @@ export const LOADING_OFF = 'LOADING_OFF';
 export const OPEN_TOAST = 'OPEN_TOAST';
 export const CLOSE_TOAST = 'CLOSE_TOAST';
 
+//side_bar
+export const SIDE_BAR_SHOW = 'SIDE_BAR_SHOW';
+export const SIDE_BAR_HIDE = 'SIDE_BAR_HIDE';
+
+
+
 //获取手机验证码
 export const GET_AUTH_CODE = 'GET_AUTH_CODE';     
 export const GET_AUTH_CODE_SUCCESS = 'GET_AUTH_CODE_SUCCESS';
@@ -37,11 +43,6 @@ export const AUTO_SIGNIN = 'AUTO_SIGNIN';
 //user
 export const USER_RESTORE = 'USER_RESTORE'
 export const USER_TYPE_CLEAN = 'USER_TYPE_CLEAN';
-
-//side_bar
-export const SIDE_BAR_SHOW = 'SIDE_BAR_SHOW';
-export const SIDE_BAR_HIDE = 'SIDE_BAR_HIDE';
-
 
 //mansion
 export const GET_HOUSE_LAYOUT_PATTERNS_SUCCESS = 'GET_HOUSE_LAYOUT_PATTERNS_SUCCESS';
