@@ -16,6 +16,8 @@ import { signin } from './sign';
 
 //mansion
 import houseLayoutPatterns from './mansion/house_layout_patterns'
+import mansions from './mansion/mansions'
+
 
 const rootReducer = combineReducers({
   //add other reducer here,
@@ -30,6 +32,7 @@ const rootReducer = combineReducers({
   signin,
 
   houseLayoutPatterns,
+  mansions,
 });
 
 export default rootReducer;

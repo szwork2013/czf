@@ -13,7 +13,7 @@ const ObjectId = Schema.ObjectId;
  * 房子户型
  */
 const HouseLayoutsSchema = new Schema({
-  mansionsId: {
+  mansionId: {
     type: ObjectId,
     ref: 'mansions'
   },
@@ -65,56 +65,66 @@ let houseLayouts = [{
     defaultDeposit: 300,
     defaultRental: 300,
     defaultSubscription: 150,
-    order: 1,
+    servicesCharges: 20,
+    overdueFine: 20,
   }, {
     description: '单房亮',
     patterns: {bedroom: '1', livingroom: '0', brightness: '10'},
     defaultDeposit: 350,
     defaultRental: 350,
     defaultSubscription: 250,
-    order: 2,
+    servicesCharges: 20,
+    overdueFine: 20,
   }, {
     description: '一房一厅暗',
     patterns: {bedroom: '1', livingroom: '1', brightness: '0'},
     defaultDeposit: 500,
     defaultRental: 500,
     defaultSubscription: 250,
-    order: 3,
+    servicesCharges: 20,
+    overdueFine: 20,
   }, {
     description: '一房一厅亮',
     patterns: {bedroom: '1', livingroom: '1', brightness: '10'},
     defaultDeposit: 600,
     defaultRental: 600,
     defaultSubscription: 300,
-    order: 4,
+    servicesCharges: 20,
+    overdueFine: 20,
   }, {
     description: '两房一厅暗',
     patterns: {bedroom: '2', livingroom: '1', brightness: '0'},
     defaultDeposit: 750,
     defaultRental: 750,
     defaultSubscription: 350,
-    order: 5,
+    servicesCharges: 20,
+    overdueFine: 20,
   }, {
     description: '两房一厅亮',
     patterns: {bedroom: '2', livingroom: '1', brightness: '10'},
     defaultDeposit: 900,
     defaultRental: 900,
     defaultSubscription: 450,
-    order: 6,
+    servicesCharges: 20,
+    overdueFine: 20,
   }, {
     description: '三房一厅暗',
     patterns: {bedroom: '3', livingroom: '1', brightness: '0'},
     defaultDeposit: 1050,
     defaultRental: 1050,
     defaultSubscription: 550,
-    order: 7,
+    servicesCharges: 20,
+    overdueFine: 20,
   }, {
     description: '三房一厅亮',
     patterns: {bedroom: '3', livingroom: '1', brightness: '10'},
     defaultDeposit: 1200,
     defaultRental: 1200,
     defaultSubscription: 600,
-    order: 8,
+    servicesCharges: 20,
+    overdueFine: 20,
   }
 ];
+
+
 

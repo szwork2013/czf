@@ -3,7 +3,7 @@
  * 记录出租信息
  */
 
-import log from '../utils/log'
+import log from '../../utils/log'
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;

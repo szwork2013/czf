@@ -9,6 +9,12 @@ import { setDeviceSize } from '../../actions/master/mui';
 import Events from 'material-ui/lib/utils/events'
 
 
+// Needed for onTouchTap
+// Can go away when react 1.0 release
+// Check this repo:
+// https://github.com/zilverline/react-tap-event-plugin
+import injectTapEventPlugin from 'react-tap-event-plugin';
+
 const MUIMaster = React.createClass({
   manuallyBindResize: true,
 
@@ -19,6 +25,10 @@ const MUIMaster = React.createClass({
   mixins: [
     StyleResizable,
   ],
+
+  componentWillMount() {
+    injectTapEventPlugin();
+  },
 
   componentDidMount() {
     this._bindResize2();

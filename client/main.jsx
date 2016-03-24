@@ -21,20 +21,10 @@ const history = syncHistoryWithStore(browserHistory, store);
 const root = document.getElementById('root');
 
 
-// Needed for onTouchTap
-// Can go away when react 1.0 release
-// Check this repo:
-// https://github.com/zilverline/react-tap-event-plugin
-import injectTapEventPlugin from 'react-tap-event-plugin';
-
-
 //react render
 import MUIMaster from './containers/master/mui_master';
 import APPMaster from './containers/master/app_master';
 class Root extends Component {
-  componentWillMount() {
-    injectTapEventPlugin();
-  }
   
   render() {
     const { store, history } = this.props;

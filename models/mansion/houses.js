@@ -3,12 +3,12 @@
  * 记录房子信息
  */
 
-import log from '../utils/log'
+import log from '../../utils/log'
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-const HousesModel = new Schema({
+const HousesSchema = new Schema({
   mansionId: {                    
     type: ObjectId,
     ref: 'mansions'
@@ -39,8 +39,8 @@ const HousesModel = new Schema({
   waterMeterEndNumber: Number,     //水表
   remark: String                   //备注
 });
-let Houses = mongoose.model('houses', HousesModel);
-exports.Houses = Houses;
+const HousesModel = mongoose.model('houses', HousesSchema);
+exports.Houses = HousesModel;
 
 
 

@@ -9,6 +9,10 @@ import { Users, UsersTypes, UsersOmit, UsersPopulate, initUsers } from './users'
 import { HouseLayoutPatterns, initHouseLayoutPatterns } from './mansion/house_layout_patterns';
 import { Mansions, initMansions } from './mansion/mansions'
 import { HouseLayouts, initHouseLayouts } from './mansion/house_layouts';
+import { Houses } from './mansion/houses';
+import { Shops } from './mansion/shops';
+import { Tenant } from './mansion/tenant';
+import { Subscriber } from './mansion/subscriber'
 
 // mongoose.Promise = require('bluebird');
 
@@ -67,6 +71,8 @@ exports.UsersPopulate = UsersPopulate;
 exports.HouseLayoutPatterns = HouseLayoutPatterns;
 exports.Mansions = Mansions;
 exports.HouseLayouts = HouseLayouts;
+exports.Houses = Houses;
+exports.Shops = Shops;
 
 exports.init = async (clean, rebuiltRelationships) => {
   if (clean) {
@@ -90,7 +96,7 @@ exports.init = async (clean, rebuiltRelationships) => {
     mansion.managerIds = [owner._id];
 
     //为mansion绑定户型
-    await HouseLayouts.update({}, {$set: {mansionsId: mansion._id}}).exec();
+    await HouseLayouts.update({}, {$set: {mansionId: mansion._id}}, {multi: true}).exec();
 
     //更新mansion各户型的物业费
     let houseLayouts = await HouseLayouts.find().sort({order: 1}).exec();
