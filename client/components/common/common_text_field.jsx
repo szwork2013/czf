@@ -14,10 +14,12 @@ import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } f
 class CommonTextField extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.value !== this.props.value) {
-      return true;
+    let props = this.props
+    if (nextProps.value === props.value &&
+        nextProps.disabled === props.disabled) {
+      return false;
     }
-    return false;
+    return true;
   }
 
   onChange(e) {

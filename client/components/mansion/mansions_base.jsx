@@ -27,15 +27,6 @@ class MansionsBase extends Component {
     return true;
   }
 
-  valueChange(key) {
-    return function (e, idx, value) {
-      let mansion = this.props.mansion
-      if (this.refs[key].getValue)
-        value = this.refs[key].getValue()
-      mansion[key] = value
-      this.props.updateParentState({mansion})
-    }
-  }
   commonTextFiledChange(key) {
     return function (value) {
       let mansion = this.props.mansion
@@ -50,29 +41,7 @@ class MansionsBase extends Component {
       this.props.updateParentState({mansion})
     }
   }
-  // getProvinces() {
-  //   var provinces = []
-  //   for (var province of provinceAndCityAndArea) {
-  //     provinces.push(<MenuItem value={province.name} primaryText={province.name} key={province.name}/>)
-  //   }
-  //   return provinces;
-  // }
-  // getCity() {
-  //   var cityArray = getCityByProvince(this.props.mansion.province)
-  //   var retCity = []
-  //   for (var city of cityArray) {
-  //     retCity.push(<MenuItem value={city.name} primaryText={city.name} key={city.name}/>)
-  //   }
-  //   return retCity;
-  // }
-  // getArea() {
-  //   var areaArray = getAreaByProvinceAndCity(this.props.mansion.province, this.props.mansion.city)
-  //   var retArea = []
-  //   for (var area of areaArray) {
-  //     retArea.push(<MenuItem value={area} primaryText={area} key={area}/>)
-  //   }
-  //   return retArea;
-  // }
+
   counter(array) {
     var retValue = 0;
     for (i in array) {
@@ -80,17 +49,6 @@ class MansionsBase extends Component {
     }
     return retValue
   }
-  /*
-          <SelectField value={mansion.province} floatingLabelText='省份' ref='province' style={styles.marginRight}  onChange={this.valueChange('province').bind(this)}>
-          { this.getProvinces() }
-        </SelectField>
-        <SelectField value={mansion.city} floatingLabelText='地市' ref='city' style={styles.marginRight} onChange={this.valueChange('city').bind(this)}>
-          { this.getCity() }
-        </SelectField>
-        <SelectField value={mansion.area} floatingLabelText='区' ref='area' style={styles.marginRight} onChange={this.valueChange('area').bind(this)}>
-          { this.getArea() }
-        </SelectField>
-*/
   render() {
     let styles = this.getStyles()
     let mansion = this.props.mansion;

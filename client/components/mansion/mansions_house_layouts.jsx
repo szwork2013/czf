@@ -15,49 +15,51 @@ import { Paper, FontIcon, RaisedButton, SelectField, TextField, MenuItem, Tabs, 
 import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } from '../../utils/location'
 
 
+import CommonTextField from '../common/common_text_field'
+import CommonSelectField from '../common/common_select_field'
+
+
 class MansionsBaseTab extends Component {
 
   constructor(props, context) {
     super(props, context);
     this.state = {}
+    this.bedroom = []
+    this.livingroom = []
+    this.brightness = []
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     return true;
   }
 
-  valueChange(idx, key, isNumber) {
-    return function (e, line, value) {
-      let houseLayouts = this.props.houseLayouts
-      let relKey = 'houseLayout:'+idx+':'+key
-      if (this.refs && this.refs[relKey] && this.refs[relKey].getValue)
-        value = this.refs[relKey].getValue()
+  componentWillMount() {
+    this.stateHouseLayoutPatterns(this.props.houseLayoutPatterns)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.stateHouseLayoutPatterns(nextProps.houseLayoutPatterns)
+  }
+
+  stateHouseLayoutPatterns(houseLayoutPatterns) {
+    var houseLayoutPattern = {}
+    for (var i in houseLayoutPatterns) {
+      houseLayoutPattern = houseLayoutPatterns[i]
+      this[houseLayoutPattern.code] = houseLayoutPattern
+    }
+  }
+
+  commonValueChange(idx, key, isNumber) {
+    return function (value) {
       if (isNumber) {
         value = Number(value)
         if (isNaN(value)) 
           value = 0
-      }  
+      } 
+      let houseLayouts = this.props.houseLayouts
       houseLayouts[idx][key] = value
       this.props.updateParentState({houseLayouts})
     }
-  }
-  getPatterns(code) {
-    var houseLayoutPatterns = this.props.houseLayoutPatterns;
-    var pattern = {items: []}
-    for (var i in houseLayoutPatterns) {
-      pattern = houseLayoutPatterns[i]
-      if (pattern.code === code) break;
-    }
-    return pattern.items.map( item => (
-      <MenuItem value={item.code} primaryText={item.description} key={item.code+item.description}/>
-    ))
-  }
-  getLayoutPatterns(styles, idx, houseLayout, code, description) {
-    return (
-      <SelectField value={houseLayout[code]} floatingLabelText={description} ref={'houseLayout:'+idx+':'+code} style={styles.tableCellSelect} onChange={this.valueChange(idx, code).bind(this)}>
-        { this.getPatterns.bind(this)(code) }
-      </SelectField>
-    )
   }
 
   render() {
@@ -81,28 +83,31 @@ class MansionsBaseTab extends Component {
           {houseLayouts.map((houseLayout, idx) => (
             <TableRow key={'houseLayout:'+idx} >
               <TableRowColumn style={{width: '12%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                <TextField ref={'houseLayout:'+idx+':description'} value={houseLayout.description} onChange={this.valueChange(idx, 'description').bind(this)} style={styles.tableCellTextField}/>
+                <CommonTextField value={houseLayout.description} onChange={this.commonValueChange(idx, 'description').bind(this)} style={styles.tableCellTextField}/>
               </TableRowColumn>
               <TableRowColumn>
-                { this.getLayoutPatterns.bind(this)(styles, idx, houseLayout, 'bedroom', '房间数') }
-                { this.getLayoutPatterns.bind(this)(styles, idx, houseLayout, 'livingroom', '客厅数') }
-                { this.getLayoutPatterns.bind(this)(styles, idx, houseLayout, 'brightness', '光线') }
+                <CommonSelectField value={houseLayout.bedroom} onChange={this.commonValueChange(idx, 'bedroom').bind(this)}
+                  floatingLabelText='房间数' items={this.bedroom.items} itemValue='code' itemPrimaryText='description' style={styles.tableCellSelect}/>
+                <CommonSelectField value={houseLayout.livingroom} onChange={this.commonValueChange(idx, 'livingroom').bind(this)}
+                  floatingLabelText='客厅数' items={this.livingroom.items} itemValue='code' itemPrimaryText='description' style={styles.tableCellSelect}/>
+                <CommonSelectField value={houseLayout.brightness} onChange={this.commonValueChange(idx, 'brightness').bind(this)}
+                  floatingLabelText='光线' items={this.brightness.items} itemValue='code' itemPrimaryText='description' style={styles.tableCellSelect}/>
                 <br />
               </TableRowColumn>
               <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                <TextField ref={'houseLayout:'+idx+':defaultDeposit'} value={houseLayout.defaultDeposit} onChange={this.valueChange(idx, 'defaultDeposit', true).bind(this)} style={styles.tableCellTextField}/>
+                <CommonTextField value={houseLayout.defaultDeposit} onChange={this.commonValueChange(idx, 'defaultDeposit', true).bind(this)} style={styles.tableCellTextField}/>
               </TableRowColumn>
               <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                <TextField ref={'houseLayout:'+idx+':defaultRental'} value={houseLayout.defaultRental} onChange={this.valueChange(idx, 'defaultRental', true).bind(this)} style={styles.tableCellTextField}/>
+                <CommonTextField value={houseLayout.defaultRental} onChange={this.commonValueChange(idx, 'defaultRental', true).bind(this)} style={styles.tableCellTextField}/>
               </TableRowColumn>
               <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                <TextField ref={'houseLayout:'+idx+':defaultSubscription'} value={houseLayout.defaultSubscription} onChange={this.valueChange(idx, 'defaultSubscription', true).bind(this)} style={styles.tableCellTextField}/>
+                <CommonTextField value={houseLayout.defaultSubscription} onChange={this.commonValueChange(idx, 'defaultSubscription', true).bind(this)} style={styles.tableCellTextField}/>
               </TableRowColumn>
               <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                <TextField ref={'houseLayout:'+idx+':servicesCharges'} value={houseLayout.servicesCharges} onChange={this.valueChange(idx, 'servicesCharges', true).bind(this)} style={styles.tableCellTextField}/>
+                <CommonTextField value={houseLayout.servicesCharges} onChange={this.commonValueChange(idx, 'servicesCharges', true).bind(this)} style={styles.tableCellTextField}/>
               </TableRowColumn>
               <TableRowColumn style={{width: '8%', paddingLeft: '5px', paddingRight: '5px', overflow: 'auto'}}>
-                <TextField ref={'houseLayout:'+idx+':overdueFine'} value={houseLayout.overdueFine} onChange={this.valueChange(idx, 'overdueFine', true).bind(this)} style={styles.tableCellTextField}/>
+                <CommonTextField value={houseLayout.overdueFine} onChange={this.commonValueChange(idx, 'overdueFine', true).bind(this)} style={styles.tableCellTextField}/>
               </TableRowColumn>
             </TableRow>
           ))}

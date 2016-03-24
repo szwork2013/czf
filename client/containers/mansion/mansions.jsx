@@ -23,6 +23,7 @@ import * as ToastActions from '../../actions/master/toast';
 import MansionsBase from '../../components/mansion/mansions_base'
 import MansionsHouseLayouts from '../../components/mansion/mansions_house_layouts'
 
+import CommonSelectField from '../../components/common/common_select_field'
 
 class Mansions extends Component {
 
@@ -34,6 +35,7 @@ class Mansions extends Component {
       houses: [],
       shops: []
     }
+    this.ownMansions = {}
   }
 
   /*
@@ -49,7 +51,7 @@ class Mansions extends Component {
       this.props.actions.requestMansionsClick();
     } else {
       //物业单位默认选择第一个
-      this.selectDefaultMansion(this.props)
+      this.stateOwnMansions(this.props.mansions)
     }
   }
 
@@ -58,22 +60,33 @@ class Mansions extends Component {
    */
   componentWillReceiveProps(nextProps) {
     //物业单位默认选择第一个
-    this.selectDefaultMansion(nextProps)
+    this.stateOwnMansions(nextProps.mansions)
   }
 
+  stateOwnMansions(mansions) {
+    var ownMansions = {}
+    var userId = this.props.user._id
+    var mansion = null
+    for (let key in mansions) {
+      mansion = mansions[key]
+      if (mansion.ownerId === userId)
+        ownMansions[key] = mansion
+    }
+    this.ownMansions = ownMansions
+    this.selectDefaultMansion(ownMansions)
+  }
   /* 
    * 当state中的Mansion为空时，设置为第一个
    */
-  selectDefaultMansion(props) {
-    let mansions = props.mansions
-    if (_.isEmpty(this.state.mansion) && mansions && mansions.length>0) {
+  selectDefaultMansion(mansions) {
+    if (_.isEmpty(this.state.mansion) && !_.isEmpty(mansions)) {
       for (let key in mansions) {
         this.selectMansion(mansions[key])
         return
       }
     }
   }
-  selectMansion(mansion) {
+  selectMansion(mansion) {    
     mansion = _.cloneDeep(mansion);
     let houseLayouts = mansion.houseLayouts;
     mansion.houseLayouts = true;
@@ -87,6 +100,7 @@ class Mansions extends Component {
       shops = mansion.shops
       mansion.houses = true
     }
+    window.selectMansion = {mansion, houseLayouts, houses, shops}
     this.setState({mansion, houseLayouts, houses, shops})
     this.getMansionAllInfo(mansion)
   }
@@ -112,57 +126,40 @@ class Mansions extends Component {
   }
 
 
+  handleMansionsChange(value) {
+    this.selectMansion(this.ownMansions[value])
+  }
   /*
    * 取得所有物业
    */
-  getOwnMansions(mansions) {
-    let retMansions = []
-    let userId = this.props.user._id
-    let mansion = {}
+  getMansionsMenuItem() {
+    var mansions = this.ownMansions
+    var retMansions = []
+    var mansion = {}
     for (let idx in mansions) {
       mansion = mansions[idx]
-      if (mansion.ownerId === userId)
-        retMansions.push(<MenuItem value={mansion._id} primaryText={mansion.name} key={mansion._id}/>)
+      retMansions.push(<MenuItem value={mansion._id} primaryText={mansion.name} key={mansion._id}/>)
     }
     return retMansions;
   }
-  handleMansionsChange(e, idx, key) {
-    this.selectMansion(this.props.mansions[key])
-  }
 
-
-
-  // /*
-  //  * 出租房Tab
-  //  */
-  // getHousesTab(styles) {
-  //   return (
-  //     <Tab label="出租房">
-        
-  //     </Tab>
-  //   )
-  // }
-  // getShopsTab(styles) {
-  //   return (
-  //     <Tab label="商铺">
-  //     2
-  //     </Tab>
-  //   )
-  // }
 
   render() {
     let styles = this.getStyles()
     let mansion = this.state.mansion;
     let houseLayouts = this.state.houseLayouts;
     let houseLayoutPatterns = this.props.houseLayoutPatterns;
-    //          
+    /*
+      <SelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)} 
+          floatingLabelText='物业单位' selectFieldRoot={{}}>
+          { this.getMansionsMenuItem() }
+        </SelectField>
+    */    
 
     return (
       <div>
-        <SelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)} 
-          floatingLabelText='物业单位' selectFieldRoot={{}}>
-          { this.getOwnMansions(this.props.mansions) }
-        </SelectField>
+        <CommonSelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)}
+          floatingLabelText='物业单位' items={this.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' />
         <span></span>
         <br/>
         <Tabs initialSelectedIndex={0} >
