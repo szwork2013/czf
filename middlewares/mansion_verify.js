@@ -20,7 +20,7 @@ var mansionVerify = async (req, res, next) => {
 
   var have = false;
   try {
-    have = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {managerIds: user._id}]}).exec();
+    have = await Mansions.findOne({_id: mansionId, available: true, '$or': [{ownerId: user._id}, {managerIds: user._id}]}).exec();
   } catch (err) {
     log.error(err.name, err.message)
     have = null;

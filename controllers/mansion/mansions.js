@@ -15,7 +15,7 @@ import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts, Houses, Shops 
 const mansionsAll = async (req, res) => {
   let query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
   let user = req.user;
-  let mansions = await Mansions.find({'$or': [{ownerId: user._id}, {managerIds: user._id}]}).exec();
+  let mansions = await Mansions.find({available: true, '$or': [{ownerId: user._id}, {managerIds: user._id}]}).exec();
   return res.handleResponse(200, {mansions});
 }
 exports.mansionsAll = mansionsAll;
@@ -59,4 +59,43 @@ const mansionInfo = async (req, res) => {
 }
 exports.mansionInfo = mansionInfo;
 
+/*
+ * 新建单位
+ */
+const addMansion = async (req, res) => {
+  try{
+    let body = req.body || {};
+    let user = req.user;
+    var name = body.name;
+    if (!name) {
+      return res.handleResponse(400, {}, 'name is require');
+    }
+    let mansion = await Mansions.create({name, ownerId: user._id});
+    return res.handleResponse(200, mansion);
+  }catch(err) {
+    log.error(err.name, erro.message)
+    return res.handleResponse(500, {});
+  }
+}
+exports.addMansion = addMansion;
+
+/*
+ * 删除单位
+ */
+const deleteMansion = async (req, res) => {
+  try{
+    let body = req.body || {};
+    let user = req.user;
+    var id = body.id;
+    if (!id) {
+      return res.handleResponse(400, {}, 'id is require');
+    }
+    await Mansions.update({_id: id, ownerId: user._id}, {'$set': {available:false}});
+    return res.handleResponse(200, {id});
+  }catch(err) {
+    log.error(err.name, erro.message)
+    return res.handleResponse(500, {});
+  }
+}
+exports.deleteMansion = deleteMansion;
 

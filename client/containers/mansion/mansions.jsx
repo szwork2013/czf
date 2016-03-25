@@ -20,10 +20,9 @@ import * as HouseLayoutPatternsAction from '../../actions/mansion/house_layout_p
 import * as MansionsAction from '../../actions/mansion/mansions'
 import * as ToastActions from '../../actions/master/toast';
 
+import MansionsHeader from '../../components/mansion/mansions_header'
 import MansionsBase from '../../components/mansion/mansions_base'
 import MansionsHouseLayouts from '../../components/mansion/mansions_house_layouts'
-
-import CommonSelectField from '../../components/common/common_select_field'
 
 class Mansions extends Component {
 
@@ -33,9 +32,10 @@ class Mansions extends Component {
       mansion: {},
       houseLayouts: [],
       houses: [],
-      shops: []
+      shops: [],
+      ownMansions: {},
+      forceUpdate: true
     }
-    this.ownMansions = {}
   }
 
   /*
@@ -55,12 +55,26 @@ class Mansions extends Component {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return true;
+  }
+
+
   /*
    * 组件props更新
    */
   componentWillReceiveProps(nextProps) {
+    this.state.forceUpdate = true         //删除时需要
+    this.setState({forceUpdate: true})
     //物业单位默认选择第一个
     this.stateOwnMansions(nextProps.mansions)
+    // this.forceUpdate()
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.forceUpdate) {
+      this.setState({forceUpdate: false})
+    }
   }
 
   stateOwnMansions(mansions) {
@@ -72,7 +86,9 @@ class Mansions extends Component {
       if (mansion.ownerId === userId)
         ownMansions[key] = mansion
     }
-    this.ownMansions = ownMansions
+    // this.ownMansions = ownMansions
+    // this.state.ownMansions = ownMansions
+    this.setState({ownMansions})
     this.selectDefaultMansion(ownMansions)
   }
   /* 
@@ -83,6 +99,13 @@ class Mansions extends Component {
       for (let key in mansions) {
         this.selectMansion(mansions[key])
         return
+      }
+    } else if (this.state.forceUpdate) {
+      if (!mansions[this.state.mansion._id]) {
+        for (let key in mansions) {
+          this.selectMansion(mansions[key])
+          return
+        }
       }
     }
   }
@@ -100,7 +123,6 @@ class Mansions extends Component {
       shops = mansion.shops
       mansion.houses = true
     }
-    window.selectMansion = {mansion, houseLayouts, houses, shops}
     this.setState({mansion, houseLayouts, houses, shops})
     this.getMansionAllInfo(mansion)
   }
@@ -125,43 +147,33 @@ class Mansions extends Component {
     this.setState(obj)
   }
 
-
   handleMansionsChange(value) {
-    this.selectMansion(this.ownMansions[value])
+    this.selectMansion(this.state.ownMansions[value])
   }
-  /*
-   * 取得所有物业
-   */
-  getMansionsMenuItem() {
-    var mansions = this.ownMansions
-    var retMansions = []
-    var mansion = {}
-    for (let idx in mansions) {
-      mansion = mansions[idx]
-      retMansions.push(<MenuItem value={mansion._id} primaryText={mansion.name} key={mansion._id}/>)
-    }
-    return retMansions;
-  }
-
 
   render() {
     let styles = this.getStyles()
+    let props = this.props
     let mansion = this.state.mansion;
+    let ownMansions = this.state.ownMansions
     let houseLayouts = this.state.houseLayouts;
-    let houseLayoutPatterns = this.props.houseLayoutPatterns;
-    /*
-      <SelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)} 
-          floatingLabelText='物业单位' selectFieldRoot={{}}>
-          { this.getMansionsMenuItem() }
-        </SelectField>
-    */    
+    let houseLayoutPatterns = props.houseLayoutPatterns;
 
+    /*
+<div style={{marginBottom: '20px'}}>
+          <CommonSelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)} style={styles.marginRight}
+            floatingLabelText='物业单位' items={this.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' />
+          <RaisedButton label="新建" labelPosition="before" style={styles.button} primary={true} onTouchEnd={this.onAddMansionDialogClick.bind(this)}>
+          <RaisedButton label="导入旧数据" labelPosition="before" style={styles.button} primary={true}>
+            <input type="file" style={styles.fileInput} ref="import" onChange={this.onUpload.bind(this)}/>
+          </RaisedButton>
+        </div>
+     */
     return (
       <div>
-        <CommonSelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)}
-          floatingLabelText='物业单位' items={this.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' />
-        <span></span>
-        <br/>
+        <MansionsHeader mansion={mansion} ownMansions={ownMansions} 
+            handleMansionsChange={this.handleMansionsChange.bind(this)}
+            actions={props.actions} forceUpdate={this.state.forceUpdate}/>
         <Tabs initialSelectedIndex={0} >
           <Tab label="基础信息" ><MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} /></Tab>
           <Tab label="户型（出租房）"><MansionsHouseLayouts houseLayouts={houseLayouts} houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} /></Tab>
@@ -193,17 +205,16 @@ class Mansions extends Component {
         width: '20px',
         display: 'inline-block',
       },
-      tableCellTextField: {
-        minWidth: '80px',
+      fileInput: {
+        cursor: 'pointer',
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        right: 0,
+        left: 0,
         width: '100%',
-        fontSize: '12px',
+        opacity: 0,
       },
-      tableCellSelect: {
-        minWidth: '80px',
-        width: '30%',
-        fontSize: '12px',
-        marginRight: '10px',
-      }
     }
     return styles;
   }
@@ -227,3 +238,12 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(Mansions);
+
+
+
+
+
+
+
+
+

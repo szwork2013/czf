@@ -4,7 +4,7 @@ import _ from 'lodash'
 import log from '../../utils/log'
 
 
-import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS } from '../../constants/actionTypes';
+import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, DELETE_MANSION_SUCCESS } from '../../constants/actionTypes';
 
 
 
@@ -35,6 +35,16 @@ export default (state = initialState, action) => {
         newMansions[data.mansionId] = mansion
       }
       return newMansions
+    case ADD_MANSION_SUCCESS:
+      newMansions = _.assign({}, state)
+      newMansions[action.resData.data._id] = action.resData.data
+      newMansions.length += 1
+      return newMansions;
+    case DELETE_MANSION_SUCCESS:
+      newMansions = _.assign({}, state)
+      delete newMansions[action.resData.data.id]
+      newMansions.length -= 1
+      return newMansions;
     default:
       return state;
   }

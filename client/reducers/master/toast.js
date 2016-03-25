@@ -8,7 +8,7 @@ const initState = {
   msg: '',
   status: 200,
   isOpen: false,
-  duration: 3000
+  duration: 1000 * 30
 };
 
 export default function toast(toast = initState, action) {
