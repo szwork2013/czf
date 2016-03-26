@@ -112,10 +112,10 @@ const MansionsSchema = new Schema({
     default: 'day'
   },
   shopSubscriptionValidityCount: Number,          //订金有效期限
-  available: {
+  deleted: {
     type: Boolean,
-    default: true
-  }, 
+    default: false
+  },
   ownerId: {                //所有者
     type: ObjectId,
     ref: 'users'

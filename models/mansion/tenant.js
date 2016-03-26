@@ -36,9 +36,9 @@ const TenantModel = new Schema({
   },
   floor: Number,                  //从1开始，1代表1楼
   room: Number,                   //从1开始，1代表01房
-  type: {                         //交租类型，in新入住，out退房，rental租金
+  type: {                         //交租类型，in新入住，out退房，rental租金，migrate导入数据迁移
     type: String,
-    enum: ['in', 'out', 'rental']
+    enum: ['in', 'out', 'rental', 'migrate']
   },
   name: String,
   mobile: String,

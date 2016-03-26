@@ -32,9 +32,10 @@ const SubscriberModel = new Schema({
     default: Date.now
   },
   expiredDate: Date,              //过期日期
-  status: {                       //状态，normal正常状态，transfer为入住转移到押金，expired过期订金不退，default我方违约，需要赔偿
+  status: {                       //状态，normal正常状态，transfer为入住转移到押金，expired过期订金不退，
+                                  //default我方违约，需要赔偿，migrate导入数据迁移
     type: String,
-    enum: ['normal', 'transfer', 'expired', 'default'],
+    enum: ['normal', 'transfer', 'expired', 'default', 'migrate'],
     default: 'normal'
   },
   total: Number,                  //补偿状态，如果状态为expired，则为正数，default为负数，其它为零

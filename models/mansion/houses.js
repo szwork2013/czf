@@ -27,6 +27,10 @@ const HousesSchema = new Schema({
     type: Boolean,
     default: true
   },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
   tenantId: {                       //租客信息
     type: ObjectId,
     ref: 'tenant'

@@ -23,7 +23,11 @@ const ShopsModel = new Schema({
   available: {
     type: Boolean,
     default: true
-  }
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
 });
 let Shops = mongoose.model('shops', ShopsModel);
 exports.Shops = Shops;

@@ -6,7 +6,8 @@ import utils from '../../utils';
 import config from '../../config';
 
 
-import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts, defaultHouseLayouts, Houses, Shops } from '../../models';
+import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts, defaultHouseLayouts, 
+        Houses, Tenant, Subscriber, Shops } from '../../models';
 
 
 /*
@@ -15,7 +16,7 @@ import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts, defaultHouseLa
 const mansionsAll = async (req, res) => {
   let query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
   let user = req.user;
-  let mansions = await Mansions.find({available: true, '$or': [{ownerId: user._id}, {managerIds: user._id}]}).exec();
+  let mansions = await Mansions.find({deleted: false, '$or': [{ownerId: user._id}, {managerIds: user._id}]}).exec();
   return res.handleResponse(200, {mansions});
 }
 exports.mansionsAll = mansionsAll;
@@ -31,7 +32,7 @@ const mansionInfo = async (req, res) => {
 
     var houseLayouts = null
     if (query.houseLayouts) {
-      houseLayouts = await HouseLayouts.find({mansionId: mansionId}).sort({order: 1}).exec()
+      houseLayouts = await HouseLayouts.find({mansionId: mansionId, deleted: false}).sort({order: 1}).exec()
     }
 
     let pupulateStr = ''
@@ -44,12 +45,12 @@ const mansionInfo = async (req, res) => {
     }
     
     if (query.houses) {
-      houses = await Houses.find({mansionId: mansionId}).populate(pupulateStr).exec()
+      houses = await Houses.find({mansionId: mansionId, deleted: false}).populate(pupulateStr).exec()
     }
 
     var shops = null;
     if (query.shops) {
-      shops = await Shops.find({mansionId: mansionId}).exec()
+      shops = await Shops.find({mansionId: mansionId, deleted: true}).exec()
     }
     return res.handleResponse(200, {mansionId, houseLayouts, houses, shops});
   }catch(err) {
@@ -90,7 +91,7 @@ const deleteMansion = async (req, res) => {
     if (!mansionId) {
       return res.handleResponse(400, {}, 'mansionId is require');
     }
-    await Mansions.update({_id: mansionId, ownerId: user._id, available: true}, {'$set': {available:false}});
+    await Mansions.update({_id: mansionId, ownerId: user._id, deleted: false}, {'$set': {deleted:true}});
     return res.handleResponse(200, {id: mansionId});
   }catch(err) {
     log.error(err.name, erro.message)
@@ -113,7 +114,7 @@ const importHistoryVersionData = async (req, res) => {
     if (!mansionId) {
       return res.handleResponse(400, {}, 'mansionId is require');
     }
-    var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, available: true}).exec();
+    var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
     if (!mansion) {
       return res.handleResponse(400, {}, 'mansion not found');
     }
@@ -125,7 +126,21 @@ const importHistoryVersionData = async (req, res) => {
     if (_.isEmpty(hisObj)) {
       return res.handleResponse(400, {}, 'file is broken');
     }
-    //更新旧的出租信息和
+    //迁移旧的出租信息和订房
+    var oldHouses = Houses.find({mansionId: mansionId}).populate('tenantId subscriberId').exec()
+    var oldTenant = {}
+    for (var oldHouse of oldHouses) {
+      //有租客，需要将租户的信息转入tenant表
+      if (oldHouse.tenantId) {
+        await Tenant.update({_id: oldHouse.oldTenant._id}, {$set: {type: 'migrate'}}).exec()
+      }
+      if (oldHouse.subscriberId) {
+        await Subscriber.update({_id: oldHouse.subscriberId._id}, {$set: {type: 'migrate'}}).exec()
+      }
+    }
+    await Houses.update({mansionId: mansionId}, {$set: {deleted: true}}).exec();
+
+    //更新户型
     var houseLayouts = mansion.houseLayouts = _.cloneDeep(defaultHouseLayouts);
     //门卡
     mansion.doorCardSellCharges = hisObj.doorCardSellCharges;
@@ -161,6 +176,7 @@ const importHistoryVersionData = async (req, res) => {
     mansion.housesAvailableCount = []
     //出租房
     var houses = []
+    
 
     return res.handleResponse(200, {});
   }catch(err) {

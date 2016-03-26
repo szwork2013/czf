@@ -46,6 +46,10 @@ const HouseLayoutsSchema = new Schema({
     type: Number,
     default: 0
   },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
   order: Number
 });
 const HouseLayoutsModel = mongoose.model('house_layouts', HouseLayoutsSchema);
