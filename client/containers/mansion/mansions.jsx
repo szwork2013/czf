@@ -106,13 +106,22 @@ class Mansions extends Component {
           this.selectMansion(mansions[key])
           return
         }
+      } else {
+        this.selectMansion(mansions[this.state.mansion._id])
+        return
       }
     }
   }
   selectMansion(mansion) {    
     mansion = _.cloneDeep(mansion);
-    let houseLayouts = mansion.houseLayouts;
-    mansion.houseLayouts = true;
+    let houseLayouts = []
+
+    if (mansion.houseLayouts) {
+      houseLayouts = mansion.houseLayouts
+      mansion.houseLayouts = true;
+    } 
+    // let houseLayouts = mansion.houseLayouts;
+    // mansion.houseLayouts = true;
     let houses = []
     if (mansion.houses) {
       houses = mansion.houses
@@ -133,6 +142,9 @@ class Mansions extends Component {
     let formData = {}
     if (!mansion.houses) {
       formData.houses = true
+    } 
+    if (!mansion.houseLayouts) {
+      formData.houseLayouts = true
     } 
     if (!mansion.shops) {
       formData.shops = true

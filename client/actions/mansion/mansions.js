@@ -1,6 +1,7 @@
 'use strict';
 
-import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, DELETE_MANSION_SUCCESS } from '../../constants/actionTypes';
+import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, DELETE_MANSION_SUCCESS, 
+         IMPORT_HISTORY_VERSION_DATA_SUCCESS } from '../../constants/actionTypes';
 import { CALL_API_V1 } from '../../middleware/api';
 import { APP_STATE } from '../../reducers/master/app_state'
 
@@ -79,3 +80,24 @@ function deleteMansion(formData) {
 export function deleteMansionClick(formData) {
   return dispatch => dispatch(deleteMansion(formData));
 }
+
+/*
+ * 导入单个物业
+ */
+function importHistoryVersionData(formData) {
+  return {
+    [CALL_API_V1]: {
+      actions: {
+         successType: IMPORT_HISTORY_VERSION_DATA_SUCCESS
+      },
+      url: '/mansion/history_version/data',
+      method: 'PUT',
+      data: formData,
+      uploadFile: true
+    }
+  };
+}
+export function importHistoryVersionDataClick(formData) {
+  return dispatch => dispatch(importHistoryVersionData(formData));
+}
+

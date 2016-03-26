@@ -27,9 +27,14 @@ class MansionsBase extends Component {
     return true;
   }
 
-  commonTextFiledChange(key) {
+  commonTextFiledChange(key, isNumber) {
     return function (value) {
       let mansion = this.props.mansion
+      if (isNumber) {
+        value = Number(value)
+        if (isNaN(value)) 
+          value = 0
+      } 
       mansion[key] = value
       this.props.updateParentState({mansion})
     }
@@ -66,6 +71,23 @@ class MansionsBase extends Component {
         <br />
         <CommonTextField hintText="详细地址" floatingLabelText="详细地址" ref='address' style={styles.marginRight} value={mansion.address} onChange={this.commonTextFiledChange('address').bind(this)} fullWidth={true}/>
         <br />
+        <br />
+        <br />
+        <br />
+
+        <CommonTextField hintText="出租房单位电价/度" floatingLabelText="出租房单位电价/度" ref='houseElectricChargesPerKWh' style={styles.marginRight} value={mansion.houseElectricChargesPerKWh} onChange={this.commonTextFiledChange('houseElectricChargesPerKWh', true).bind(this)} />
+        <CommonTextField hintText="出租房最少用电量/月/度" floatingLabelText="出租房最少用电量/月/度" ref='houseElectricChargesMinimalKWhs' style={styles.marginRight} value={mansion.houseElectricChargesMinimalKWhs} onChange={this.commonTextFiledChange('houseElectricChargesMinimalKWhs', true).bind(this)} />
+        <br />
+        <CommonTextField hintText="出租房单位水价/吨" floatingLabelText="出租房单位水价/吨" ref='houseWaterChargesPerTon' style={styles.marginRight} value={mansion.houseWaterChargesPerTon} onChange={this.commonTextFiledChange('houseWaterChargesPerTon', true).bind(this)} />
+        <CommonTextField hintText="出租房最少用水量/月/吨" floatingLabelText="出租房最少用水量/月/吨" ref='houseWaterChargesMinimalTons' style={styles.marginRight} value={mansion.houseWaterChargesMinimalTons} onChange={this.commonTextFiledChange('houseWaterChargesMinimalTons', true).bind(this)} />
+        <br />
+        <CommonTextField hintText="门卡出售价/个" floatingLabelText="门卡出售价/个" ref='doorCardSellCharges' style={styles.marginRight} value={mansion.doorCardSellCharges} onChange={this.commonTextFiledChange('doorCardSellCharges', true).bind(this)} />
+        <CommonTextField hintText="门卡回收价/个" floatingLabelText="门卡回收价/个" ref='doorCardRecoverCharges' style={styles.marginRight} value={mansion.doorCardRecoverCharges} onChange={this.commonTextFiledChange('doorCardRecoverCharges', true).bind(this)} />
+        <br />
+        <br />
+        <br />
+        <br />
+
         <CommonTextField hintText="楼层总数" floatingLabelText="楼层总数" ref='floorCount' style={styles.marginRight} value={mansion.floorCount} disabled={true}/>
         <CommonTextField hintText="出租房总数" floatingLabelText="出租房总数" ref='housesAvailableCount' style={styles.marginRight} value={this.counter(mansion.housesAvailableCount)} disabled={true}/>
         <CommonTextField hintText="商铺总数" floatingLabelText="商铺总数" ref='shopsAvailableCount' style={styles.marginRight} value={this.counter(mansion.shopsAvailableCount)} disabled={true}/>

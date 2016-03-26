@@ -14,11 +14,16 @@ const mail = require('./utils/mail')
 const config = require('./config');
 const handleResponse = require('./middlewares/handle_response').default;
 
+
 var app = express();
 var startServer = () => {
   return new Promise((resolve, reject) => {
     //start server
     app.use(morgan('dev'));
+
+    app.use(bodyParser.json({limit: '5mb'}));
+    app.use(bodyParser.urlencoded({limit: '5mb', extended: true}));
+
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(express.static(path.join(__dirname, 'public')));

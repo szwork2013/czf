@@ -47,7 +47,7 @@ class MansionsHeader extends Component {
       return false;
     } else {
       this.mansionDialogCancel()
-      let param = {id: this.props.mansion._id}
+      let param = {mansionId: this.props.mansion._id}
       this.props.actions.deleteMansionClick(param)
     }
   }
@@ -79,6 +79,15 @@ class MansionsHeader extends Component {
     }
   }
 
+  importOldVersionData(e) {
+    var fileInput = this.refs["old_version_file_input"] || {}
+    var files = fileInput.files || {}
+    var file = files[0]
+    var param = {mansionId: this.props.mansion._id, file: file}
+    this.props.actions.importHistoryVersionDataClick(param)
+    fileInput.value = null;
+  }
+
 
   render() {
     var styles = this.getStyles()
@@ -90,7 +99,8 @@ class MansionsHeader extends Component {
             floatingLabelText='物业单位' forceUpdate={props.forceUpdate}
             items={props.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' />
           <RaisedButton label="导入旧数据" labelPosition="before" style={styles.marginRight} primary={true}>
-            <input type="file" style={styles.fileInput} ref="import" />
+            <input type="file" style={styles.fileInput} ref="old_version_file_input" accept=".rdt,"
+                onChange={this.importOldVersionData.bind(this)}/>
           </RaisedButton>
 
 

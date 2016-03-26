@@ -203,6 +203,7 @@ exports.signinMobileWithAuthCode = signinMobileWithAuthCode;
  */
 var signinWithPwd = async (req, res) => {
   let body = req.body || {};
+  log.info(body)
   let name = body.name || '';
   name = name.toString().trim();
   let password = body.password || '';

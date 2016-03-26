@@ -37,13 +37,13 @@ const toLowerCaseKeys = (obj, types = ['string'], isExclude = false) => {
 /*
  * method : it is a byte-case-insensitive match for `DELETE`, `GET`, `HEAD`, `OPTIONS`, `POST`, or `PUT`, byte-uppercase it.
  */
-function callApi(url, method = 'POST', data = {}, headers = {}) {
+function callApi(url, method = 'POST', data = {}, headers = {}, uploadFile = false) {
   let state = window.defaultStore.getState() || {};
   let user = state.user || {};
   let token = user.token;
   let defaultHeaders = {
       'accept': 'application/json',
-      'content-type': method.toUpperCase() === 'GET'? 'application/x-www-form-urlencoded': 'application/json',
+      // 'content-type': method.toUpperCase() === 'GET'? 'application/x-www-form-urlencoded': 'application/json',
       'authorization': token
     };
   headers = _.assign(defaultHeaders, toLowerCaseKeys(headers));
@@ -52,18 +52,27 @@ function callApi(url, method = 'POST', data = {}, headers = {}) {
     headers
   };
 
-  let contentType = headers['content-type'].toLowerCase();
-  if (contentType === 'application/json') {
-    options.body = JSON.stringify(data);
-  } else if (contentType === 'form-data') {
-    options.body = data
-  } else if (contentType === 'application/x-www-form-urlencoded') {
+  if (method.toUpperCase() === 'GET') {
+    options.headers['content-type'] = 'application/x-www-form-urlencoded'
     var query = jquery.param(data);
     if (url.indexOf('?') > -1) {
       url += `&${query}`
     } else {
       url += `?${query}`
     }
+  } else {
+    if (uploadFile) {
+      var formData = new FormData()
+      for (var key in data) {
+        formData.append(key, data[key])
+      }
+      options.body = formData
+      options.contentType = false
+    } else {
+      options.headers['content-type'] = 'application/json'
+      options.body = JSON.stringify(data)
+    }
+    
   }
 
   return fetch(url, options)
@@ -96,10 +105,10 @@ export default store => next => action => {
   //取参数
   if (callAPI) {
     callSymbol = CALL_API;
-    var { url, method, data, headers, actions, manualLoading, manualResponse } = callAPI;
+    var { url, method, data, headers, actions, manualLoading, manualResponse, uploadFile } = callAPI;
   } else if (callAPIV1) {
     callSymbol = CALL_API_V1;
-    var { url, method, data, headers, actions, manualLoading, manualResponse } = callAPIV1;
+    var { url, method, data, headers, actions, manualLoading, manualResponse, uploadFile } = callAPIV1;
     url = '/api/v1' + url;
   } else {
     return next(action);
@@ -124,7 +133,7 @@ export default store => next => action => {
     next(loadingOn());
   }
 
-  return callApi(url, method, data, headers).then( resObj => {
+  return callApi(url, method, data, headers, uploadFile).then( resObj => {
     //auto loading off
     if (!manualLoading) {
       next(loadingOff());

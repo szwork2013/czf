@@ -8,39 +8,6 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-/*
- * 房子户型
- */
-const HouseLayoutsSchema = new Schema({
-  description: String,
-  // patterns: Object,
-  bedroom: String,
-  livingroom: String,
-  kitchen: String,
-  washroom: String,
-  balcony: String,
-  brightness: String,
-  defaultDeposit: {       //默认押金
-    type: Number,
-    default: 0
-  },
-  defaultRental: {       //默认租金
-    type: Number,
-    default: 0
-  },
-  defaultSubscription: {  //默认定金
-    type: Number,
-    default: 0
-  },
-  servicesCharges: {
-    type: Number,
-    default: 0,
-  },
-  overdueFine: {
-    type: Number,
-    default: 0
-  }
-}, {_id: false});
 
 /*
  * 大厦
@@ -77,8 +44,6 @@ const MansionsSchema = new Schema({
     default: 2
   },
 
-  //
-  houseLayouts: [HouseLayoutsSchema],
   //物业费
   housePropertyMaintenanceChargesType: {    //房子物业费收取方式
     type: Number,
@@ -102,12 +67,10 @@ const MansionsSchema = new Schema({
   houseWaterChargesPerTon: Number,           //房子单位水费
   houseWaterChargesMinimalTons: {            //房子每月最低用水量
     type: Number,
-    default: 1
   },
   houseElectricChargesPerKWh: Number,        //房子单位电费
-  houseElectricChargesMinimalKWhs: {         //房子每水最小用电量
+  houseElectricChargesMinimalKWhs: {         //房子每月最小用电量
     type: Number,
-    default: 1
   },
   //门卡
   doorCardSellCharges: Number,         //房子门卡单价
@@ -214,63 +177,6 @@ let mansions = [{
   //订金
   houseSubscriptionValidityUnit: 'day',            //订金有效期限单位
   houseSubscriptionValidityCount: 15,            //订金有效期限
-  houseLayouts: [{
-    description: '单房暗',
-    bedroom: '1', livingroom: '0', brightness: '0',
-    defaultDeposit: 300,
-    defaultRental: 300,
-    defaultSubscription: 150,
-    order: 1,
-  }, {
-    description: '单房亮',
-    bedroom: '1', livingroom: '0', brightness: '10',
-    defaultDeposit: 350,
-    defaultRental: 350,
-    defaultSubscription: 250,
-    order: 2,
-  }, {
-    description: '一房一厅暗',
-    bedroom: '1', livingroom: '1', brightness: '0',
-    defaultDeposit: 500,
-    defaultRental: 500,
-    defaultSubscription: 250,
-    order: 3,
-  }, {
-    description: '一房一厅亮',
-    bedroom: '1', livingroom: '1', brightness: '10',
-    defaultDeposit: 600,
-    defaultRental: 600,
-    defaultSubscription: 300,
-    order: 4,
-  }, {
-    description: '两房一厅暗',
-    bedroom: '2', livingroom: '1', brightness: '0',
-    defaultDeposit: 750,
-    defaultRental: 750,
-    defaultSubscription: 350,
-    order: 5,
-  }, {
-    description: '两房一厅亮',
-    bedroom: '2', livingroom: '1', brightness: '10',
-    defaultDeposit: 900,
-    defaultRental: 900,
-    defaultSubscription: 450,
-    order: 6,
-  }, {
-    description: '三房一厅暗',
-    bedroom: '3', livingroom: '1', brightness: '0',
-    defaultDeposit: 1050,
-    defaultRental: 1050,
-    defaultSubscription: 550,
-    order: 7,
-  }, {
-    description: '三房一厅亮',
-    bedroom: '3', livingroom: '1', brightness: '10',
-    defaultDeposit: 1200,
-    defaultRental: 1200,
-    defaultSubscription: 600,
-    order: 8,
-  }]
 }];
 
 

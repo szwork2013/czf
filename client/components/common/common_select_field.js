@@ -14,7 +14,6 @@ class CommonSelectField extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     let props = this.props
     if (nextProps.forceUpdate) {
-      log.error('nextProps.forceUpdate', nextProps.forceUpdate)
       return true
     }
     if (nextProps.value === props.value &&

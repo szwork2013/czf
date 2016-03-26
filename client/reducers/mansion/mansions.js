@@ -28,9 +28,12 @@ export default (state = initialState, action) => {
       let mansion = state[data.mansionId]
       if (mansion) {
         mansion = _.assign({}, mansion)
-        mansion.houses = data.houses
-        mansion.shops = data.shops
-        // mansion.houseLayouts = data.houseLayouts
+        if (data.houseLayouts)
+          mansion.houseLayouts = data.houseLayouts
+        if (data.houses)
+          mansion.houses = data.houses
+        if (data.shops)
+          mansion.shops = data.shops
         newMansions = _.assign({}, state)
         newMansions[data.mansionId] = mansion
       }

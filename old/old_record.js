@@ -5,22 +5,23 @@ import fs from 'mz/fs';
 import log from '../utils/log';
 import { Iconv } from 'iconv';
 
-let historyFilePath = 'rentroomdata_1.rdt'
-let historyFileAbsPath = path.join(process.cwd(), 'old', historyFilePath);
+// let historyFilePath = 'rentroomdata_1.rdt'
+// let historyFileAbsPath = path.join(process.cwd(), 'old', historyFilePath);
 let longIntLength = 4
 
-const loadRentFile = async () => {
+const loadRentFile = async (historyFilePath) => {
+  var historyFileAbsPath = path.join(process.cwd(), historyFilePath)
   try {
     // log.info(historyFileAbsPath);
     var retObj = {}
-    log.warn('prepare to load history file: ', historyFileAbsPath);
-    let isExist = await fs.exists(historyFileAbsPath);
+    // log.warn('prepare to load history file: ', historyFileAbsPath);
+    let isExist = await fs.exists(historyFilePath);
     if (isExist) {
       let buf = null;
       try {
         buf = await fs.readFile(historyFileAbsPath)
       } catch (err) {
-        log.err(err.name, err.message);
+        log.error(err.name, err.message);
         return retObj;
       }
       let offset = 0
@@ -47,10 +48,10 @@ const loadRentFile = async () => {
       retObj.houseElectricChargesPerKWh = retObj.houseElectricChargesPerKWh.toFixed(1);
       offset += 4;
       log.trace('houseElectricChargesPerKWh: ', retObj.houseElectricChargesPerKWh);
-      //订访有效天数
-      retObj.houseSubscriptionValidityCount = buf.readInt32LE(offset);
+      //回收门卡
+      retObj.doorCardRecoverCharges = buf.readInt32LE(offset);
       offset += 4;
-      log.trace('houseSubscriptionValidityCount: ', retObj.houseSubscriptionValidityCount);
+      log.trace('doorCardRecoverCharges: ', retObj.doorCardRecoverCharges);
       //愈期罚款
       retObj.houseOverdueFineForLayoutPerDay0 = buf.readFloatLE(offset);
       retObj.houseOverdueFineForLayoutPerDay0 = retObj.houseOverdueFineForLayoutPerDay0.toFixed(1);
@@ -242,7 +243,7 @@ const loadRentFile = async () => {
       };
       log.trace('mansion house total count :', retObj.totalHouseCount, ';\t house exists count :', retObj.totalExistsHouseCount);
     } else {
-      log.warn('file dose not exist');
+      log.error('file dose not exist');
       return retObj;
     }
   } catch(err) {
@@ -253,3 +254,9 @@ const loadRentFile = async () => {
 }
 // loadRentFile();
 exports.loadRentFile = loadRentFile;
+
+
+
+
+
+

@@ -9,6 +9,7 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 
+
 /*
  * 房子户型
  */
@@ -18,7 +19,13 @@ const HouseLayoutsSchema = new Schema({
     ref: 'mansions'
   },
   description: String,
-  patterns: Object,
+  // patterns: Object,
+  bedroom: String,
+  livingroom: String,
+  kitchen: String,
+  washroom: String,
+  balcony: String,
+  brightness: String,
   defaultDeposit: {       //默认押金
     type: Number,
     default: 0
@@ -31,7 +38,15 @@ const HouseLayoutsSchema = new Schema({
     type: Number,
     default: 0
   },
-  order: Number,
+  servicesCharges: {
+    type: Number,
+    default: 0,
+  },
+  overdueFine: {
+    type: Number,
+    default: 0
+  },
+  order: Number
 });
 const HouseLayoutsModel = mongoose.model('house_layouts', HouseLayoutsSchema);
 
@@ -61,70 +76,78 @@ exports.initHouseLayouts = async (clean) => {
  */
 let houseLayouts = [{
     description: '单房暗',
-    patterns: {bedroom: '1', livingroom: '0', brightness: '0'},
+    bedroom: '1', livingroom: '0', brightness: '0',
     defaultDeposit: 300,
     defaultRental: 300,
     defaultSubscription: 150,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 1,
   }, {
     description: '单房亮',
-    patterns: {bedroom: '1', livingroom: '0', brightness: '10'},
+    bedroom: '1', livingroom: '0', brightness: '10',
     defaultDeposit: 350,
     defaultRental: 350,
     defaultSubscription: 250,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 2,
   }, {
     description: '一房一厅暗',
-    patterns: {bedroom: '1', livingroom: '1', brightness: '0'},
+    bedroom: '1', livingroom: '1', brightness: '0',
     defaultDeposit: 500,
     defaultRental: 500,
     defaultSubscription: 250,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 3,
   }, {
     description: '一房一厅亮',
-    patterns: {bedroom: '1', livingroom: '1', brightness: '10'},
+    bedroom: '1', livingroom: '1', brightness: '10',
     defaultDeposit: 600,
     defaultRental: 600,
     defaultSubscription: 300,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 4,
   }, {
     description: '两房一厅暗',
-    patterns: {bedroom: '2', livingroom: '1', brightness: '0'},
+    bedroom: '2', livingroom: '1', brightness: '0',
     defaultDeposit: 750,
     defaultRental: 750,
     defaultSubscription: 350,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 5,
   }, {
     description: '两房一厅亮',
-    patterns: {bedroom: '2', livingroom: '1', brightness: '10'},
+    bedroom: '2', livingroom: '1', brightness: '10',
     defaultDeposit: 900,
     defaultRental: 900,
     defaultSubscription: 450,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 6,
   }, {
     description: '三房一厅暗',
-    patterns: {bedroom: '3', livingroom: '1', brightness: '0'},
+    bedroom: '3', livingroom: '1', brightness: '0',
     defaultDeposit: 1050,
     defaultRental: 1050,
     defaultSubscription: 550,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 7,
   }, {
     description: '三房一厅亮',
-    patterns: {bedroom: '3', livingroom: '1', brightness: '10'},
+    bedroom: '3', livingroom: '1', brightness: '10',
     defaultDeposit: 1200,
     defaultRental: 1200,
     defaultSubscription: 600,
     servicesCharges: 20,
     overdueFine: 20,
+    order: 8,
   }
 ];
-
+exports.defaultHouseLayouts = houseLayouts;
 
 

@@ -8,7 +8,7 @@ import { AuthCodes } from './auth_codes'
 import { Users, UsersTypes, UsersOmit, UsersPopulate, initUsers } from './users';
 import { HouseLayoutPatterns, initHouseLayoutPatterns } from './mansion/house_layout_patterns';
 import { Mansions, initMansions } from './mansion/mansions'
-import { HouseLayouts, initHouseLayouts } from './mansion/house_layouts';
+import { HouseLayouts, initHouseLayouts, defaultHouseLayouts } from './mansion/house_layouts';
 import { Houses } from './mansion/houses';
 import { Shops } from './mansion/shops';
 import { Tenant } from './mansion/tenant';
@@ -71,6 +71,7 @@ exports.UsersPopulate = UsersPopulate;
 exports.HouseLayoutPatterns = HouseLayoutPatterns;
 exports.Mansions = Mansions;
 exports.HouseLayouts = HouseLayouts;
+exports.defaultHouseLayouts = defaultHouseLayouts;
 exports.Houses = Houses;
 exports.Shops = Shops;
 
