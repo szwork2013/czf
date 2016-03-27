@@ -30,7 +30,7 @@ const TenantModel = new Schema({
     type: ObjectId,
     ref: 'mansions'
   },
-  housesId: {
+  houseId: {
     type: ObjectId,
     ref: 'houses'
   },
@@ -54,7 +54,7 @@ const TenantModel = new Schema({
   rentalStartDate: Date,      //本次租金开始日期，闭区间
   rentalEndDate: Date,        //本次租金有效日期，开区间
   oweRental: Number,              //欠租金
-  oweRentalExpiredDate: Number,   //欠租金补交最迟时间，开区间
+  oweRentalExpiredDate: Date,   //欠租金补交最迟时间，开区间
   doorCardCount: Number,      //持有门卡数
   contractStartDate: Date,    //合同开始
   contractEndDate: Date,      //合同结束日期
@@ -67,7 +67,7 @@ const TenantModel = new Schema({
     type: Date,
     default: Date.now
   },
-  createBy: {
+  createdBy: {
     type: ObjectId,
     ref: 'users'
   }

@@ -24,7 +24,7 @@ const MansionsSchema = new Schema({
   //房子
   floorCount: Number,                       //楼层数
   housesCount: [Number],                    //数组下标从0开始，0代表1层的总房子数
-  housesAvailableCount: [Number],            
+  housesExistCount: [Number],            
   shopsCount: [Number],                     //0代表1层的总商铺数
   shopsAvailableCount: [Number],
   floorDesPrefix: {                         //楼层显示前缀

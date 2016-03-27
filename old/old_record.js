@@ -112,11 +112,15 @@ const loadRentFile = async (historyFilePath) => {
       retObj.floorCount = 18;
       retObj.totalHouseCount = 0;
       retObj.totalExistsHouseCount = 0;
-      retObj.floor = [18];
+      retObj.totalTenantCount = 0;
+      retObj.totalSubscriberCount = 0;
+      retObj.floor = [16];
       for (let i = 0; i < 16; i++) {
         let floor = retObj.floor[i] = [80]
         floor.houseCount = 0;
         floor.existsHouseCount = 0;
+        floor.tenantCount = 0
+        floor.subscriberCount = 0
         for (let j=0; j < 80; j++) {
           let house = floor[j] = {}
           //房间号
@@ -160,6 +164,7 @@ const loadRentFile = async (historyFilePath) => {
             house.hasTenant = buf.readInt8(offset);
             offset += 1;
             if (house.hasTenant) {
+              floor.tenantCount += 1
               // log.trace('has tenant:');
               let tenant = house.tenant = {}
               //姓名
@@ -240,31 +245,32 @@ const loadRentFile = async (historyFilePath) => {
             house.hasSubscriber = buf.readInt8(offset);
             offset += 1;
             if (house.hasSubscriber) {
-              log.trace('has subscriber:');
+              floor.hasSubscriber += 1
+              // log.trace('has subscriber:');
               let subscriber = house.subscriber = {}
               //姓名
               len = buf.readUInt32LE(offset);
               offset += 4
               subscriber.name = iconv.convert(buf.slice(offset, offset+len)).toString();
               offset += len;
-              log.trace('name: ', subscriber.name);
+              // log.trace('name: ', subscriber.name);
               //身份证
               len = buf.readUInt32LE(offset);
               offset += 4
               subscriber.idNo = iconv.convert(buf.slice(offset, offset+len)).toString();
               offset += len;
-              log.trace('idNo: ', subscriber.idNo);
+              // log.trace('idNo: ', subscriber.idNo);
               //手机
               len = buf.readUInt32LE(offset);
               offset += 4
               subscriber.mobile = iconv.convert(buf.slice(offset, offset+len)).toString();
               offset += len;
-              log.trace('mobile: ', subscriber.mobile);
+              // log.trace('mobile: ', subscriber.mobile);
               //定金
               subscriber.subscription = buf.readFloatLE(offset);
               subscriber.subscription = subscriber.subscription.toFixed(1);
               offset += 4;
-              log.trace('subscription: ', subscriber.subscription);
+              // log.trace('subscription: ', subscriber.subscription);
               // //定房时间
               // subscriber.createdAt = buf.slice(offset, offset+8);
               // offset += longIntLength;
@@ -280,11 +286,13 @@ const loadRentFile = async (historyFilePath) => {
             }
           }
         } 
-        log.trace('floor for :', i+1, ';\t total count :', floor.houseCount, ';\t exists count :', floor.existsHouseCount);
+        log.trace('floor for :', i+1, ';\t total count :', floor.houseCount, ';\t exists count :', floor.existsHouseCount, ';\t tenant count :', floor.tenantCount, ';\t subscriber count :', floor.subscriberCount);
         retObj.totalHouseCount += floor.houseCount;
         retObj.totalExistsHouseCount += floor.existsHouseCount;
+        retObj.totalTenantCount += floor.tenantCount;
+        retObj.totalSubscriberCount += floor.subscriberCount;
       };
-      log.trace('mansion house total count :', retObj.totalHouseCount, ';\t house exists count :', retObj.totalExistsHouseCount);
+      log.trace('mansion house total count :', retObj.totalHouseCount, ';\t house exists count :', retObj.totalExistsHouseCount, ';\t total tenant count: ', retObj.totalTenantCount, ';\t total subscription count: ', retObj.totalSubscriberCount);
     } else {
       log.error('file dose not exist');
       return retObj;

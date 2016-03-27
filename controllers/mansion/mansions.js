@@ -9,6 +9,7 @@ import config from '../../config';
 import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts, defaultHouseLayouts, 
         Houses, Tenant, Subscriber, Shops } from '../../models';
 
+import moment from 'moment';
 
 /*
  * 取得所有资产，包括所有和管理
@@ -50,7 +51,7 @@ const mansionInfo = async (req, res) => {
 
     var shops = null;
     if (query.shops) {
-      shops = await Shops.find({mansionId: mansionId, deleted: true}).exec()
+      shops = await Shops.find({mansionId: mansionId, deleted: false}).exec()
     }
     return res.handleResponse(200, {mansionId, houseLayouts, houses, shops});
   }catch(err) {
@@ -121,6 +122,7 @@ const importHistoryVersionData = async (req, res) => {
     var body = req.body || {};
     var user = req.user
     var mansionId = body.mansionId;
+    var mansionObjectId = new ObjectId(mansionId);
     if (!mansionId) {
       return res.handleResponse(400, {}, 'mansionId is require');
     }
@@ -137,27 +139,27 @@ const importHistoryVersionData = async (req, res) => {
       return res.handleResponse(400, {}, 'file is broken');
     }
     //迁移旧的出租信息和订房
-    var oldHouses = await Houses.find({mansionId: mansionId}).populate('tenantId subscriberId').exec()
+    var oldHouses = await Houses.find({mansionId: mansionId}).exec()
     // var oldTenant = {}
     var oldHouse = {}
     for (oldHouse of oldHouses) {
-      log.info(i, oldHouse)
-      oldHouse = oldHouse[i]
+      // log.info(i, oldHouse)
+      // oldHouse = oldHouse[i]
       //有租客，需要将租户的信息转入tenant表
       if (oldHouse.tenantId) {
-        await Tenant.update({_id: oldHouse.oldTenant._id}, {$set: {type: 'migrate'}}).exec()
+        await Tenant.update({_id: oldHouse.tenantId}, {$set: {type: 'migrate'}}).exec()
       }
       if (oldHouse.subscriberId) {
-        await Subscriber.update({_id: oldHouse.subscriberId._id}, {$set: {type: 'migrate'}}).exec()
+        await Subscriber.update({_id: oldHouse.subscriberId}, {$set: {type: 'migrate'}}).exec()
       }
     }
-    await Houses.update({mansionId: mansionId}, {$set: {deleted: true}}).exec();
+    await Houses.update({mansionId: mansionId, deleted: false}, {$set: {deleted: true}}, {multi: true}).exec();
     //更新旧户型
-    await HouseLayouts.update({mansionId: mansionId}, {$set: {deleted: true}}).exec();
+    await HouseLayouts.update({mansionId: mansionId, deleted: false}, {$set: {deleted: true}}, {multi: true}).exec();
 
     //插入新户型
     var houseLayouts = _.cloneDeep(defaultHouseLayouts);
-    houseLayouts.forEach((houseLayout) => {houseLayout.mansionId = new ObjectId(mansionId)})
+    houseLayouts.forEach((houseLayout) => {houseLayout.mansionId = mansionObjectId})
     //管理费
     houseLayouts[0].servicesCharges = hisObj.houseServicesChargesForLayoutPerMonth0
     houseLayouts[1].servicesCharges = hisObj.houseServicesChargesForLayoutPerMonth0
@@ -178,6 +180,7 @@ const importHistoryVersionData = async (req, res) => {
     houseLayouts[6].overdueFine = hisObj.houseOverdueFineForLayoutPerDay3
     houseLayouts[7].overdueFine = hisObj.houseOverdueFineForLayoutPerDay3
     houseLayouts = await insertBatch(HouseLayouts, houseLayouts);
+    houseLayouts = houseLayouts.ops
 
     mansion.housePropertyMaintenanceChargesType = 0
     mansion.houseOverdueFineType = 0
@@ -193,30 +196,104 @@ const importHistoryVersionData = async (req, res) => {
     //楼层数
     mansion.floorCount = 0;
     mansion.housesCount = [];
-    mansion.housesAvailableCount = []
+    mansion.housesExistCount = []
     //出租房
     var floorCount = 0
     var housesCount = []
-    var housesAvailableCount = []
+    var housesExistCount = []
     var newHouses = []
+    var newHouse = []
+    var newTenant = {}
+    var newSubscriber = {}
 
     var floor = []
     var house = {}
-    var tenant = null
+    var tenant = {}
     var subscriber = null
-    for (var floorIdx in hisObj.floor) {
+
+
+    for (var floorIdx=0;  floorIdx< hisObj.floor.length; floorIdx++) {
       floor = hisObj.floor[floorIdx]
-      for (var houseIdx in floor) {
+      for (var houseIdx=0; houseIdx<floor.houseCount; houseIdx++) {
         house = floor[houseIdx]
-        if(house.isExist)
+        
+        newHouse = {}
+        newHouse.mansionId = mansionObjectId;
+        newHouse.floor = floorIdx;
+        newHouse.room = houseIdx;
+        newHouse.isExist = house.isExist;
+        newHouse.deleted = false;
+        newHouse = await Houses.create(newHouse);
 
-        if (house.tenant && house.tenant.name === '张长清') {
-          // house.tenant.contractStartDate = house.tenant.contractStartDate.toString()
-          log.info(house)
+        if(house.isExist) {
+          floorCount = floorIdx+1;
+          newHouse.houseLayout = houseLayouts[house.roomNum*2 + Number(house.brightness)]._id;
+          newHouse.electricMeterEndNumber = house.electricMeterEndNumber
+          newHouse.waterMeterEndNumber = house.waterMeterEndNumber
+          newHouse.remark = house.remark;
+          
+          if (!_.isEmpty(house.tenant)) {
+            tenant = house.tenant
+            newTenant = {}
+            newTenant.mansionId = mansionId;
+            newTenant.houseId = newHouse._id;
+            newTenant.floor = floorIdx;
+            newTenant.room = houseIdx;
+            newTenant.type = 'migrate';
+            newTenant.name = tenant.name;
+            newTenant.mobile = tenant.mobile;
+            newTenant.idNo = tenant.idNo;
+            newTenant.deposit = tenant.deposit;
+            newTenant.rental = tenant.rental;
+            newTenant.oweRental = tenant.oweRental || tenant.ownDeposit;
+
+            newTenant.oweRentalExpiredDate = tenant.oweRentalExpiredDate;
+            newTenant.doorCardCount = tenant.doorCardCount;
+            newTenant.contractStartDate = tenant.contractStartDate;
+            newTenant.contractEndDate = tenant.contractEndDate;
+            newTenant.rentalEndDate = tenant.rentalEndDate;
+
+            newTenant.rentalStartDate = moment(tenant.rentalEndDate).add(-1, 'month').toDate()
+            newTenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
+            newTenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
+            newTenant.waterTons = 0
+            newTenant.electricKWhs = 0
+            newTenant.summed = {}
+
+            newTenant.createdAt = new Date()
+            newTenant.createdBy = user._id;
+            newTenant = await Tenant.create(newTenant)
+            newHouse.tenantId = newTenant._id;
+          }
+          if (!_.isEmpty(house.subscriber)) {
+            subscriber = house.subscriber
+            newSubscriber = {}
+            newSubscriber.mansionId = mansionObjectId;
+            newSubscriber.houseId = newHouse._id;
+            newSubscriber.floor = floorIdx;
+            newSubscriber.room = houseIdx;
+            newSubscriber.status = 'migrate';
+            newSubscriber.name = subscriber.name;
+            newSubscriber.mobile = subscriber.mobile;
+            newSubscriber.idNo = subscriber.idNo;
+            newSubscriber.subscription = subscriber.subscription
+            newSubscriber.createdAt = subscriber.createdAt
+            newSubscriber.expiredDate = subscriber.expiredDate
+            newSubscriber.createdBy = new Date()
+            newSubscriber = await Subscriber.create(newSubscriber)
+            newHouse.subscriberId = newSubscriber._id;
+          }
+          await newHouse.save()
         }
-
       }
     }
+    mansion.floorCount = floorCount;
+    for (var i=0; i<floorCount; i++) {
+      housesCount.push(hisObj.floor[i].houseCount)
+      housesExistCount.push(hisObj.floor[i].existsHouseCount)
+    }
+    mansion.housesCount = housesCount
+    mansion.housesExistCount = housesExistCount;
 
     return res.handleResponse(200, mansion);
   }catch(err) {

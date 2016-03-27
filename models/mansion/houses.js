@@ -15,6 +15,10 @@ const HousesSchema = new Schema({
   },
   floor: Number,                  //从1开始，1代表1楼
   room: Number,                   //从1开始，1代表01房
+  isExist: {
+    type: Boolean,
+    default: true
+  },
   houseLayout: {
     type: ObjectId,
     ref: 'house_layouts'
@@ -22,10 +26,6 @@ const HousesSchema = new Schema({
   area: {                         //面积
     type: Number,
     default: 0
-  },
-  available: {
-    type: Boolean,
-    default: true
   },
   deleted: {
     type: Boolean,

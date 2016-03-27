@@ -75,6 +75,9 @@ exports.defaultHouseLayouts = defaultHouseLayouts;
 exports.Houses = Houses;
 exports.Shops = Shops;
 
+exports.Tenant = Tenant
+exports.Subscriber = Subscriber
+
 exports.init = async (clean, rebuiltRelationships) => {
   if (clean) {
     await resetDatabase();
