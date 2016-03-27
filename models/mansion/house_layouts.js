@@ -86,6 +86,7 @@ let houseLayouts = [{
     defaultSubscription: 150,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 1,
   }, {
     description: '单房亮',
@@ -95,6 +96,7 @@ let houseLayouts = [{
     defaultSubscription: 250,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 2,
   }, {
     description: '一房一厅暗',
@@ -104,6 +106,7 @@ let houseLayouts = [{
     defaultSubscription: 250,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 3,
   }, {
     description: '一房一厅亮',
@@ -113,6 +116,7 @@ let houseLayouts = [{
     defaultSubscription: 300,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 4,
   }, {
     description: '两房一厅暗',
@@ -122,6 +126,7 @@ let houseLayouts = [{
     defaultSubscription: 350,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 5,
   }, {
     description: '两房一厅亮',
@@ -131,6 +136,7 @@ let houseLayouts = [{
     defaultSubscription: 450,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 6,
   }, {
     description: '三房一厅暗',
@@ -140,6 +146,7 @@ let houseLayouts = [{
     defaultSubscription: 550,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 7,
   }, {
     description: '三房一厅亮',
@@ -149,6 +156,7 @@ let houseLayouts = [{
     defaultSubscription: 600,
     servicesCharges: 20,
     overdueFine: 20,
+    deleted: false,
     order: 8,
   }
 ];

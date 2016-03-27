@@ -103,6 +103,16 @@ exports.deleteMansion = deleteMansion;
 
 
 import { loadRentFile } from '../../old/old_record'
+import mongoose from 'mongoose';
+const ObjectId = mongoose.Types.ObjectId;
+const insertBatch = (model, docs) => {
+  return new Promise((resolve, reject) => {
+    model.collection.insert(docs, (err, newDocs) => {
+      if (err) reject(err);
+      resolve(newDocs)
+    });
+  })
+}
 /*
  * 导入旧版本历史数据
  */
@@ -127,9 +137,12 @@ const importHistoryVersionData = async (req, res) => {
       return res.handleResponse(400, {}, 'file is broken');
     }
     //迁移旧的出租信息和订房
-    var oldHouses = Houses.find({mansionId: mansionId}).populate('tenantId subscriberId').exec()
-    var oldTenant = {}
-    for (var oldHouse of oldHouses) {
+    var oldHouses = await Houses.find({mansionId: mansionId}).populate('tenantId subscriberId').exec()
+    // var oldTenant = {}
+    var oldHouse = {}
+    for (oldHouse of oldHouses) {
+      log.info(i, oldHouse)
+      oldHouse = oldHouse[i]
       //有租客，需要将租户的信息转入tenant表
       if (oldHouse.tenantId) {
         await Tenant.update({_id: oldHouse.oldTenant._id}, {$set: {type: 'migrate'}}).exec()
@@ -139,19 +152,13 @@ const importHistoryVersionData = async (req, res) => {
       }
     }
     await Houses.update({mansionId: mansionId}, {$set: {deleted: true}}).exec();
+    //更新旧户型
+    await HouseLayouts.update({mansionId: mansionId}, {$set: {deleted: true}}).exec();
 
-    //更新户型
-    var houseLayouts = mansion.houseLayouts = _.cloneDeep(defaultHouseLayouts);
-    //门卡
-    mansion.doorCardSellCharges = hisObj.doorCardSellCharges;
-    mansion.doorCardRecoverCharges = hisObj.doorCardRecoverCharges;
-    //出租房电水费
-    mansion.houseElectricChargesPerKWh = hisObj.houseElectricChargesPerKWh
-    mansion.houseElectricChargesMinimalKWhs = 1
-    mansion.houseWaterChargesPerTon = hisObj.houseWaterChargesPerTon
-    mansion.houseWaterChargesMinimalTons = 1
+    //插入新户型
+    var houseLayouts = _.cloneDeep(defaultHouseLayouts);
+    houseLayouts.forEach((houseLayout) => {houseLayout.mansionId = new ObjectId(mansionId)})
     //管理费
-    mansion.housePropertyMaintenanceChargesType = 0
     houseLayouts[0].servicesCharges = hisObj.houseServicesChargesForLayoutPerMonth0
     houseLayouts[1].servicesCharges = hisObj.houseServicesChargesForLayoutPerMonth0
     houseLayouts[2].servicesCharges = hisObj.houseServicesChargesForLayoutPerMonth1
@@ -161,7 +168,7 @@ const importHistoryVersionData = async (req, res) => {
     houseLayouts[6].servicesCharges = hisObj.houseServicesChargesForLayoutPerMonth3
     houseLayouts[7].servicesCharges = hisObj.houseServicesChargesForLayoutPerMonth3
     //逾期罚款
-    mansion.houseOverdueFineType = 0
+    
     houseLayouts[0].overdueFine = hisObj.houseOverdueFineForLayoutPerDay0
     houseLayouts[1].overdueFine = hisObj.houseOverdueFineForLayoutPerDay0
     houseLayouts[2].overdueFine = hisObj.houseOverdueFineForLayoutPerDay1
@@ -170,15 +177,48 @@ const importHistoryVersionData = async (req, res) => {
     houseLayouts[5].overdueFine = hisObj.houseOverdueFineForLayoutPerDay2
     houseLayouts[6].overdueFine = hisObj.houseOverdueFineForLayoutPerDay3
     houseLayouts[7].overdueFine = hisObj.houseOverdueFineForLayoutPerDay3
+    houseLayouts = await insertBatch(HouseLayouts, houseLayouts);
+
+    mansion.housePropertyMaintenanceChargesType = 0
+    mansion.houseOverdueFineType = 0
+    //门卡
+    mansion.doorCardSellCharges = hisObj.doorCardSellCharges;
+    mansion.doorCardRecoverCharges = hisObj.doorCardRecoverCharges;
+    //出租房电水费
+    mansion.houseElectricChargesPerKWh = hisObj.houseElectricChargesPerKWh
+    mansion.houseElectricChargesMinimalKWhs = 1
+    mansion.houseWaterChargesPerTon = hisObj.houseWaterChargesPerTon
+    mansion.houseWaterChargesMinimalTons = 1
+
     //楼层数
     mansion.floorCount = 0;
     mansion.housesCount = [];
     mansion.housesAvailableCount = []
     //出租房
-    var houses = []
-    
+    var floorCount = 0
+    var housesCount = []
+    var housesAvailableCount = []
+    var newHouses = []
 
-    return res.handleResponse(200, {});
+    var floor = []
+    var house = {}
+    var tenant = null
+    var subscriber = null
+    for (var floorIdx in hisObj.floor) {
+      floor = hisObj.floor[floorIdx]
+      for (var houseIdx in floor) {
+        house = floor[houseIdx]
+        if(house.isExist)
+
+        if (house.tenant && house.tenant.name === '张长清') {
+          // house.tenant.contractStartDate = house.tenant.contractStartDate.toString()
+          log.info(house)
+        }
+
+      }
+    }
+
+    return res.handleResponse(200, mansion);
   }catch(err) {
     log.error(err.name, err.message)
     return res.handleResponse(500, {});

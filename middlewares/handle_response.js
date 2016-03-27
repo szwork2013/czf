@@ -35,7 +35,7 @@ var handleResponse = (req, res, next) => {
       });
       
       // log.debug('this.body:', this.body.code, this.body.msg, this.body.data);
-      log.trace(`status=${status};`, `msg='${msg}';`, `data=`, data);
+      log.trace(`status=${status};`, `msg='${msg}';`);
     }
   }
   next();

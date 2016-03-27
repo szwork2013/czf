@@ -115,7 +115,6 @@ class Mansions extends Component {
   selectMansion(mansion) {    
     mansion = _.cloneDeep(mansion);
     let houseLayouts = []
-
     if (mansion.houseLayouts) {
       houseLayouts = mansion.houseLayouts
       mansion.houseLayouts = true;

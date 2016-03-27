@@ -15,7 +15,7 @@ import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } f
 
 import CommonSelectField from '../../components/common/common_select_field'
 import CommonTextField from '../common/common_text_field'
-
+import CommonRaisedButton from '../common/common_raised_button'
 
 
 class MansionsHeader extends Component {
@@ -98,16 +98,16 @@ class MansionsHeader extends Component {
           <CommonSelectField value={mansion._id} onChange={props.handleMansionsChange} style={styles.marginRight}
             floatingLabelText='物业单位' forceUpdate={props.forceUpdate}
             items={props.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' />
-          <RaisedButton label="导入旧数据" labelPosition="before" style={styles.marginRight} primary={true}>
+          <CommonRaisedButton label="导入旧数据" labelPosition="before" style={styles.marginRight} primary={true}>
             <input type="file" style={styles.fileInput} ref="old_version_file_input" accept=".rdt,"
                 onChange={this.importOldVersionData.bind(this)}/>
-          </RaisedButton>
+          </CommonRaisedButton>
 
 
-          <RaisedButton label="删除物业单位" labelPosition="before" primary={true} 
+          <CommonRaisedButton label="删除物业单位" labelPosition="before" primary={true} 
             style={styles.marginRight} onTouchTap={this.deleteMansionDialogClick.bind(this)}/>
 
-          <RaisedButton label="新建物业单位" labelPosition="before" primary={true} 
+          <CommonRaisedButton label="新建物业单位" labelPosition="before" primary={true} 
             style={styles.marginRight} onTouchTap={this.newMansionDialogClick.bind(this)}/>
 
           <Dialog title={this.state.mansionDialogTitle} modal={true} open={this.state.mansionDialogShow}>

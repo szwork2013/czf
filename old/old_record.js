@@ -9,6 +9,23 @@ import { Iconv } from 'iconv';
 // let historyFileAbsPath = path.join(process.cwd(), 'old', historyFilePath);
 let longIntLength = 4
 
+const readDate = (buf, offset) => {
+    let year = buf.readInt32LE(offset);
+    offset += 4;
+    let month = buf.readInt32LE(offset)-1;
+    offset += 4;
+    let day = buf.readInt32LE(offset);
+    offset += 4;
+    let hour = buf.readInt32LE(offset);
+    offset += 4;
+    let minute = buf.readInt32LE(offset);
+    offset += 4;
+    let second = buf.readInt32LE(offset);
+    offset += 4;
+    return new Date(year, month, day, hour,minute, second)
+
+}
+
 const loadRentFile = async (historyFilePath) => {
   var historyFileAbsPath = path.join(process.cwd(), historyFilePath)
   try {
@@ -188,17 +205,37 @@ const loadRentFile = async (historyFilePath) => {
               offset += 4;
               // log.trace('doorCardCount: ', tenant.doorCardCount);
               //合同开始
-              tenant.contractStartDate = buf.slice(offset, offset+8);
-              offset += longIntLength;
-              //合同结束
-              tenant.contractEndDate = buf.slice(offset, offset+8);
-              offset += longIntLength;
-              //下次交租
-              tenant.rentalEndDate = buf.slice(offset, offset+8);
-              offset += longIntLength;
-              //下次交欠款
-              tenant.oweRentalExpiredDate = buf.slice(offset, offset+8);
-              offset += longIntLength;
+              // let year = buf.readInt32LE(offset);
+              // offset += 4;
+              // let month = buf.readInt32LE(offset)-1;
+              // offset += 4;
+              // let day = buf.readInt32LE(offset);
+              // offset += 4;
+              // let hour = buf.readInt32LE(offset);
+              // offset += 4;
+              // let minute = buf.readInt32LE(offset);
+              // offset += 4;
+              // let second = buf.readInt32LE(offset);
+              // offset += 4;
+              // tenant.contractStartDate = new Date(year, month, day, hour,minute, second)
+              tenant.contractStartDate = readDate(buf, offset);
+              offset += 24;
+              // offset += longIntLength;
+              // //合同结束
+              // tenant.contractEndDate = buf.slice(offset, offset+8);
+              // offset += longIntLength;
+              tenant.contractEndDate = readDate(buf, offset);
+              offset += 24;
+              // //下次交租
+              // tenant.rentalEndDate = buf.slice(offset, offset+8);
+              // offset += longIntLength;
+              tenant.rentalEndDate = readDate(buf, offset);
+              offset += 24;
+              // //下次交欠款
+              // tenant.oweRentalExpiredDate = buf.slice(offset, offset+8);
+              // offset += longIntLength;
+              tenant.oweRentalExpiredDate = readDate(buf, offset);
+              offset += 24;
             }
             house.hasSubscriber = buf.readInt8(offset);
             offset += 1;
@@ -228,12 +265,18 @@ const loadRentFile = async (historyFilePath) => {
               subscriber.subscription = subscriber.subscription.toFixed(1);
               offset += 4;
               log.trace('subscription: ', subscriber.subscription);
-              //定房时间
-              tenant.createdAt = buf.slice(offset, offset+8);
-              offset += longIntLength;
-              //定房无效期
-              tenant.expiredDate = buf.slice(offset, offset+8);
-              offset += longIntLength;
+              // //定房时间
+              // subscriber.createdAt = buf.slice(offset, offset+8);
+              // offset += longIntLength;
+              subscriber.createdAt = readDate(buf, offset);
+              offset += 24;
+
+              // //定房无效期
+              // subscriber.expiredDate = buf.slice(offset, offset+8);
+              // offset += longIntLength;
+              subscriber.expiredDate = readDate(buf, offset);
+              offset += 24;
+
             }
           }
         } 
