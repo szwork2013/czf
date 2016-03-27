@@ -294,7 +294,7 @@ const importHistoryVersionData = async (req, res) => {
     }
     mansion.housesCount = housesCount
     mansion.housesExistCount = housesExistCount;
-
+    await mansion.save()
     return res.handleResponse(200, mansion);
   }catch(err) {
     log.error(err.name, err.message)
