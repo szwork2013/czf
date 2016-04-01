@@ -98,7 +98,7 @@ class MansionsHeader extends Component {
     var props = this.props
     var mansion = props.mansion;
     return (
-        <div style={{marginBottom: '20px'}} className='container-fluid'>
+        <div style={{marginBottom: '20px'}}>
             <CommonSelectField value={mansion._id} onChange={props.handleMansionsChange} style={styles.marginRight}
               floatingLabelText='物业单位' forceUpdate={props.forceUpdate}
               items={props.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' fullWidth={false}/>

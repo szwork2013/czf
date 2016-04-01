@@ -14,7 +14,7 @@ import Colors from 'material-ui/lib/styles/colors';
 
 import { Paper, FontIcon, RaisedButton, SelectField, TextField, MenuItem, Tabs, Tab,
          Table, TableHeader, TableRow, TableHeaderColumn, TableBody, TableRowColumn, TableFooter,
-         Checkbox } from 'material-ui/lib'
+         Checkbox, RadioButtonGroup, RadioButton } from 'material-ui/lib'
 
 import * as HouseLayoutPatternsAction from '../../actions/mansion/house_layout_patterns'
 import * as MansionsAction from '../../actions/mansion/mansions'
@@ -23,6 +23,10 @@ import * as ToastActions from '../../actions/master/toast';
 import MansionsHeader from '../../components/mansion/mansions_header'
 import MansionsBase from '../../components/mansion/mansions_base'
 import MansionsHouseLayouts from '../../components/mansion/mansions_house_layouts'
+
+
+import CommonRadioButtonGroup from '../../components/common/common_radio_button_group'
+
 
 class Mansions extends Component {
 
@@ -34,7 +38,9 @@ class Mansions extends Component {
       houses: [],
       shops: [],
       ownMansions: {},
-      forceUpdate: true
+      forceUpdate: true,
+
+      showTab: "base",
     }
   }
 
@@ -170,16 +176,38 @@ class Mansions extends Component {
     this.state.houseLayouts.push({});
     this.setState({houseLayouts: this.state.houseLayouts})
   }
+  onShowTabChange(e, value) {
+    this.setState({showTab: value})
+  }
+  getTab(styles) {
+    let props = this.props
+    let mansion = this.state.mansion;
+    let houseLayouts = this.state.houseLayouts;
+    let houseLayoutPatterns = props.houseLayoutPatterns;
+    let theme = props.theme
+
+    switch (this.state.showTab) {
+      case 'houseLayouts':
+        return (
+          <MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} 
+            onDeleteHouseLayout={this.onDeleteHouseLayout.bind(this)} onAddHouseLayout={this.onAddHouseLayout.bind(this)}
+            houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} />
+        )
+      case 'base':
+      default:
+        return (
+          <MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} theme={theme}/>
+        )
+
+    }
+  }
 
   render() {
     let styles = this.getStyles()
     let props = this.props
     let mansion = this.state.mansion;
     let ownMansions = this.state.ownMansions
-    let houseLayouts = this.state.houseLayouts;
-    let houseLayoutPatterns = props.houseLayoutPatterns;
-    let theme = this.props.theme
-
+    let theme = props.theme
     /*
 <div style={{marginBottom: '20px'}}>
           <CommonSelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)} style={styles.marginRight}
@@ -195,16 +223,22 @@ class Mansions extends Component {
         <MansionsHeader mansion={mansion} ownMansions={ownMansions} 
             handleMansionsChange={this.handleMansionsChange.bind(this)}
             actions={props.actions} forceUpdate={this.state.forceUpdate} theme={theme}/>
-        <Tabs initialSelectedIndex={1} >
-          <Tab label="基础信息" ><MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} theme={theme}/></Tab>
-          <Tab label="户型（出租房）"><MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} 
-            onDeleteHouseLayout={this.onDeleteHouseLayout.bind(this)} onAddHouseLayout={this.onAddHouseLayout.bind(this)}
-            houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} /></Tab>
-        </Tabs>
+        <CommonRadioButtonGroup name='showTab' valueSelected={this.state.showTab} style={{marginBottom: '20px'}}
+          onChange={this.onShowTabChange.bind(this)}>
+          <RadioButton value="base" label="基础信息" style={styles.raidoButton}/>
+          <RadioButton value="houseLayouts" label="户型（出租房）" style={styles.raidoButton}/>
+        </CommonRadioButtonGroup>
+        {this.getTab(styles)}
       </div>
     )
   }
 
+// <Tabs initialSelectedIndex={1} >
+//           <Tab label="基础信息" ><MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} theme={theme}/></Tab>
+//           <Tab label="户型（出租房）"><MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} 
+//             onDeleteHouseLayout={this.onDeleteHouseLayout.bind(this)} onAddHouseLayout={this.onAddHouseLayout.bind(this)}
+//             houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} /></Tab>
+//         </Tabs>
   getStyles() {
     // const palette = this.props.theme.baseTheme.palette
     // const backgroundColor = palette.primary1Color;
@@ -214,15 +248,21 @@ class Mansions extends Component {
     // const textColor = palette.textColor;
     // const disabledColor = palette.disabledColor;
     const styles = {
-      tab: {
-        marginLeft: 'auto',
-        marginRight: 'auto',
+      raidioButtonGroup: {
+        
         padding: '30px 20px 40px 20px',
         backgroundColor: Colors.grey100,
         marginBottom: '40px'
       },
       marginRight: {
         marginRight: '20px',
+      },
+      raidoButton: {
+        display: 'inline-block',
+        fontSize: '18px',
+        whiteSpace: 'nowrap',
+        marginRight: '80px',
+        width: 'auto'
       },
       divider: {
         width: '20px',
