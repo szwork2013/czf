@@ -10,7 +10,7 @@ import Colors from 'material-ui/lib/styles/colors';
 
 import { Paper, FontIcon, RaisedButton, SelectField, TextField, MenuItem, Tabs, Tab,
          Table, TableHeader, TableRow, TableHeaderColumn, TableBody, TableRowColumn, TableFooter,
-         Checkbox } from 'material-ui/lib'
+         Checkbox, FloatingActionButton } from 'material-ui/lib'
 
 import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } from '../../utils/location'
 import LocationSelectField from '../common/location_select_field'
@@ -49,7 +49,7 @@ class MansionsBase extends Component {
 
   counter(array) {
     var retValue = 0;
-    for (i in array) {
+    for (var i in array) {
       retValue += array[i]
     }
     return retValue
@@ -89,7 +89,7 @@ class MansionsBase extends Component {
         <br />
 
         <CommonTextField hintText="楼层总数" floatingLabelText="楼层总数" ref='floorCount' style={styles.marginRight} value={mansion.floorCount} disabled={true}/>
-        <CommonTextField hintText="出租房总数" floatingLabelText="出租房总数" ref='housesAvailableCount' style={styles.marginRight} value={this.counter(mansion.housesAvailableCount)} disabled={true}/>
+        <CommonTextField hintText="出租房总数" floatingLabelText="出租房总数" ref='housesAvailableCount' style={styles.marginRight} value={this.counter(mansion.housesExistCount)} disabled={true}/>
         <CommonTextField hintText="商铺总数" floatingLabelText="商铺总数" ref='shopsAvailableCount' style={styles.marginRight} value={this.counter(mansion.shopsAvailableCount)} disabled={true}/>
         <br />
         <CommonTextField hintText="楼层显示前缀" floatingLabelText="楼层显示前缀" ref='floorDesPrefix' style={styles.marginRight} value={mansion.floorDesPrefix || ' '} disabled={true}/>
@@ -123,6 +123,11 @@ class MansionsBase extends Component {
       divider: {
         width: '20px',
         display: 'inline-block',
+      },
+      floatingActionButton: {
+        position: 'fixed',
+        // bottom: '20px',
+        // right: '20px',
       }
     }
     return styles;

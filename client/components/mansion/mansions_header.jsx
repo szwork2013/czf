@@ -16,7 +16,7 @@ import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } f
 import CommonSelectField from '../../components/common/common_select_field'
 import CommonTextField from '../common/common_text_field'
 import CommonRaisedButton from '../common/common_raised_button'
-
+import CommonPromptDialog from '../common/common_prompt_dialog'
 
 class MansionsHeader extends Component {
 
@@ -40,8 +40,8 @@ class MansionsHeader extends Component {
     this.setState({mansionDialogShow: true, mansionDialogTitle: '确认删除：'+this.props.mansion.name, 
       mansionName: '', mansionDialogOKClick: this.deleteMansionDialogOK})
   }
-  deleteMansionDialogOK() {
-    var mansionName = this.refs['mansionName'].getValue()
+  deleteMansionDialogOK(mansionName) {
+    // var mansionName = this.refs['mansionName'].getValue()
     if (mansionName !== this.props.mansion.name) {
       this.props.actions.openToast({msg: '确认物业单位名称错误'})
       return false;
@@ -55,8 +55,8 @@ class MansionsHeader extends Component {
   newMansionDialogClick() {
     this.setState({mansionDialogShow: true, mansionDialogTitle: '新建物业', mansionName: '', mansionDialogOKClick: this.newMansionDialogOK})
   }
-  newMansionDialogOK() {
-    var mansionName = this.refs['mansionName'].getValue()
+  newMansionDialogOK(mansionName) {
+    // var mansionName = this.refs['mansionName'].getValue()
     if (_.isEmpty(mansionName)) {
       this.props.actions.openToast({msg: '物业单位名称不能为空'})
       return false;
@@ -65,6 +65,10 @@ class MansionsHeader extends Component {
       let param = {name: mansionName}
       this.props.actions.addMansionClick(param)
     }
+  }
+
+  mansionDialogOK(value) {
+    this.state.mansionDialogOKClick.bind(this)(value)
   }
   mansionDialogCancel() {
     this.setState({mansionDialogShow: false, mansionDialogTitle: '', mansionName: '', mansionDialogOKClick: this.mansionDialogCancel})
@@ -94,35 +98,36 @@ class MansionsHeader extends Component {
     var props = this.props
     var mansion = props.mansion;
     return (
-        <div style={{marginBottom: '20px'}}>
-          <CommonSelectField value={mansion._id} onChange={props.handleMansionsChange} style={styles.marginRight}
-            floatingLabelText='物业单位' forceUpdate={props.forceUpdate}
-            items={props.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' />
-          <CommonRaisedButton label="导入旧数据" labelPosition="before" style={styles.marginRight} primary={true}>
-            <input type="file" style={styles.fileInput} ref="old_version_file_input" accept=".rdt,"
-                onChange={this.importOldVersionData.bind(this)}/>
-          </CommonRaisedButton>
+        <div style={{marginBottom: '20px'}} className='container-fluid'>
+            <CommonSelectField value={mansion._id} onChange={props.handleMansionsChange} style={styles.marginRight}
+              floatingLabelText='物业单位' forceUpdate={props.forceUpdate}
+              items={props.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' fullWidth={false}/>
+            <CommonRaisedButton label="导入旧数据" labelPosition="before" style={styles.marginRight} primary={true}>
+              <input type="file" style={styles.fileInput} ref="old_version_file_input" accept=".rdt,"
+                  onChange={this.importOldVersionData.bind(this)}/>
+            </CommonRaisedButton>
+            <CommonRaisedButton label="删除物业单位" labelPosition="before" primary={true} 
+              style={styles.marginRight} onTouchTap={this.deleteMansionDialogClick.bind(this)}/>
+            <CommonRaisedButton label="新建物业单位" labelPosition="before" primary={true} 
+              style={styles.marginRight} onTouchTap={this.newMansionDialogClick.bind(this)}/>
 
-
-          <CommonRaisedButton label="删除物业单位" labelPosition="before" primary={true} 
-            style={styles.marginRight} onTouchTap={this.deleteMansionDialogClick.bind(this)}/>
-
-          <CommonRaisedButton label="新建物业单位" labelPosition="before" primary={true} 
-            style={styles.marginRight} onTouchTap={this.newMansionDialogClick.bind(this)}/>
-
-          <Dialog title={this.state.mansionDialogTitle} modal={true} open={this.state.mansionDialogShow}>
-            <TextField hintText="请输入物业单位名称" floatingLabelText="请输入物业单位名称" 
-              fullWidth={true} ref='mansionName'/>
-            <div style={{width: '100%', textAlign: 'right', marginTop: '30px'}}>
-              <RaisedButton label="确定" labelPosition="before" primary={true} 
-                style={styles.marginRight} onTouchTap={this.state.mansionDialogOKClick.bind(this)}/>
-              <RaisedButton label="取消" labelPosition="before" primary={true} 
-                style={styles.marginRight} onTouchTap={this.mansionDialogCancel.bind(this)}/>
-            </div>
-          </Dialog>
+            <CommonPromptDialog title={this.state.mansionDialogTitle} open={this.state.mansionDialogShow} 
+              hintText="请输入物业单位名称"
+              ok={this.mansionDialogOK.bind(this)} cancel={this.mansionDialogCancel.bind(this)} />
         </div>
     )
   }
+
+          // <Dialog title={this.state.mansionDialogTitle} modal={true} open={this.state.mansionDialogShow}>
+          //   <TextField hintText="请输入物业单位名称" floatingLabelText="请输入物业单位名称" 
+          //     fullWidth={true} ref='mansionName'/>
+          //   <div style={{width: '100%', textAlign: 'right', marginTop: '30px'}}>
+          //     <RaisedButton label="确定" labelPosition="before" primary={true} 
+          //       style={styles.marginRight} onTouchTap={this.state.mansionDialogOKClick.bind(this)}/>
+          //     <RaisedButton label="取消" labelPosition="before" primary={true} 
+          //       style={styles.marginRight} onTouchTap={this.mansionDialogCancel.bind(this)}/>
+          //   </div>
+          // </Dialog>
 
   getStyles() {
     // const palette = this.props.theme.baseTheme.palette

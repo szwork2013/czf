@@ -162,6 +162,15 @@ class Mansions extends Component {
     this.selectMansion(this.state.ownMansions[value])
   }
 
+  onDeleteHouseLayout(idx) {
+    this.state.houseLayouts.splice(idx, 1);
+    this.setState({houseLayouts: this.state.houseLayouts})
+  }
+  onAddHouseLayout() {
+    this.state.houseLayouts.push({});
+    this.setState({houseLayouts: this.state.houseLayouts})
+  }
+
   render() {
     let styles = this.getStyles()
     let props = this.props
@@ -169,6 +178,7 @@ class Mansions extends Component {
     let ownMansions = this.state.ownMansions
     let houseLayouts = this.state.houseLayouts;
     let houseLayoutPatterns = props.houseLayoutPatterns;
+    let theme = this.props.theme
 
     /*
 <div style={{marginBottom: '20px'}}>
@@ -184,10 +194,12 @@ class Mansions extends Component {
       <div>
         <MansionsHeader mansion={mansion} ownMansions={ownMansions} 
             handleMansionsChange={this.handleMansionsChange.bind(this)}
-            actions={props.actions} forceUpdate={this.state.forceUpdate}/>
-        <Tabs initialSelectedIndex={0} >
-          <Tab label="基础信息" ><MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} /></Tab>
-          <Tab label="户型（出租房）"><MansionsHouseLayouts houseLayouts={houseLayouts} houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} /></Tab>
+            actions={props.actions} forceUpdate={this.state.forceUpdate} theme={theme}/>
+        <Tabs initialSelectedIndex={1} >
+          <Tab label="基础信息" ><MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} theme={theme}/></Tab>
+          <Tab label="户型（出租房）"><MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} 
+            onDeleteHouseLayout={this.onDeleteHouseLayout.bind(this)} onAddHouseLayout={this.onAddHouseLayout.bind(this)}
+            houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} /></Tab>
         </Tabs>
       </div>
     )
