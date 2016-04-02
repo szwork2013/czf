@@ -15,6 +15,10 @@ class CommonRadioButtonGroup extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     let props = this.props
+    // log.error(nextProps.forceUpdate)
+    if (nextProps.forceUpdate) {
+      return true
+    }
     if (nextProps.valueSelected === props.valueSelected) {
       return false;
     }

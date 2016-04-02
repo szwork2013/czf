@@ -12,8 +12,6 @@ import { Paper, FontIcon, RaisedButton, SelectField, TextField, MenuItem, Tabs, 
          Table, TableHeader, TableRow, TableHeaderColumn, TableBody, TableRowColumn, TableFooter,
          Checkbox, IconButton, Dialog } from 'material-ui/lib'
 
-import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } from '../../utils/location'
-
 
 import CommonTextField from '../common/common_text_field'
 import CommonSelectField from '../common/common_select_field'
@@ -111,6 +109,9 @@ class MansionsHouseLayouts extends Component {
     let houseLayouts = this.props.houseLayouts || []
     return (
       <div style={styles.tab}>
+        <div style={{marginBottom: '20px', textAlign: 'right'}}>
+          <CommonRaisedButton label="增加户型" primary={true} style={styles.marginRight} onTouchTap={this.props.onAddHouseLayout}/>
+        </div>
         <table className='table'>
           <thead className='thead'>
             <tr className='tr'>
@@ -121,7 +122,7 @@ class MansionsHouseLayouts extends Component {
               <th style={{width: '9%'}} className='th'>默认定金</th>
               <th style={{width: '9%'}} className='th'>物业费/月</th>
               <th style={{width: '9%'}} className='th'>逾期罚款/天</th>
-              <th style={{width: '12%'}} className='th'>操作</th>
+              <th style={{width: '10%'}} className='th'>操作</th>
             </tr>
           </thead>
           <tbody className='tbody'>
@@ -154,7 +155,7 @@ class MansionsHouseLayouts extends Component {
                 <CommonTextField value={houseLayout.overdueFine} onChange={this.commonValueChange(idx, 'overdueFine', true).bind(this)} style={styles.tableCellTextField}/>
               </td>
               <td className='td'> 
-                <CommonIconButton tooltip="删除" touch={true} iconStyle={{color: 'red'}} onTouchTap={this.onDelete(idx).bind(this)}>
+                <CommonIconButton iconStyle={{color: 'red'}} onTouchTap={this.onDelete(idx).bind(this)}>
                   <FontIcon className="material-icons">delete</FontIcon>
                 </CommonIconButton>
               </td>
@@ -162,9 +163,6 @@ class MansionsHouseLayouts extends Component {
           ))}
           </tbody>
         </table>
-        <div style={{marginTop: '20px', textAlign: 'right'}}>
-          <CommonRaisedButton label="增加" primary={true} style={styles.marginRight} onTouchTap={this.props.onAddHouseLayout}/>
-        </div>
         <CommonConfirmDialog title={this.state.confirmDialogTitle} open={this.state.confirmDialogShow}
           ok={this.confirmDialogOK.bind(this)} cancel={this.confirmDialogCancel.bind(this)}/>
       </div>

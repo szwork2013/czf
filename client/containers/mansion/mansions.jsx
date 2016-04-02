@@ -23,6 +23,7 @@ import * as ToastActions from '../../actions/master/toast';
 import MansionsHeader from '../../components/mansion/mansions_header'
 import MansionsBase from '../../components/mansion/mansions_base'
 import MansionsHouseLayouts from '../../components/mansion/mansions_house_layouts'
+import MansionsHouses from '../../components/mansion/mansions_houses'
 
 
 import CommonRadioButtonGroup from '../../components/common/common_radio_button_group'
@@ -35,12 +36,12 @@ class Mansions extends Component {
     this.state = {
       mansion: {},
       houseLayouts: [],
-      houses: [],
+      floor: [],
       shops: [],
       ownMansions: {},
       forceUpdate: true,
 
-      showTab: "base",
+      showTab: "houses",
     }
   }
 
@@ -118,6 +119,19 @@ class Mansions extends Component {
       }
     }
   }
+
+  buildHouses(houses) {
+    var floor = []
+    houses.forEach((house, idx) => {
+      if (!floor[house.floor]) floor[house.floor] = [];
+      house.__idx = idx;
+      floor[house.floor].push(house)
+    })
+    for (var i=0; i<floor.length; i++) {
+      if (!floor[i]) floor[i] = []
+    }
+    return floor
+  }
   selectMansion(mansion) {    
     mansion = _.cloneDeep(mansion);
     let houseLayouts = []
@@ -127,17 +141,17 @@ class Mansions extends Component {
     } 
     // let houseLayouts = mansion.houseLayouts;
     // mansion.houseLayouts = true;
-    let houses = []
+    var floor = []
     if (mansion.houses) {
-      houses = mansion.houses
+      floor = this.buildHouses(mansion.houses)
       mansion.houses = true;
     } 
     let shops = []
     if (mansion.shops) {
       shops = mansion.shops
-      mansion.houses = true
+      mansion.shops = true
     }
-    this.setState({mansion, houseLayouts, houses, shops})
+    this.setState({mansion, houseLayouts, floor, shops})
     this.getMansionAllInfo(mansion)
   }
   /*
@@ -169,6 +183,26 @@ class Mansions extends Component {
   }
 
   onDeleteHouseLayout(idx) {
+    var id = this.state.houseLayouts[idx]._id;
+    if (id) {
+      var isInUsed = false;
+      var floor = this.state.floor;
+      var i, j;
+      for(i=0; i<floor.length; i++) {
+        var houses = floor[i]
+        for(j=0; j<houses.length; j++) {
+          if (id === houses[j].houseLayout) {
+            isInUsed = true;
+            break;
+          }
+        }
+        if (isInUsed === true) break;
+      }
+      if (isInUsed) {
+        this.props.actions.openToast({msg: '户型使用中，无法删除！'})
+        return;
+      }
+    }
     this.state.houseLayouts.splice(idx, 1);
     this.setState({houseLayouts: this.state.houseLayouts})
   }
@@ -176,6 +210,26 @@ class Mansions extends Component {
     this.state.houseLayouts.push({});
     this.setState({houseLayouts: this.state.houseLayouts})
   }
+
+  onAddFloor() {
+    this.state.floor.push([])
+    this.setState({floor: this.state.floor})
+  }
+
+  onDeleteFloor(idx) {
+    var houses = this.state.floor[idx]
+    if (houses.length>0) {
+      for (var i=0; i<houses.length; i++) {
+        if (houses[i].tenantId) {
+          this.props.actions.openToast({msg: '该楼层尚有房间出租，无法删除！'})
+          return;
+        }
+      }
+    }
+    this.state.floor.splice(idx, 1);
+    this.setState({floor: this.state.floor})
+  }
+
   onShowTabChange(e, value) {
     this.setState({showTab: value})
   }
@@ -184,14 +238,21 @@ class Mansions extends Component {
     let mansion = this.state.mansion;
     let houseLayouts = this.state.houseLayouts;
     let houseLayoutPatterns = props.houseLayoutPatterns;
+    let floor = this.state.floor
     let theme = props.theme
 
     switch (this.state.showTab) {
       case 'houseLayouts':
         return (
-          <MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} 
+          <MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} floor={floor}
             onDeleteHouseLayout={this.onDeleteHouseLayout.bind(this)} onAddHouseLayout={this.onAddHouseLayout.bind(this)}
             houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} />
+        )
+      case 'houses': 
+        return (
+          <MansionsHouses floor={floor} houseLayouts={houseLayouts} theme={theme} 
+            onAddFloor={this.onAddFloor.bind(this)} onDeleteFloor={this.onDeleteFloor.bind(this)}
+            updateParentState={this.updateState.bind(this)} />
         )
       case 'base':
       default:
@@ -226,7 +287,8 @@ class Mansions extends Component {
         <CommonRadioButtonGroup name='showTab' valueSelected={this.state.showTab} style={{marginBottom: '20px'}}
           onChange={this.onShowTabChange.bind(this)}>
           <RadioButton value="base" label="基础信息" style={styles.raidoButton}/>
-          <RadioButton value="houseLayouts" label="户型（出租房）" style={styles.raidoButton}/>
+          <RadioButton value="houseLayouts" label="户型管理（出租房）" style={styles.raidoButton}/>
+          <RadioButton value="houses" label="出租房" style={styles.raidoButton}/>
         </CommonRadioButtonGroup>
         {this.getTab(styles)}
       </div>
@@ -259,9 +321,9 @@ class Mansions extends Component {
       },
       raidoButton: {
         display: 'inline-block',
-        fontSize: '18px',
+        fontSize: '16px',
         whiteSpace: 'nowrap',
-        marginRight: '80px',
+        marginRight: '70px',
         width: 'auto'
       },
       divider: {
