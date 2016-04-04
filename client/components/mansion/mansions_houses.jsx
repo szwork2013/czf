@@ -61,7 +61,10 @@ class MansionsHouse extends Component {
   stateFloor(floor) {
     if (this.floorLength != floor.length) {
       this.floorLength = floor.length
-      this.setState({floor, forceUpdate: true})
+      if (Number(this.state.showFloor) > floor.length-1) {
+        this.state.showFloor = '0'
+      }
+      this.setState({floor, showFloor: this.state.showFloor, forceUpdate: true})
     } else {
       this.setState({floor, forceUpdate: false})
     }
@@ -80,27 +83,6 @@ class MansionsHouse extends Component {
     }
   }
 
-  onDelete(idx) {
-    return function(e) {
-      this.deleteIdx = idx
-      this.setState({
-        confirmDialogTitle : '确定删除 '+this.props.houseLayouts[idx].description,
-        confirmDialogShow : true,
-        confirmDialogOKClick : this.onDeleteConfirm.bind(this)
-      })
-    }
-  }
-  onDeleteConfirm() {
-    if (this.deleteIdx>-1 && this.deleteIdx<this.props.houseLayouts.length) {
-      this.props.onDeleteHouseLayout(this.deleteIdx)
-    }
-    this.setState({
-      confirmDialogTitle : '',
-      confirmDialogShow : false,
-      confirmDialogOKClick : () => {}
-    })
-  }
-
   confirmDialogOK() {
     this.state.confirmDialogOKClick.bind(this)()
   }
@@ -115,10 +97,6 @@ class MansionsHouse extends Component {
 
   onShowFloorChange(e, value) {
     this.setState({showFloor: value})
-  }
-
-  confirmDialogOK() {
-    this.state.confirmDialogOKClick.bind(this)()
   }
 
   /*
@@ -142,6 +120,46 @@ class MansionsHouse extends Component {
     })
   }
 
+  /*
+   * 删除房间
+   */
+  onDeleteHouse(floorIdx, roomIdx) {
+    return function(e) {
+      this.setState({
+        confirmDialogTitle : '确定删除 '+(floorIdx+1)+' 楼 '+(roomIdx+1)+' 房？',
+        confirmDialogShow : true,
+        confirmDialogOKClick : this.onDeleteHouseConfirm(floorIdx, roomIdx).bind(this)
+      })
+    }
+  }
+  onDeleteHouseConfirm(floorIdx, roomIdx) {
+    return function(e) {
+      if (this.props.onDeleteHouse) {
+        this.props.onDeleteHouse(floorIdx, roomIdx)
+      }
+      this.setState({
+        confirmDialogTitle : '',
+        confirmDialogShow : false,
+        confirmDialogOKClick : () => {}
+      })
+    }
+  }
+
+  onAddHouse() {
+    var onAddHouse = this.props.onAddHouse
+    if (onAddHouse) {
+      onAddHouse(Number(this.state.showFloor))
+    }
+  }
+
+  changeExist(floorIdx, roomIdx) {
+    return function (e) {
+      var house = this.state.floor[floorIdx][roomIdx]
+      house.isExist = !house.isExist
+      this.props.updateParentState({floor: this.state.floor})
+    } 
+  }
+
             //   {floor.map((f, i)=> {
             //   return (
             //     <RadioButton value={String(i)} label={i+1+'楼'} style={styles.raidoButton} />
@@ -150,8 +168,10 @@ class MansionsHouse extends Component {
 
 
   render() {
-    let styles = this.getStyles()
-    let floor = this.state.floor || []
+    var styles = this.getStyles()
+    var floor = this.state.floor || []
+    var houses = floor[Number(this.state.showFloor) || 0] || []
+    var maxHouseIdx = houses.length-1
     return (
       <div style={styles.tab}>
         <div style={styles.floorTableDiv}>
@@ -167,7 +187,7 @@ class MansionsHouse extends Component {
             <span style={{display: 'inline-block', width: '216px'}} />
             <CommonRaisedButton label="增加楼层" primary={true} style={styles.buttonTop} onTouchTap={this.props.onAddFloor}/>
             <CommonRaisedButton label="删除楼层" primary={true} style={styles.buttonTop} onTouchTap={this.onDeleteFloor.bind(this)}/>
-            <CommonRaisedButton label="增加房间" primary={true} style={styles.buttonBotton} onTouchTap={this.props.onAddHouse}/>
+            <CommonRaisedButton label="增加房间" primary={true} style={styles.buttonBotton} onTouchTap={this.onAddHouse.bind(this)}/>
           </div>
         </div>
         <table className='table'>
@@ -180,41 +200,89 @@ class MansionsHouse extends Component {
               <th style={{width: '10%'}} className='th'>水表底表</th>
               <th style={{width: '8%'}} className='th'>已出租</th>
               <th className='th'>备注</th>
-              <th style={{width: '10%'}} className='th'>操作</th>
+              <th style={{width: '12%'}} className='th'>操作</th>
             </tr>
           </thead>
           <tbody className='tbody'>
-          {(this.state.floor[Number(this.state.showFloor) || 0] || []).map((house, idx) => (
-            <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+idx}>
-              <td className='td'> 
-                {house.floor+1}
-              </td>
-              <td className='td'> 
-                {house.room+1}
-              </td>
-              <td className='td'> 
-                <CommonSelectField value={house.houseLayout} onChange={this.commonValueChange(house.floor, house.room, 'houseLayout').bind(this)}
-                  floatingLabelText='户型' items={this.props.houseLayouts} itemValue='_id' itemPrimaryText='description' style={styles.tableCellSelect}/>
-              </td>
-              <td className='td'> 
-                <CommonTextField value={house.electricMeterEndNumber} onChange={this.commonValueChange(house.floor, house.room, 'electricMeterEndNumber', true).bind(this)} style={styles.tableCellTextField}/>
-              </td>
-              <td className='td'> 
-                <CommonTextField value={house.waterMeterEndNumber} onChange={this.commonValueChange(house.floor, house.room, 'waterMeterEndNumber', true).bind(this)} style={styles.tableCellTextField}/>
-              </td>
-              <td className='td'> 
-                {house.tenantId? '是': '否'}
-              </td>
-              <td className='td'> 
-                <CommonTextField value={house.remark} onChange={this.commonValueChange(house.floor, house.room, 'remark').bind(this)} style={styles.tableCellTextField}/>
-              </td>
-              <td className='td'> 
-                <CommonIconButton tooltip="删除" touch={true} iconStyle={{color: 'red'}} onTouchTap={this.onDelete(idx).bind(this)}>
-                  <FontIcon className="material-icons">delete</FontIcon>
-                </CommonIconButton>
-              </td>
-            </tr>
-          ))}
+          {houses.map((house, idx) => {
+            var tr = house.isExist? (
+              <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+idx}>
+                <td className='td'> 
+                  {house.floor+1}
+                </td>
+                <td className='td'> 
+                  {house.room+1}
+                </td>
+                <td className='td'> 
+                  <CommonSelectField value={house.houseLayout} onChange={this.commonValueChange(house.floor, house.room, 'houseLayout').bind(this)}
+                    floatingLabelText='户型' items={this.props.houseLayouts} itemValue='_id' itemPrimaryText='description' style={styles.tableCellSelect}/>
+                </td>
+                <td className='td'> 
+                  <CommonTextField value={house.electricMeterEndNumber} onChange={this.commonValueChange(house.floor, house.room, 'electricMeterEndNumber', true).bind(this)} style={styles.tableCellTextField}/>
+                </td>
+                <td className='td'> 
+                  <CommonTextField value={house.waterMeterEndNumber} onChange={this.commonValueChange(house.floor, house.room, 'waterMeterEndNumber', true).bind(this)} style={styles.tableCellTextField}/>
+                </td>
+                <td className='td'> 
+                  {house.tenantId? (
+                    <CommonIconButton attr={house.tenantId} iconStyle={{color: '#0CC022'}}>
+                      <FontIcon className="material-icons">perm_identity</FontIcon>
+                    </CommonIconButton>
+                  ): (
+                    <CommonIconButton attr={house.tenantId} iconStyle={{color: '#E1E9E2'}}>
+                      <FontIcon className="material-icons" >perm_identity</FontIcon>
+                    </CommonIconButton>
+                  )}
+                </td>
+                <td className='td'> 
+                  <CommonTextField value={house.remark} onChange={this.commonValueChange(house.floor, house.room, 'remark').bind(this)} style={styles.tableCellTextField}/>
+                </td>
+                <td className='td'> 
+                  <CommonIconButton attr={house.isExist} iconStyle={{color: 'orange'}} onTouchTap={this.changeExist(house.floor, house.room, 'isExist').bind(this)}>
+                    <FontIcon className="material-icons">lightbulb_outline</FontIcon>
+                  </CommonIconButton>
+                  {
+                    maxHouseIdx === idx? (
+                      <CommonIconButton iconStyle={{color: 'red'}} onTouchTap={this.onDeleteHouse(house.floor, house.room).bind(this)}>
+                        <FontIcon className="material-icons">delete</FontIcon>
+                      </CommonIconButton>
+                    ) : ''
+                  }
+                  
+                </td>
+              </tr>
+              ) : (
+              <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+idx}>
+                <td className='td'> 
+                  {house.floor+1}
+                </td>
+                <td className='td'> 
+                  {house.room+1}
+                </td>
+                <td className='td'>
+                  <div style={{display: 'inline-block', minHeight: '75px'}} ></div>
+                </td>
+                <td className='td'>  </td>
+                <td className='td'>  </td>
+                <td className='td'>  </td>
+                <td className='td'>  </td>
+                <td className='td'>
+                  <CommonIconButton attr={house.isExist} iconStyle={{color: '#EBE7E0'}} onTouchTap={this.changeExist(house.floor, house.room, 'isExist').bind(this)}>
+                    <FontIcon className="material-icons">lightbulb_outline</FontIcon>
+                  </CommonIconButton>
+                  {
+                    maxHouseIdx === idx? (
+                      <CommonIconButton iconStyle={{color: 'red'}} onTouchTap={this.onDeleteHouse(house.floor, house.room).bind(this)}>
+                        <FontIcon className="material-icons">delete</FontIcon>
+                      </CommonIconButton>
+                    ) : ''
+                  }
+                </td>
+              </tr>
+              )
+            return tr;
+            }
+            )}
           </tbody>
         </table>
         <CommonConfirmDialog title={this.state.confirmDialogTitle} open={this.state.confirmDialogShow}

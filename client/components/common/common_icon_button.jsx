@@ -15,7 +15,8 @@ class CommonIconButton extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     let props = this.props
-    if (nextProps.disabled === props.disabled) {
+    if (nextProps.disabled === props.disabled &&
+        nextProps.attr === props.attr) {
       return false;
     }
     return true;

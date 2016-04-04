@@ -46,12 +46,12 @@ const mansionInfo = async (req, res) => {
     }
     
     if (query.houses) {
-      houses = await Houses.find({mansionId: mansionId, deleted: false}).populate(pupulateStr).exec()
+      houses = await Houses.find({mansionId: mansionId, deleted: false}).sort({floor: 1, room: 1}).populate(pupulateStr).exec()
     }
 
     var shops = null;
     if (query.shops) {
-      shops = await Shops.find({mansionId: mansionId, deleted: false}).exec()
+      shops = await Shops.find({mansionId: mansionId, deleted: false}).sort({floor: 1, room: 1}).exec()
     }
     return res.handleResponse(200, {mansionId, houseLayouts, houses, shops});
   }catch(err) {

@@ -217,7 +217,8 @@ class Mansions extends Component {
   }
 
   onDeleteFloor(idx) {
-    var houses = this.state.floor[idx]
+    var floor = this.state.floor
+    var houses = floor[idx]
     if (houses.length>0) {
       for (var i=0; i<houses.length; i++) {
         if (houses[i].tenantId) {
@@ -226,8 +227,38 @@ class Mansions extends Component {
         }
       }
     }
-    this.state.floor.splice(idx, 1);
-    this.setState({floor: this.state.floor})
+    if (floor.length-1 === idx) {
+      //顶层可以删除
+      floor.splice(idx, 1);
+    } else {
+      //否则只清除该楼层的合部房屋数据
+      floor[idx] = []
+    }
+    this.setState({floor: floor}) 
+  }
+
+  onAddHouse(floorIdx) {
+    var floor = this.state.floor
+    floor[floorIdx].push({floor: floorIdx, room: floor[floorIdx].length, electricMeterEndNumber: 0, waterMeterEndNumber: 0, isExist: true})
+    this.setState({floor: floor})
+  }
+
+  onDeleteHouse(floorIdx, roomIdx) {
+    var floor = this.state.floor
+    var houses = floor[floorIdx]
+    //只能删除最后一个
+    if (houses.length-1 === roomIdx) {
+      var house = houses[roomIdx]
+      if (house.tenantId) {
+        this.props.actions.openToast({msg: '该房间尚有房间出租，无法删除！'})
+        return;
+      }
+      houses.splice(roomIdx, 1)
+      this.setState({floor: floor}) 
+    } else {
+      this.props.actions.openToast({msg: '只能删除最后一间房间！'})
+      return;
+    }
   }
 
   onShowTabChange(e, value) {
@@ -252,6 +283,7 @@ class Mansions extends Component {
         return (
           <MansionsHouses floor={floor} houseLayouts={houseLayouts} theme={theme} 
             onAddFloor={this.onAddFloor.bind(this)} onDeleteFloor={this.onDeleteFloor.bind(this)}
+            onAddHouse={this.onAddHouse.bind(this)} onDeleteHouse={this.onDeleteHouse.bind(this)}
             updateParentState={this.updateState.bind(this)} />
         )
       case 'base':
