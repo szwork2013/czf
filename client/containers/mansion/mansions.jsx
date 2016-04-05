@@ -25,6 +25,8 @@ import MansionsBase from '../../components/mansion/mansions_base'
 import MansionsHouseLayouts from '../../components/mansion/mansions_house_layouts'
 import MansionsHouses from '../../components/mansion/mansions_houses'
 
+// import ObjectId from 'objectid'
+
 
 import CommonRadioButtonGroup from '../../components/common/common_radio_button_group'
 
@@ -77,7 +79,6 @@ class Mansions extends Component {
     this.stateOwnMansions(nextProps.mansions)
     // this.forceUpdate()
   }
-
   componentDidUpdate(prevProps, prevState) {
     if (this.state.forceUpdate) {
       this.setState({forceUpdate: false})
@@ -120,14 +121,18 @@ class Mansions extends Component {
     }
   }
 
-  buildHouses(houses) {
+  /*
+   * 将扁平化的houses格式化成floor
+   */
+  buildFloor(mansion, houses) {
     var floor = []
+
     houses.forEach((house, idx) => {
       if (!floor[house.floor]) floor[house.floor] = [];
       house.__idx = idx;
-      floor[house.floor].push(house)
+      floor[house.floor][house.room] = house;
     })
-    for (var i=0; i<floor.length; i++) {
+    for (var i=0; i<mansion.floorCount; i++) {
       if (!floor[i]) floor[i] = []
     }
     return floor
@@ -143,7 +148,7 @@ class Mansions extends Component {
     // mansion.houseLayouts = true;
     var floor = []
     if (mansion.houses) {
-      floor = this.buildHouses(mansion.houses)
+      floor = this.buildFloor(mansion, mansion.houses)
       mansion.houses = true;
     } 
     let shops = []
@@ -178,10 +183,17 @@ class Mansions extends Component {
     this.setState(obj)
   }
 
+
+  /*
+   * 选择物业单位
+   */
   handleMansionsChange(value) {
     this.selectMansion(this.state.ownMansions[value])
   }
 
+  /*
+   * houseLayouts增删改
+   */
   onDeleteHouseLayout(idx) {
     var id = this.state.houseLayouts[idx]._id;
     if (id) {
@@ -211,18 +223,24 @@ class Mansions extends Component {
     this.setState({houseLayouts: this.state.houseLayouts})
   }
 
+  /*
+   * houses增删改
+   */
   onAddFloor() {
-    this.state.floor.push([])
-    this.setState({floor: this.state.floor})
+    var floor = this.state.floor
+    var mansion = this.state.mansion
+    floor.push([])
+    mansion.floorCount += 1
+    this.setState({floor, mansion})
   }
-
   onDeleteFloor(idx) {
     var floor = this.state.floor
+    var mansion = this.state.mansion
     var houses = floor[idx]
     if (houses.length>0) {
       for (var i=0; i<houses.length; i++) {
-        if (houses[i].tenantId) {
-          this.props.actions.openToast({msg: '该楼层尚有房间出租，无法删除！'})
+        if (houses[i].tenantId || houses[i].subscriberId) {
+          this.props.actions.openToast({msg: '该楼层尚有房间出租或被预定，无法删除！'})
           return;
         }
       }
@@ -230,37 +248,82 @@ class Mansions extends Component {
     if (floor.length-1 === idx) {
       //顶层可以删除
       floor.splice(idx, 1);
+      mansion.floorCount -= 1
     } else {
       //否则只清除该楼层的合部房屋数据
       floor[idx] = []
     }
-    this.setState({floor: floor}) 
+    mansion.housesCount[idx] = 0
+    mansion.housesExistCount[idx] = 0
+    this.setState({floor, mansion}) 
   }
-
   onAddHouse(floorIdx) {
     var floor = this.state.floor
-    floor[floorIdx].push({floor: floorIdx, room: floor[floorIdx].length, electricMeterEndNumber: 0, waterMeterEndNumber: 0, isExist: true})
-    this.setState({floor: floor})
+    var mansion = this.state.mansion
+    mansion.housesCount[floorIdx] += 1;
+    mansion.housesExistCount[floorIdx] += 1;
+    floor[floorIdx].push({mansionId: mansion._id, floor: floorIdx, room: floor[floorIdx].length, electricMeterEndNumber: 0, waterMeterEndNumber: 0, isExist: true})
+    this.setState({floor, mansion})
   }
-
   onDeleteHouse(floorIdx, roomIdx) {
     var floor = this.state.floor
     var houses = floor[floorIdx]
+    var mansion = this.state.mansion
     //只能删除最后一个
     if (houses.length-1 === roomIdx) {
       var house = houses[roomIdx]
-      if (house.tenantId) {
-        this.props.actions.openToast({msg: '该房间尚有房间出租，无法删除！'})
+      if (house.tenantId || house.subscriberId) {
+        this.props.actions.openToast({msg: '该房间已出租或被预定，无法删除！'})
         return;
       }
       houses.splice(roomIdx, 1)
-      this.setState({floor: floor}) 
+      mansion.housesCount[floorIdx] -= 1;
+      mansion.housesExistCount[floorIdx] -= 1;
+      this.setState({floor, mansion}) 
     } else {
       this.props.actions.openToast({msg: '只能删除最后一间房间！'})
       return;
     }
   }
+  onChangeHouseExist(floorIdx, roomIdx) {
+    log.info(floorIdx, roomIdx)
+    var floor = this.state.floor
+    var house = floor[floorIdx][roomIdx]
+    var mansion = this.state.mansion
+    if (house.isExist) {
+      if (house.tenantId || house.subscriberId) {
+        this.props.actions.openToast({msg: '该房间已出租或被预定，无法设为不存在！'})
+        return;
+      }
+      house.isExist = false;
+      mansion.housesExistCount[floorIdx] -= 1;
+    } else {
+      house.isExist = true;
+      mansion.housesExistCount[floorIdx] += 1;
+    }
+    this.setState({floor, mansion}) 
+  }
 
+
+
+  saveMansionBase() {
+    // log.error(this.state.mansion)
+    this.props.actions.saveMansionBaseClick({mansion: this.state.mansion})
+  }
+
+  saveHouseLayouts() {
+    // log.error(this.state.houseLayouts)
+    this.props.actions.saveHouseLayoutsClick({mansionId: this.state.mansion._id, houseLayouts: this.state.houseLayouts})
+  }
+
+  onSaveFloor() {
+    log.error(this.state.floor)
+    this.props.actions.saveFloorClick({mansionId: this.state.mansion._id, floor: this.state.floor})
+  }
+
+  /*
+   * 切换物业的属性
+   */
   onShowTabChange(e, value) {
     this.setState({showTab: value})
   }
@@ -277,23 +340,27 @@ class Mansions extends Component {
         return (
           <MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} floor={floor}
             onDeleteHouseLayout={this.onDeleteHouseLayout.bind(this)} onAddHouseLayout={this.onAddHouseLayout.bind(this)}
-            houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} />
+            houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} 
+            saveHouseLayouts={this.saveHouseLayouts.bind(this)} />
         )
       case 'houses': 
         return (
           <MansionsHouses floor={floor} houseLayouts={houseLayouts} theme={theme} 
             onAddFloor={this.onAddFloor.bind(this)} onDeleteFloor={this.onDeleteFloor.bind(this)}
             onAddHouse={this.onAddHouse.bind(this)} onDeleteHouse={this.onDeleteHouse.bind(this)}
+            onChangeHouseExist={this.onChangeHouseExist.bind(this)} onSaveFloor={this.onSaveFloor.bind(this)}
             updateParentState={this.updateState.bind(this)} />
         )
       case 'base':
       default:
         return (
-          <MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} theme={theme}/>
+          <MansionsBase mansion={mansion} theme={theme}
+            updateParentState={this.updateState.bind(this)} saveMansionBase={this.saveMansionBase.bind(this)} />
         )
 
     }
   }
+
 
   render() {
     let styles = this.getStyles()

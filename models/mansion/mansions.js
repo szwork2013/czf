@@ -52,7 +52,10 @@ const MansionsSchema = new Schema({
   },
   houseServicesChargesPerUnit: Number,      //房子单位面积物业费
   // houseServicesChargesForLayoutPerMonth: Object,    //房子各个户型物业费
-  houseServicesChargesDes: String,          //房子物业费描述：路灯，电梯，卫生
+  houseServicesChargesDes: {                //房子物业费描述：路灯，电梯，卫生
+    type: String,
+    default: '路灯，电梯，卫生'
+  },
 
   //逾期罚款
   houseOverdueFineType: {                   //房子逾期罚款收取方式
@@ -65,10 +68,18 @@ const MansionsSchema = new Schema({
   houseOverdueFineDes: String,
   //电水费
   houseWaterChargesPerTon: Number,           //房子单位水费
+  houseWaterMeterMax: {
+    type: Number,
+    default: 9999
+  },
   houseWaterChargesMinimalTons: {            //房子每月最低用水量
     type: Number,
   },
   houseElectricChargesPerKWh: Number,        //房子单位电费
+  houseElectricMeterMax: {
+    type: Number,
+    default: 99999
+  },
   houseElectricChargesMinimalKWhs: {         //房子每月最小用电量
     type: Number,
   },
@@ -90,17 +101,28 @@ const MansionsSchema = new Schema({
     default: 1
   },
   //管理费
-  shopPropertyMaintenanceChargesPerUnit: Number,              //商铺单位面积管理费
-  shopPropertyMaintenanceChargesDes: String,                  //商铺管理费描述：路灯，电梯，卫生
+  shopServicesChargesPerUnit: Number,              //商铺单位面积管理费
+  shopServicesChargesDes: {                        //商铺管理费描述：路灯，电梯，卫生
+    type: String,
+    default: '路灯，电梯，卫生'
+  },
   //逾期交租罚款
   shopOverdueFinePerUnitPerDay: Number,                       //商铺单位面积逾期每天每平方费用
   //水电费
   shopWaterChargesPerTon: Number,             //商铺单位水费
+  shopWaterMeterMax: {
+    type: Number,
+    default: 9999
+  },
   shopWaterChargesMinimalTons: {              //商铺每月最低用水量
     type: Number,
     default: 1
   },
   shopElectricChargesPerKWh: Number,          //商铺单位电费
+  shopElectricMeterMax: {
+    type: Number,
+    default: 99999
+  },
   shopElectricChargesMinimalKWhs: {           //商铺每水最小用电量
     type: Number,
     default: 1

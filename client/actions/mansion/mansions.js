@@ -1,7 +1,9 @@
 'use strict';
 
 import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, DELETE_MANSION_SUCCESS, 
-         IMPORT_HISTORY_VERSION_DATA_SUCCESS } from '../../constants/actionTypes';
+         IMPORT_HISTORY_VERSION_DATA_SUCCESS,
+         SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS, 
+         SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS} from '../../constants/actionTypes';
 import { CALL_API_V1 } from '../../middleware/api';
 import { APP_STATE } from '../../reducers/master/app_state'
 
@@ -100,4 +102,81 @@ function importHistoryVersionData(formData) {
 export function importHistoryVersionDataClick(formData) {
   return dispatch => dispatch(importHistoryVersionData(formData));
 }
+
+
+/*
+ * 保存物业基本信息
+ */
+function saveMansionBase(formData) {
+  return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: SAVE_MANSION_BASE_SUCCESS
+      },
+      url: '/mansion/base',
+      method: 'PUT',
+      data: formData
+    }
+  }
+}
+export function saveMansionBaseClick(formData) {
+  return dispatch => dispatch(saveMansionBase(formData));
+}
+
+
+/*
+ * 保存户型
+ */
+function saveHouseLayouts(formData) {
+  return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: SAVE_HOUSE_LAYOUTS_SUCCESS
+      },
+      url: '/mansion/houseLayouts',
+      method: 'PUT',
+      data: formData
+    }
+  }
+}
+export function saveHouseLayoutsClick(formData) {
+  return dispatch => dispatch(saveHouseLayouts(formData));
+}
+
+/*
+ * 保存出租房信息
+ */
+function saveHouses(formData) {
+  return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: SAVE_HOUSES_SUCCESS
+      },
+      url: '/mansion/houses',
+      method: 'PUT',
+      data: formData
+    }
+  }
+}
+export function saveHousesClick(formData) {
+  return dispatch => dispatch(saveHouses(formData));
+}
+function saveFloor(formData) {
+  return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: SAVE_FLOOR_SUCCESS
+      },
+      url: '/mansion/floor',
+      method: 'PUT',
+      data: formData
+    }
+  }
+}
+export function saveFloorClick(formData) {
+  return dispatch => dispatch(saveFloor(formData));
+}
+
+
+
 

@@ -102,6 +102,273 @@ const deleteMansion = async (req, res) => {
 exports.deleteMansion = deleteMansion;
 
 
+/*
+ * 保存基本信息
+ */
+const saveMansionBase = async (req, res) => {
+  var pickArray = ['name', 'invoiceTitle', 'province', 'city', 'area', 'address',
+    // 'floorCount', 'housesCount', 'housesExistCount', 'shopsCount', 'shopsExistCount', 
+    'floorDesPrefix', 'floorDesLength', 'housesDesLength', 'shopsDesLength', 'houseServicesChargesDes', 
+    'houseWaterChargesPerTon', 'houseWaterMeterMax', 'houseWaterChargesMinimalTons', 
+    'houseElectricChargesPerKWh', 'houseElectricMeterMax', 'houseElectricChargesMinimalKWhs', 
+    'doorCardSellCharges', 'doorCardRecoverCharges', 'houseSubscriptionValidityCount', 
+    'shopServicesChargesPerUnit', 'shopServicesChargesDes', 'shopOverdueFinePerUnitPerDay', 
+    'shopWaterChargesPerTon', 'shopWaterMeterMax', 'shopWaterChargesMinimalTons', 
+    'shopElectricChargesPerKWh', 'shopElectricMeterMax', 'shopElectricChargesMinimalKWhs', 'shopSubscriptionValidityCount']
+  try{
+    var body = req.body || {};
+    var user = req.user;
+    var newMansion = body.mansion;
+    var oldMansion = await Mansions.findOne({_id: newMansion._id, ownerId: user._id, deleted: false}).exec();
+    if (!oldMansion) {
+      return res.handleResponse(403, {}, 'mansion not found');
+    }
+    _.assign(oldMansion, _.pick(newMansion, pickArray));    
+    await oldMansion.save()  
+    return res.handleResponse(200, {mansion: oldMansion})
+  }catch(err) {
+    log.error(err.name, erro.message)
+    return res.handleResponse(500, {});
+  }
+}
+exports.saveMansionBase = saveMansionBase;
+
+
+function findIndex(arrObj, key, value, type=String) {
+  for (var i=0; i<arrObj.length; i++) {
+    if (type(arrObj[i][key]) === type(value)) {
+      return i;
+    }
+  }
+  return -1;
+}
+function isEqualWith(oldObj, newObj, attr, type=String) {
+  for (var i=0; i<attr.length; i++) {
+    if (type(oldObj[attr[i]]) !== type(newObj[attr[i]])) {
+      return false;
+    }
+  } 
+  return true;
+}
+/*
+ * 保存全部户型信息
+ */
+const saveHouseLayouts = async (req, res) => {
+  var pickArray = ['description', 
+    'bedroom', 'livingroom', 'kitchen', 'washroom', 'balcony', 'brightness', 
+    'defaultDeposit', 'defaultRental', 'defaultSubscription', 'servicesCharges', 'overdueFine', 'order']
+  try{
+    var body = req.body || {};
+    var mansionId = body.mansionId
+    var user = req.user;
+    var newHouseLayouts = body.houseLayouts;
+    var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(403, {}, 'mansion not found');
+    }
+    var oldHouseLayouts = await HouseLayouts.find({mansionId: mansionId, deleted: false}).sort({order: 1}).exec()
+
+    var updateHouseLayouts = []
+    // var createHouseLayouts = []
+    var removeHouseLayouts = []
+    var newHouseLayout = {}
+    for(var i=0; i<oldHouseLayouts.length; i++) {
+      var oldHouseLayout = oldHouseLayouts[i]
+      newHouseLayout = {}
+      var newHouseLayoutIdx = findIndex(newHouseLayouts, '_id', oldHouseLayout._id)
+      if (newHouseLayoutIdx>=0) {
+        //修改
+        newHouseLayout = newHouseLayouts[newHouseLayoutIdx]
+        if (!isEqualWith(oldHouseLayout, newHouseLayout, pickArray)) {
+          //需要保存
+          _.assign(oldHouseLayout, _.pick(newHouseLayout, pickArray)); 
+          updateHouseLayouts.push(oldHouseLayout)   
+        }
+        newHouseLayouts.splice(newHouseLayoutIdx, 1)
+      } else {
+        //删除
+        var houseLayoutIsInUsed = await Houses.findOne({mansionId, isExist: true, deleted: false, houseLayout: oldHouseLayout._id})
+        if (houseLayoutIsInUsed) {
+          return res.handleResponse(400, {}, oldHouseLayout.description+' is in used, cann\'t delete')
+        }
+        removeHouseLayouts.push(oldHouseLayout)
+      }
+    }
+    // log.info(updateHouseLayouts, removeHouseLayouts, newHouseLayouts);
+    for (var i=0; i<updateHouseLayouts.length; i++) {
+      await updateHouseLayouts[i].save()
+    }
+    for (var i=0; i<removeHouseLayouts.length; i++) {
+      removeHouseLayouts[i].deleted = true;
+      await removeHouseLayouts[i].save()
+    }
+    for (var i=0; i<newHouseLayouts.length; i++) {
+      newHouseLayout = _.pick(newHouseLayouts[i], pickArray)
+      newHouseLayout.mansionId = mansionId
+      newHouseLayout.deleted = false;
+      if (!newHouseLayout.order) {
+        newHouseLayout.order = oldHouseLayouts.length + i + 1
+      }
+      await HouseLayouts.create(newHouseLayout)
+    }
+
+    var retHouseLayouts = await HouseLayouts.find({mansionId: mansionId, deleted: false}).sort({order: 1}).exec()
+
+    return res.handleResponse(200, {mansionId: mansionId, houseLayouts: retHouseLayouts})
+  } catch(err) {
+    log.error(err.name, err.message)
+    return res.handleResponse(500, {});
+  }
+}
+exports.saveHouseLayouts = saveHouseLayouts;
+
+/*
+ * 保存全部出租房信息
+ */
+const saveFloor = async (req, res) => {
+  var pickArray = ['isExist', 'houseLayout', 'area', 'electricMeterEndNumber', 'waterMeterEndNumber', 'remark']
+  try{
+    var body = req.body || {};
+    var mansionId = body.mansionId
+    var user = req.user;
+    var newFloor = body.floor;
+    var i, j;
+    var newHouses = []
+    var newHouse = {};
+    var newHouseIdx = -1;
+    var oldHouses = [];
+    var oldHouse = {}
+    //确保新的房间信息连续
+    var floorCount = newFloor.length;
+    var housesCount = [];
+    var housesExistCount = [];
+    for (i=0; i<newFloor.length; i++) {
+      newHouses = newFloor[i]
+      housesCount[i] = newHouses.length;
+      housesExistCount[i] = 0;
+
+      for (j=0; j<newHouses.length; j++) {
+        newHouse = newHouses[j]
+        if (newHouse.floor !== i || newHouse.room !== j) {
+          return res.handleResponse(400, {}, 'floor or room number error')
+        }
+        if (newHouse.isExist) {
+          housesExistCount[i] += 1;
+        }
+      }
+    }
+
+    var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(403, {}, 'mansion not found');
+    }
+
+    var updateHouses = []
+    // var createHouses = []
+    var removeHouses = []
+
+    oldHouses = await Houses.find({mansionId: mansionId, deleted: false}).sort({floor: 1, room: 1}).exec()
+    for(i=0; i<oldHouses.length; i++) {
+      oldHouse = oldHouses[i]
+      newHouseIdx = findIndex(newFloor[oldHouse.floor], 'room', oldHouse.room, Number) //newFloor[oldHouse.floor][oldHouse.room]
+      
+      if (newHouseIdx>-1) {
+        newHouse = newFloor[oldHouse.floor][newHouseIdx]
+        if (!isEqualWith(oldHouse, newHouse, pickArray)) {
+          //需要保存
+          _.assign(oldHouse, _.pick(newHouse, pickArray)); 
+          updateHouses.push(oldHouse)   
+        } else {
+          if ((oldHouse.tenantId || oldHouse.subscriberId) && !newHouse.isExist) {
+            return res.handleResponse(400, {}, 'floor '+(oldHouse.floor+1)+' room '+(oldHouse.room+1) +' is in used, cann\'t set isExist to false');
+          }
+        }
+        newFloor[oldHouse.floor].splice(newHouseIdx, 1)
+      } else {
+        //删除
+        if (oldHouse.tenantId || oldHouse.subscriberId) {
+          return res.handleResponse(400, {}, 'floor '+(oldHouse.floor+1)+' room '+(oldHouse.room+1) +' is in used, cann\'t delete');
+        }
+        removeHouses.push(oldHouse)
+      }
+    }
+
+    log.info(updateHouses, removeHouses, newFloor);
+    for (i=0; i<updateHouses.length; i++) {
+      await updateHouses[i].save()
+    }
+    for (i=0; i<removeHouses.length; i++) {
+      removeHouses[i].deleted = true;
+      await removeHouses[i].save()
+    }
+    for (i=0; i<newFloor.length; i++) {
+      newHouses = newFloor[i]
+      for (j=0; j<newHouses.length; j++) {
+        newHouse = _.pick(newHouses[j], pickArray)
+        newHouse.mansionId = mansionId
+        newHouse.deleted = false;
+        newHouse.floor = i
+        newHouse.room = j
+        if (!newHouse.electricMeterEndNumber) {
+          newHouse.electricMeterEndNumber = 0
+        }
+        if (!newHouse.waterMeterEndNumber) {
+          newHouse.waterMeterEndNumber = 0
+        }
+        await Houses.create(newHouse)
+      }
+    }
+    mansion.floorCount = floorCount>mansion.shopsCount.length? floorCount: mansion.shopsCount.length;
+    mansion.housesCount = housesCount;
+    mansion.housesExistCount = housesExistCount;
+    mansion = await mansion.save()
+
+    var retHouses = await Houses.find({mansionId: mansionId, deleted: false}).sort({floor: 1, room: 1}).exec()
+    return res.handleResponse(200, {mansionId, mansion, houses: retHouses})
+  } catch(err) {
+    log.error(err.name, err.message)
+    return res.handleResponse(500, {});
+  }
+}
+exports.saveFloor = saveFloor;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { loadRentFile } from '../../old/old_record'
 import mongoose from 'mongoose';

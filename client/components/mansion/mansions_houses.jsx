@@ -46,10 +46,12 @@ class MansionsHouse extends Component {
 
   componentWillMount() {
     this.stateFloor(this.props.floor)
+    this.stateHouseLayouts(this.props.houseLayouts)
   }
 
   componentWillReceiveProps(nextProps) {
     this.stateFloor(nextProps.floor)
+    this.stateHouseLayouts(nextProps.houseLayouts)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -68,6 +70,13 @@ class MansionsHouse extends Component {
     } else {
       this.setState({floor, forceUpdate: false})
     }
+  }
+
+  stateHouseLayouts(houseLayouts) {
+    var newHouseLayouts = houseLayouts.filter(houseLayout => {
+      return houseLayout._id
+    })
+    this.setState({houseLayouts: newHouseLayouts})
   }
 
   commonValueChange(floorIdx, roomIdx, key, isNumber) {
@@ -152,20 +161,17 @@ class MansionsHouse extends Component {
     }
   }
 
-  changeExist(floorIdx, roomIdx) {
+  onChangeHouseExist(floorIdx, roomIdx) {
     return function (e) {
-      var house = this.state.floor[floorIdx][roomIdx]
-      house.isExist = !house.isExist
-      this.props.updateParentState({floor: this.state.floor})
+      var onChangeHouseExist = this.props.onChangeHouseExist
+      if (onChangeHouseExist) {
+        onChangeHouseExist(floorIdx, roomIdx);
+      }
+      // var house = this.state.floor[floorIdx][roomIdx]
+      // house.isExist = !house.isExist
+      // this.props.updateParentState({floor: this.state.floor})
     } 
   }
-
-            //   {floor.map((f, i)=> {
-            //   return (
-            //     <RadioButton value={String(i)} label={i+1+'楼'} style={styles.raidoButton} />
-            //   )
-            // })}
-
 
   render() {
     var styles = this.getStyles()
@@ -187,7 +193,9 @@ class MansionsHouse extends Component {
             <span style={{display: 'inline-block', width: '216px'}} />
             <CommonRaisedButton label="增加楼层" primary={true} style={styles.buttonTop} onTouchTap={this.props.onAddFloor}/>
             <CommonRaisedButton label="删除楼层" primary={true} style={styles.buttonTop} onTouchTap={this.onDeleteFloor.bind(this)}/>
-            <CommonRaisedButton label="增加房间" primary={true} style={styles.buttonBotton} onTouchTap={this.onAddHouse.bind(this)}/>
+            <CommonRaisedButton label="增加房间" primary={true} style={styles.buttonMiddle} onTouchTap={this.onAddHouse.bind(this)}/>
+            <CommonRaisedButton label={"保存所有楼层出租房信息"} secondary={true} style={styles.buttonBotton} onTouchTap={this.props.onSaveFloor}/>
+        
           </div>
         </div>
         <table className='table'>
@@ -205,8 +213,9 @@ class MansionsHouse extends Component {
           </thead>
           <tbody className='tbody'>
           {houses.map((house, idx) => {
+            var keyString = (house.isExist+house.floor)+house.room
             var tr = house.isExist? (
-              <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+idx}>
+              <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+house+':'+idx}>
                 <td className='td'> 
                   {house.floor+1}
                 </td>
@@ -215,7 +224,7 @@ class MansionsHouse extends Component {
                 </td>
                 <td className='td'> 
                   <CommonSelectField value={house.houseLayout} onChange={this.commonValueChange(house.floor, house.room, 'houseLayout').bind(this)}
-                    floatingLabelText='户型' items={this.props.houseLayouts} itemValue='_id' itemPrimaryText='description' style={styles.tableCellSelect}/>
+                    floatingLabelText='户型' items={this.state.houseLayouts} itemValue='_id' itemPrimaryText='description' style={styles.tableCellSelect}/>
                 </td>
                 <td className='td'> 
                   <CommonTextField value={house.electricMeterEndNumber} onChange={this.commonValueChange(house.floor, house.room, 'electricMeterEndNumber', true).bind(this)} style={styles.tableCellTextField}/>
@@ -225,11 +234,11 @@ class MansionsHouse extends Component {
                 </td>
                 <td className='td'> 
                   {house.tenantId? (
-                    <CommonIconButton attr={house.tenantId} iconStyle={{color: '#0CC022'}}>
+                    <CommonIconButton keyString={keyString} iconStyle={{color: '#0CC022'}}>
                       <FontIcon className="material-icons">perm_identity</FontIcon>
                     </CommonIconButton>
                   ): (
-                    <CommonIconButton attr={house.tenantId} iconStyle={{color: '#E1E9E2'}}>
+                    <CommonIconButton keyString={keyString} iconStyle={{color: '#E1E9E2'}}>
                       <FontIcon className="material-icons" >perm_identity</FontIcon>
                     </CommonIconButton>
                   )}
@@ -238,12 +247,12 @@ class MansionsHouse extends Component {
                   <CommonTextField value={house.remark} onChange={this.commonValueChange(house.floor, house.room, 'remark').bind(this)} style={styles.tableCellTextField}/>
                 </td>
                 <td className='td'> 
-                  <CommonIconButton attr={house.isExist} iconStyle={{color: 'orange'}} onTouchTap={this.changeExist(house.floor, house.room, 'isExist').bind(this)}>
+                  <CommonIconButton keyString={keyString} iconStyle={{color: 'orange'}} onTouchTap={this.onChangeHouseExist(house.floor, house.room, 'isExist').bind(this)}>
                     <FontIcon className="material-icons">lightbulb_outline</FontIcon>
                   </CommonIconButton>
                   {
                     maxHouseIdx === idx? (
-                      <CommonIconButton iconStyle={{color: 'red'}} onTouchTap={this.onDeleteHouse(house.floor, house.room).bind(this)}>
+                      <CommonIconButton keyString={keyString} iconStyle={{color: 'red'}} onTouchTap={this.onDeleteHouse(house.floor, house.room).bind(this)}>
                         <FontIcon className="material-icons">delete</FontIcon>
                       </CommonIconButton>
                     ) : ''
@@ -267,12 +276,12 @@ class MansionsHouse extends Component {
                 <td className='td'>  </td>
                 <td className='td'>  </td>
                 <td className='td'>
-                  <CommonIconButton attr={house.isExist} iconStyle={{color: '#EBE7E0'}} onTouchTap={this.changeExist(house.floor, house.room, 'isExist').bind(this)}>
+                  <CommonIconButton keyString={keyString} iconStyle={{color: '#EBE7E0'}} onTouchTap={this.onChangeHouseExist(house.floor, house.room, 'isExist').bind(this)}>
                     <FontIcon className="material-icons">lightbulb_outline</FontIcon>
                   </CommonIconButton>
                   {
                     maxHouseIdx === idx? (
-                      <CommonIconButton iconStyle={{color: 'red'}} onTouchTap={this.onDeleteHouse(house.floor, house.room).bind(this)}>
+                      <CommonIconButton keyString={keyString} iconStyle={{color: 'red'}} onTouchTap={this.onDeleteHouse(house.floor, house.room).bind(this)}>
                         <FontIcon className="material-icons">delete</FontIcon>
                       </CommonIconButton>
                     ) : ''
@@ -316,6 +325,9 @@ class MansionsHouse extends Component {
       },
       buttonTop: {
         margin: '0px 10px 10px 10px'
+      },
+      buttonMiddle: {
+        margin: '10px 10px 10px 10px'
       },
       buttonBotton: {
         margin: '10px 10px 30px 10px',

@@ -111,6 +111,7 @@ class MansionsHouseLayouts extends Component {
       <div style={styles.tab}>
         <div style={{marginBottom: '20px', textAlign: 'right'}}>
           <CommonRaisedButton label="增加户型" primary={true} style={styles.marginRight} onTouchTap={this.props.onAddHouseLayout}/>
+          <CommonRaisedButton label="保存户型信息" secondary={true} style={styles.marginRight} onTouchTap={this.props.saveHouseLayouts}/>
         </div>
         <table className='table'>
           <thead className='thead'>
@@ -155,7 +156,7 @@ class MansionsHouseLayouts extends Component {
                 <CommonTextField value={houseLayout.overdueFine} onChange={this.commonValueChange(idx, 'overdueFine', true).bind(this)} style={styles.tableCellTextField}/>
               </td>
               <td className='td'> 
-                <CommonIconButton iconStyle={{color: 'red'}} onTouchTap={this.onDelete(idx).bind(this)}>
+                <CommonIconButton keyString={houseLayout._id} iconStyle={{color: 'red'}} onTouchTap={this.onDelete(idx).bind(this)}>
                   <FontIcon className="material-icons">delete</FontIcon>
                 </CommonIconButton>
               </td>
