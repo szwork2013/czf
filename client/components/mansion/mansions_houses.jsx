@@ -92,17 +92,24 @@ class MansionsHouse extends Component {
     }
   }
 
-  confirmDialogOK() {
-    this.state.confirmDialogOKClick.bind(this)()
+  onSaveFloor() {
+    this.setState({
+      confirmDialogTitle : '确定保存所有楼层出租房信息',
+      confirmDialogShow : true,
+      confirmDialogOKClick : this.onSaveFloorConfirm.bind(this)
+    })
   }
-  confirmDialogCancel() {
-    this.deleteIdx = -1
+  onSaveFloorConfirm() {
+    if (this.props.onSaveFloor) {
+      this.props.onSaveFloor()
+    }
     this.setState({
       confirmDialogTitle : '',
       confirmDialogShow : false,
       confirmDialogOKClick : () => {}
     })
   }
+  
 
   onShowFloorChange(e, value) {
     this.setState({showFloor: value})
@@ -173,6 +180,18 @@ class MansionsHouse extends Component {
     } 
   }
 
+  confirmDialogOK() {
+    this.state.confirmDialogOKClick.bind(this)()
+  }
+  confirmDialogCancel() {
+    this.deleteIdx = -1
+    this.setState({
+      confirmDialogTitle : '',
+      confirmDialogShow : false,
+      confirmDialogOKClick : () => {}
+    })
+  }
+
   render() {
     var styles = this.getStyles()
     var floor = this.state.floor || []
@@ -194,7 +213,7 @@ class MansionsHouse extends Component {
             <CommonRaisedButton label="增加楼层" primary={true} style={styles.buttonTop} onTouchTap={this.props.onAddFloor}/>
             <CommonRaisedButton label="删除楼层" primary={true} style={styles.buttonTop} onTouchTap={this.onDeleteFloor.bind(this)}/>
             <CommonRaisedButton label="增加房间" primary={true} style={styles.buttonMiddle} onTouchTap={this.onAddHouse.bind(this)}/>
-            <CommonRaisedButton label={"保存所有楼层出租房信息"} secondary={true} style={styles.buttonBotton} onTouchTap={this.props.onSaveFloor}/>
+            <CommonRaisedButton label="保存所有楼层出租房信息" secondary={true} style={styles.buttonBotton} onTouchTap={this.onSaveFloor.bind(this)}/>
         
           </div>
         </div>

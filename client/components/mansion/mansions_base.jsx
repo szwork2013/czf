@@ -16,12 +16,18 @@ import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } f
 import LocationSelectField from '../common/location_select_field'
 import CommonTextField from '../common/common_text_field'
 import CommonRaisedButton from '../common/common_raised_button'
+import CommonConfirmDialog from '../common/common_confirm_dialog'
+
 
 class MansionsBase extends Component {
 
   constructor(props, context) {
     super(props, context);
-    this.state = {}
+    this.state = {
+      confirmDialogTitle : '',
+      confirmDialogShow : false,
+      confirmDialogOKClick : () => {}
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -55,13 +61,45 @@ class MansionsBase extends Component {
     }
     return retValue
   }
+
+  saveMansionBase() {
+    this.setState({
+        confirmDialogTitle : '确定保存基础信息',
+        confirmDialogShow : true,
+        confirmDialogOKClick : this.saveMansionBaseConfirm.bind(this)
+      })
+    
+  }
+  saveMansionBaseConfirm() {
+    if (this.props.saveMansionBase) {
+      this.props.saveMansionBase()
+    }
+    this.setState({
+      confirmDialogTitle : '',
+      confirmDialogShow : false,
+      confirmDialogOKClick : () => {}
+    })
+  }
+
+  confirmDialogOK() {
+    this.state.confirmDialogOKClick.bind(this)()
+  }
+  confirmDialogCancel() {
+    this.deleteIdx = -1
+    this.setState({
+      confirmDialogTitle : '',
+      confirmDialogShow : false,
+      confirmDialogOKClick : () => {}
+    })
+  }
+
   render() {
     let styles = this.getStyles()
     let mansion = this.props.mansion;
     return (
       <div style={styles.tab}>
         <div style={{marginBottom: '20px', textAlign: 'right'}}>
-          <CommonRaisedButton label="保存基础信息" secondary={true} style={styles.marginRight} onTouchTap={this.props.saveMansionBase}/>
+          <CommonRaisedButton label="保存基础信息" secondary={true} style={styles.marginRight} onTouchTap={this.saveMansionBase.bind(this)}/>
         </div>
 
         <CommonTextField hintText="单位名称" floatingLabelText="单位名称" style={styles.marginRight} value={mansion.name} onChange={this.commonTextFiledChange('name').bind(this)}/>
@@ -131,6 +169,8 @@ class MansionsBase extends Component {
         <br />
         <CommonTextField hintText="出租房显示长度" floatingLabelText="出租房显示长度" ref='housesDesLength' style={styles.marginRight} value={mansion.housesDesLength} disabled={true}/>
         <CommonTextField hintText="商铺显示长度" floatingLabelText="商铺显示长度" ref='shopsDesLength' style={styles.marginRight} value={mansion.shopsDesLength} disabled={true}/>
+        <CommonConfirmDialog title={this.state.confirmDialogTitle} open={this.state.confirmDialogShow}
+          ok={this.confirmDialogOK.bind(this)} cancel={this.confirmDialogCancel.bind(this)}/>
       </div>
     )
   }

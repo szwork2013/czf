@@ -92,6 +92,24 @@ class MansionsHouseLayouts extends Component {
     })
   }
 
+  saveHouseLayouts() {
+    this.setState({
+      confirmDialogTitle : '确定保存户型信息',
+      confirmDialogShow : true,
+      confirmDialogOKClick : this.saveHouseLayoutsConfirm.bind(this)
+    })
+  }
+  saveHouseLayoutsConfirm() {
+    if (this.props.saveHouseLayouts) {
+      this.props.saveHouseLayouts()
+    }
+    this.setState({
+      confirmDialogTitle : '',
+      confirmDialogShow : false,
+      confirmDialogOKClick : () => {}
+    })
+  }
+
   confirmDialogOK() {
     this.state.confirmDialogOKClick.bind(this)()
   }
@@ -111,7 +129,7 @@ class MansionsHouseLayouts extends Component {
       <div style={styles.tab}>
         <div style={{marginBottom: '20px', textAlign: 'right'}}>
           <CommonRaisedButton label="增加户型" primary={true} style={styles.marginRight} onTouchTap={this.props.onAddHouseLayout}/>
-          <CommonRaisedButton label="保存户型信息" secondary={true} style={styles.marginRight} onTouchTap={this.props.saveHouseLayouts}/>
+          <CommonRaisedButton label="保存户型信息" secondary={true} style={styles.marginRight} onTouchTap={this.saveHouseLayouts.bind(this)}/>
         </div>
         <table className='table'>
           <thead className='thead'>
