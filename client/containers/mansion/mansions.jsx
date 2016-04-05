@@ -286,7 +286,6 @@ class Mansions extends Component {
     }
   }
   onChangeHouseExist(floorIdx, roomIdx) {
-    log.info(floorIdx, roomIdx)
     var floor = this.state.floor
     var house = floor[floorIdx][roomIdx]
     var mansion = this.state.mansion

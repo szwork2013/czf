@@ -135,6 +135,7 @@ exports.saveMansionBase = saveMansionBase;
 
 
 function findIndex(arrObj, key, value, type=String) {
+  if (!arrObj) return -1;
   for (var i=0; i<arrObj.length; i++) {
     if (type(arrObj[i][key]) === type(value)) {
       return i;
@@ -293,7 +294,7 @@ const saveFloor = async (req, res) => {
       }
     }
 
-    log.info(updateHouses, removeHouses, newFloor);
+    // log.info(updateHouses, removeHouses, newFloor);
     for (i=0; i<updateHouses.length; i++) {
       await updateHouses[i].save()
     }
@@ -326,7 +327,7 @@ const saveFloor = async (req, res) => {
     var retHouses = await Houses.find({mansionId: mansionId, deleted: false}).sort({floor: 1, room: 1}).exec()
     return res.handleResponse(200, {mansionId, mansion, houses: retHouses})
   } catch(err) {
-    log.error(err.name, err.message)
+    log.error(err)
     return res.handleResponse(500, {});
   }
 }
