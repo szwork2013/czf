@@ -9,7 +9,7 @@ import { mansionVerify } from '../middlewares/mansion_verify'
 
 import { getHouseLayoutPatterns } from '../controllers/mansion/house_layout_patterns'
 import { mansionsAll, mansionInfo, addMansion, deleteMansion, importHistoryVersionData,
-         saveMansionBase, saveHouseLayouts, saveFloor } from '../controllers/mansion/mansions';
+         saveMansionBase, saveHouseLayouts, saveFloor, saveManagersInfo } from '../controllers/mansion/mansions';
 
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/temp/' })
@@ -26,6 +26,7 @@ router.put('/mansion/history_version/data', jwtVerify, upload.single('file'), im
 router.put('/mansion/base', jwtVerify, saveMansionBase);
 router.put('/mansion/houseLayouts', jwtVerify, saveHouseLayouts);
 router.put('/mansion/floor', jwtVerify, saveFloor);
+router.put('/mansion/managersInfo', jwtVerify, saveManagersInfo);
 
 export default router;
 

@@ -17,7 +17,7 @@ import moment from 'moment';
 const mansionsAll = async (req, res) => {
   let query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
   let user = req.user;
-  let mansions = await Mansions.find({deleted: false, '$or': [{ownerId: user._id}, {managerIds: user._id}]}).exec();
+  let mansions = await Mansions.find({deleted: false, '$or': [{ownerId: user._id}, {'managers.userId': user._id}]}).exec();
   return res.handleResponse(200, {mansions});
 }
 exports.mansionsAll = mansionsAll;
@@ -29,11 +29,28 @@ exports.mansionsAll = mansionsAll;
 const mansionInfo = async (req, res) => {
   try{
     let query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
+    var user = req.user
     var mansionId = query.mansionId;
+    var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(403, {}, 'mansion not found');
+    }
 
     var houseLayouts = null
     if (query.houseLayouts) {
       houseLayouts = await HouseLayouts.find({mansionId: mansionId, deleted: false}).sort({order: 1}).exec()
+    }
+
+    var managersInfo = {}
+    var managersObj = {}
+    var managers = []
+    if (query.managersInfo && !_.isEmpty(mansion.managers)) {
+      mansion.managers.forEach( manager => {managersObj[manager.userId] = manager})
+      managers = await Users.find({_id: {$in: mansion.managers.map( manager => manager.userId) }})
+      managers.forEach( user => {
+        managersInfo[user._id] = _.pick(managersObj[user._id], ['remark', 'createdAt'])
+        managersInfo[user._id].user = user
+      })
     }
 
     let pupulateStr = ''
@@ -53,9 +70,9 @@ const mansionInfo = async (req, res) => {
     if (query.shops) {
       shops = await Shops.find({mansionId: mansionId, deleted: false}).sort({floor: 1, room: 1}).exec()
     }
-    return res.handleResponse(200, {mansionId, houseLayouts, houses, shops});
+    return res.handleResponse(200, {mansionId, managersInfo, houseLayouts, houses, shops});
   }catch(err) {
-    log.error(err.name, erro.message)
+    log.error(err)
     return res.handleResponse(500, {});
   }
 }
@@ -335,7 +352,39 @@ exports.saveFloor = saveFloor;
 
 
 
+/*
+ * 保存管理员信息
+ */
+const saveManagersInfo = async (req, res) => {
+  var pickArray = ['remark']
+  try{
+    var body = req.body || {};
+    var mansionId = body.mansionId
+    var user = req.user;
+    var newManagersInfo = body.managersInfo;
+    var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(403, {}, 'mansion not found');
+    }
+    var saveManagers = []
+    var saveManager = {}
+    _.forIn(newManagersInfo, (managerInfo, userId) => {
+      saveManager = _.pick(managerInfo, pickArray);
+      saveManager.userId = userId
+      saveManagers.push(saveManager)
+    })
+    mansion.managers = saveManagers
+    await mansion.save()
 
+    mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
+
+    return res.handleResponse(200, {mansionId: mansionId, mansion: mansion, managersInfo: newManagersInfo})
+  } catch(err) {
+    log.error(err.name, err.message)
+    return res.handleResponse(500, {});
+  }
+}
+exports.saveManagersInfo = saveManagersInfo;
 
 
 

@@ -8,6 +8,19 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
+const MansionManagersSchema = new Schema({
+  userId: {
+    type: ObjectId,
+    ref: 'users'
+  },
+  remark: String,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  _id: false
+});
 
 /*
  * 大厦
@@ -146,7 +159,7 @@ const MansionsSchema = new Schema({
   //   type: ObjectId,
   //   ref: 'users'
   // },
-  managerIds: [ObjectId],   //管理员
+  managers: [MansionManagersSchema],   //管理员
   createdAt: {              //创建时间
     type: Date,
     default: Date.now

@@ -3,7 +3,7 @@
 import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, DELETE_MANSION_SUCCESS, 
          IMPORT_HISTORY_VERSION_DATA_SUCCESS,
          SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS, 
-         SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS} from '../../constants/actionTypes';
+         SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS} from '../../constants/actionTypes';
 import { CALL_API_V1 } from '../../middleware/api';
 import { APP_STATE } from '../../reducers/master/app_state'
 
@@ -176,6 +176,24 @@ function saveFloor(formData) {
 export function saveFloorClick(formData) {
   return dispatch => dispatch(saveFloor(formData));
 }
+
+function saveManagersInfo(formData) {
+  return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: SAVE_MANAGERS_INFO_SUCCESS
+      },
+      url: '/mansion/managersInfo',
+      method: 'PUT',
+      data: formData
+    }
+  }
+}
+export function saveManagersInfoClick(formData) {
+  return dispatch => dispatch(saveManagersInfo(formData));
+}
+
+
 
 
 

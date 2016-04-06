@@ -37,7 +37,7 @@ class MansionsHouse extends Component {
     };
     
     this.floorLength = 0
-    this.deleteIdx = -1
+    // this.deleteIdx = -1
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -184,7 +184,7 @@ class MansionsHouse extends Component {
     this.state.confirmDialogOKClick.bind(this)()
   }
   confirmDialogCancel() {
-    this.deleteIdx = -1
+    // this.deleteIdx = -1
     this.setState({
       confirmDialogTitle : '',
       confirmDialogShow : false,

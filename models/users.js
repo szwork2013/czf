@@ -22,6 +22,11 @@ const UsersSchema = new Schema({
     index: { index: true }
   },
   password: String,         //密码，参见meteor account密码加密方式
+  birthday: Date,
+  gender: {
+    type: String,
+    enum: ['M', 'F']
+  },
   confirmed: {
     type: Boolean,
     default: false

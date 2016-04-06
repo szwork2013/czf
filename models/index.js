@@ -97,7 +97,7 @@ exports.init = async (clean, rebuiltRelationships) => {
     mansion.houseOverdueFineForLayoutPerDay = {};
 
     mansion.ownerId = owner._id;
-    mansion.managerIds = [owner._id];
+    mansion.managers = {[owner._id]: {remark: '测试所有者用户'}};
 
     //为mansion绑定户型
     await HouseLayouts.update({}, {$set: {mansionId: mansion._id}}, {multi: true}).exec();

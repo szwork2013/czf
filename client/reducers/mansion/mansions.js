@@ -4,10 +4,10 @@ import _ from 'lodash'
 import log from '../../utils/log'
 
 
-import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, 
+import { SIGNOUT, GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, 
   DELETE_MANSION_SUCCESS, IMPORT_HISTORY_VERSION_DATA_SUCCESS,
   SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS,
-  SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS  } from '../../constants/actionTypes';
+  SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS } from '../../constants/actionTypes';
 
 
 
@@ -32,11 +32,12 @@ export default (state = initialState, action) => {
       let mansion = state[data.mansionId]
       if (mansion) {
         mansion = _.assign({}, mansion)
+        if (data.managersInfo)
+          mansion.managersInfo = data.managersInfo
         if (data.houseLayouts)
           mansion.houseLayouts = data.houseLayouts
-        if (data.houses) {
+        if (data.houses) 
           mansion.houses = data.houses
-        }
         if (data.shops)
           mansion.shops = data.shops
         newMansions = _.assign({}, state)
@@ -78,6 +79,17 @@ export default (state = initialState, action) => {
       newMansions[mansionRet._id] = _.assign({}, newMansions[mansionRet._id], mansionRet)
       newMansions[mansionRet._id].houses = action.resData.data.houses
       return newMansions
+
+    case SAVE_MANAGERS_INFO_SUCCESS:
+      newMansions = _.assign({}, state)
+      mansionRet = action.resData.data.mansion
+      newMansions[mansionRet._id] = _.assign({}, newMansions[mansionRet._id], mansionRet)
+      newMansions[mansionRet._id].managersInfo = action.resData.data.managersInfo
+      return newMansions
+
+    case SIGNOUT:
+      return initialState
+
     default:
       return state;
   }

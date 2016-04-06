@@ -42,6 +42,7 @@ const routes = (
       <Route path='profile' component={Profile} />
 
       <Route path='mansions' component={Mansions} />
+      <Route path='authorization' component={Mansions} />
     </Route>
     <Route path="*" component={NoFound}/>
   </Router>

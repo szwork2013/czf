@@ -1,7 +1,7 @@
 'use strict';
 import log from '../../utils/log'
 import _ from 'lodash'
-
+import utils from '../../utils'
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -19,11 +19,13 @@ import { Paper, FontIcon, RaisedButton, SelectField, TextField, MenuItem, Tabs, 
 import * as HouseLayoutPatternsAction from '../../actions/mansion/house_layout_patterns'
 import * as MansionsAction from '../../actions/mansion/mansions'
 import * as ToastActions from '../../actions/master/toast';
+import * as UsersActions from '../../actions/users';
 
 import MansionsHeader from '../../components/mansion/mansions_header'
 import MansionsBase from '../../components/mansion/mansions_base'
 import MansionsHouseLayouts from '../../components/mansion/mansions_house_layouts'
 import MansionsHouses from '../../components/mansion/mansions_houses'
+import MansionsManagers from '../../components/mansion/mansions_managers'
 
 // import ObjectId from 'objectid'
 
@@ -37,14 +39,16 @@ class Mansions extends Component {
     super(props, context);
     this.state = {
       mansion: {},
+      managersInfo: {},
       houseLayouts: [],
       floor: [],
       shops: [],
       ownMansions: {},
       forceUpdate: true,
 
-      showTab: "houses",
-    }
+      showTab: "base",
+    },
+    this.newManager = null
   }
 
   /*
@@ -60,7 +64,7 @@ class Mansions extends Component {
       this.props.actions.requestMansionsClick();
     } else {
       //物业单位默认选择第一个
-      this.stateOwnMansions(this.props.mansions)
+      this.stateOwnMansions(this.props.mansions, this.props.users)
     }
   }
 
@@ -76,7 +80,7 @@ class Mansions extends Component {
     this.state.forceUpdate = true         //删除时需要
     this.setState({forceUpdate: true})
     //物业单位默认选择第一个
-    this.stateOwnMansions(nextProps.mansions)
+    this.stateOwnMansions(nextProps.mansions, nextProps.users)
     // this.forceUpdate()
   }
   componentDidUpdate(prevProps, prevState) {
@@ -85,7 +89,7 @@ class Mansions extends Component {
     }
   }
 
-  stateOwnMansions(mansions) {
+  stateOwnMansions(mansions, users) {
     var ownMansions = {}
     var userId = this.props.user._id
     var mansion = null
@@ -97,25 +101,25 @@ class Mansions extends Component {
     // this.ownMansions = ownMansions
     // this.state.ownMansions = ownMansions
     this.setState({ownMansions})
-    this.selectDefaultMansion(ownMansions)
+    this.selectDefaultMansion(ownMansions, users)
   }
   /* 
    * 当state中的Mansion为空时，设置为第一个
    */
-  selectDefaultMansion(mansions) {
+  selectDefaultMansion(mansions, users) {
     if (_.isEmpty(this.state.mansion) && !_.isEmpty(mansions)) {
       for (let key in mansions) {
-        this.selectMansion(mansions[key])
+        this.selectMansion(mansions[key], users)
         return
       }
     } else if (this.state.forceUpdate) {
       if (!mansions[this.state.mansion._id]) {
         for (let key in mansions) {
-          this.selectMansion(mansions[key])
+          this.selectMansion(mansions[key], users)
           return
         }
       } else {
-        this.selectMansion(mansions[this.state.mansion._id])
+        this.selectMansion(mansions[this.state.mansion._id], users)
         return
       }
     }
@@ -137,9 +141,37 @@ class Mansions extends Component {
     }
     return floor
   }
-  selectMansion(mansion) {    
+  selectMansion(mansion, users) {    
     mansion = _.cloneDeep(mansion);
-    let houseLayouts = []
+    var users = users || this.props.users || {};
+    var userId = null;
+
+    var managersInfo = this.state.managersInfo; //需要保留旧的managers信息
+    if (mansion.managersInfo) {
+      managersInfo = _.assign(managersInfo, mansion.managersInfo)
+      mansion.managersInfo = true;
+    }
+    //处理新添加的管理员，其key为new
+    var managerInfoNew = this.newManager
+    if (managerInfoNew) {
+      var newUserId = null
+      if (managerInfoNew.mobile) {
+        if (!_.findKey(managersInfo, {user: {mobile: managerInfoNew.mobile}})) {
+          newUserId = _.findKey(users, {mobile: managerInfoNew.mobile})
+        }
+      } else if (managerInfoNew.email) {
+        if (!_.findKey(managersInfo, {user: {email: managerInfoNew.email}})) {
+          newUserId = _.findKey(users, {email: managerInfoNew.email})
+        }
+      }
+      if (newUserId) { 
+        managersInfo[newUserId] = {user: users[newUserId]}
+        // this.props.actions.openToast({msg: '添加成功'})
+      }
+      this.newManager = null
+    }
+
+    var houseLayouts = []
     if (mansion.houseLayouts) {
       houseLayouts = mansion.houseLayouts
       mansion.houseLayouts = true;
@@ -151,12 +183,12 @@ class Mansions extends Component {
       floor = this.buildFloor(mansion, mansion.houses)
       mansion.houses = true;
     } 
-    let shops = []
+    var shops = []
     if (mansion.shops) {
       shops = mansion.shops
       mansion.shops = true
     }
-    this.setState({mansion, houseLayouts, floor, shops})
+    this.setState({mansion, houseLayouts, floor, shops, managersInfo})
     this.getMansionAllInfo(mansion)
   }
   /*
@@ -164,6 +196,9 @@ class Mansions extends Component {
    */
   getMansionAllInfo(mansion) {
     let formData = {}
+    if (!mansion.managersInfo) {
+      formData.managersInfo = true
+    }
     if (!mansion.houses) {
       formData.houses = true
     } 
@@ -188,7 +223,8 @@ class Mansions extends Component {
    * 选择物业单位
    */
   handleMansionsChange(value) {
-    this.selectMansion(this.state.ownMansions[value])
+    this.state.managersInfo = {}
+    this.selectMansion(this.state.ownMansions[value], this.props.users)
   }
 
   /*
@@ -303,7 +339,45 @@ class Mansions extends Component {
     this.setState({floor, mansion}) 
   }
 
-
+  /*
+   * 管理员
+   */
+  onAddManager(value) {
+    var userId = null
+    var user = {}
+    var users = this.props.users || {}
+    var managersInfo = this.state.managersInfo || {}
+    var findManagersInfoCond = {}
+    var findUserCond = {}
+    if (utils.isMobileNumber(value)) {
+      findManagersInfoCond = {user: {mobile: value}}
+      findUserCond = {mobile: value}
+    } else if (utils.isEmail(value)) {
+      findManagersInfoCond = {user: {email: value}}
+      findUserCond = {email: value}
+    } else {
+      this.props.actions.openToast({msg: '请输入正确的手机号或邮箱'})
+      return;
+    }
+    userId = _.findKey(managersInfo, findManagersInfoCond)
+    if (userId) {
+      this.props.actions.openToast({msg: '用户已存在您的管理员列表中'})
+      return
+    }
+    userId = _.findKey(users, findUserCond)
+    if (userId) { 
+      managersInfo[userId] = {user: users[userId]}
+      this.setState({managersInfo})
+      // this.props.actions.openToast({msg: '添加成功'})
+      return
+    }
+    this.newManager = findUserCond;
+    this.props.actions.getUserClick(findUserCond);
+  }
+  onDeleteManager(managerId) {
+    delete this.state.managersInfo[managerId]
+    this.setState({managersInfo: this.state.managersInfo})
+  }
 
   saveMansionBase() {
     // log.error(this.state.mansion)
@@ -316,8 +390,11 @@ class Mansions extends Component {
   }
 
   onSaveFloor() {
-    log.error(this.state.floor)
     this.props.actions.saveFloorClick({mansionId: this.state.mansion._id, floor: this.state.floor})
+  }
+
+  saveManagersInfo() {
+    this.props.actions.saveManagersInfoClick({mansionId: this.state.mansion._id, managersInfo: this.state.managersInfo})
   }
 
   /*
@@ -327,14 +404,21 @@ class Mansions extends Component {
     this.setState({showTab: value})
   }
   getTab(styles) {
-    let props = this.props
-    let mansion = this.state.mansion;
-    let houseLayouts = this.state.houseLayouts;
-    let houseLayoutPatterns = props.houseLayoutPatterns;
-    let floor = this.state.floor
-    let theme = props.theme
+    var props = this.props
+    var mansion = this.state.mansion;
+    var managersInfo = this.state.managersInfo;
+    var houseLayouts = this.state.houseLayouts;
+    var houseLayoutPatterns = props.houseLayoutPatterns;
+    var floor = this.state.floor
+    var theme = props.theme
 
     switch (this.state.showTab) {
+      case 'managers':
+        return (
+          <MansionsManagers managersInfo={managersInfo}
+            onAddManager={this.onAddManager.bind(this)} onDeleteManager={this.onDeleteManager.bind(this)}
+            saveManagersInfo={this.saveManagersInfo.bind(this)} updateParentState={this.updateState.bind(this)}/>
+        )
       case 'houseLayouts':
         return (
           <MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} floor={floor}
@@ -367,16 +451,6 @@ class Mansions extends Component {
     let mansion = this.state.mansion;
     let ownMansions = this.state.ownMansions
     let theme = props.theme
-    /*
-<div style={{marginBottom: '20px'}}>
-          <CommonSelectField value={mansion._id} onChange={this.handleMansionsChange.bind(this)} style={styles.marginRight}
-            floatingLabelText='物业单位' items={this.ownMansions} itemValue='_id' itemPrimaryText='name' itemKey='_id' />
-          <RaisedButton label="新建" labelPosition="before" style={styles.button} primary={true} onTouchEnd={this.onAddMansionDialogClick.bind(this)}>
-          <RaisedButton label="导入旧数据" labelPosition="before" style={styles.button} primary={true}>
-            <input type="file" style={styles.fileInput} ref="import" onChange={this.onUpload.bind(this)}/>
-          </RaisedButton>
-        </div>
-     */
     return (
       <div>
         <MansionsHeader mansion={mansion} ownMansions={ownMansions} 
@@ -387,18 +461,13 @@ class Mansions extends Component {
           <RadioButton value="base" label="基础信息" style={styles.raidoButton}/>
           <RadioButton value="houseLayouts" label="户型管理（出租房）" style={styles.raidoButton}/>
           <RadioButton value="houses" label="出租房" style={styles.raidoButton}/>
+          <RadioButton value="managers" label="管理员" style={styles.raidoButton}/>
         </CommonRadioButtonGroup>
         {this.getTab(styles)}
       </div>
     )
   }
 
-// <Tabs initialSelectedIndex={1} >
-//           <Tab label="基础信息" ><MansionsBase mansion={mansion} updateParentState={this.updateState.bind(this)} theme={theme}/></Tab>
-//           <Tab label="户型（出租房）"><MansionsHouseLayouts houseLayouts={houseLayouts} theme={theme} 
-//             onDeleteHouseLayout={this.onDeleteHouseLayout.bind(this)} onAddHouseLayout={this.onAddHouseLayout.bind(this)}
-//             houseLayoutPatterns={houseLayoutPatterns} updateParentState={this.updateState.bind(this)} /></Tab>
-//         </Tabs>
   getStyles() {
     // const palette = this.props.theme.baseTheme.palette
     // const backgroundColor = palette.primary1Color;
@@ -448,13 +517,14 @@ function mapStateToProps(state) {
     theme: state.mui.theme,
     location: state.location,
     user: state.user.user,
+    users: state.users,
     houseLayoutPatterns: state.houseLayoutPatterns,
     mansions: state.mansions
   };
 }
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(_.assign({}, ToastActions, HouseLayoutPatternsAction, MansionsAction), dispatch)
+    actions: bindActionCreators(_.assign({}, ToastActions, HouseLayoutPatternsAction, MansionsAction, UsersActions), dispatch)
   };
 }
 export default connect(

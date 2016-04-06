@@ -51,3 +51,21 @@ exports.genRandomCode = function genRandomCode(len=18) {
   }
   return code;
 }
+
+var GENDER_MAP = {
+  'F': '女',
+  'f': '女',
+  'M': '男',
+  'm': '男'
+}
+exports.decodeGender = function decodeGender(gender) {
+  return GENDER_MAP[gender] || ''
+}
+
+
+
+
+
+
+
+

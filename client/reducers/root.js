@@ -12,6 +12,7 @@ import sideBar from './side_bar'
 import menus from './menus'
 
 import user from './user';
+import users from './users'
 import { signin } from './sign';
 
 //mansion
@@ -29,6 +30,7 @@ const rootReducer = combineReducers({
   loading,
   toast,
   user,
+  users,
   signin,
 
   houseLayoutPatterns,

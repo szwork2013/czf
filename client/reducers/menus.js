@@ -21,12 +21,7 @@ const menus = [
     key: '/settings',
     menus: [{
       type: 'MENU',
-      name: '用户信息',
-      leftIcon: 'account_circle',
-      key: '/profile',
-    },{
-      type: 'MENU',
-      name: '资产',
+      name: '私有资产',
       leftIcon: 'location_city',
       key: '/mansions',
     }]
