@@ -14,8 +14,8 @@ const ShopsModel = new Schema({
     type: ObjectId,
     ref: 'mansions'
   },
-  floor: Number,
-  room: String,
+  floor: Number,                  //从0开始，0代表1楼
+  room: Number,                   //从0开始，0代表01房
   area: {                         //面积
     type: Number,
     default: 0
@@ -28,6 +28,15 @@ const ShopsModel = new Schema({
     type: Boolean,
     default: false
   },
+
+  createdAt: {                //创建时间
+    type: Date,
+    default: Date.now
+  },
+  lastUpdatedAt: {              //最后修改时间
+    type: Date,
+    default: Date.now
+  }
 });
 let Shops = mongoose.model('shops', ShopsModel);
 exports.Shops = Shops;

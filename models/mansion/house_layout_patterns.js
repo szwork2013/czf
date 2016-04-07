@@ -22,7 +22,11 @@ const HouseLayoutPatternsItemSchema = new Schema({
 const HouseLayoutPatternsSchema = new Schema({
   description: String,
   code: String,
-  items: [HouseLayoutPatternsItemSchema]
+  items: [HouseLayoutPatternsItemSchema],
+  lastUpdatedAt: {              //最后修改时间
+    type: Date,
+    default: Date.now
+  }
 });
 const HouseLayoutPatternsModel = mongoose.model('house_layout_patterns', HouseLayoutPatternsSchema);
 

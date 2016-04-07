@@ -34,8 +34,8 @@ const TenantModel = new Schema({
     type: ObjectId,
     ref: 'houses'
   },
-  floor: Number,                  //从1开始，1代表1楼
-  room: Number,                   //从1开始，1代表01房
+  floor: Number,                  //从0开始，0代表1楼
+  room: Number,                   //从0开始，0代表01房
   type: {                         //交租类型，in新入住，out退房，rental租金，migrate导入数据迁移
     type: String,
     enum: ['in', 'out', 'rental', 'migrate']
@@ -63,6 +63,7 @@ const TenantModel = new Schema({
   waterTons: Number,          //用水吨数
   electricKWhs: Number,       //用电度数
   summed: TenantSummedModel,
+  
   createdAt: {                    //交租时间
     type: Date,
     default: Date.now

@@ -20,17 +20,13 @@ const SubscriberModel = new Schema({
     type: ObjectId,
     ref: 'houses'
   },
-  floor: Number,                  //从1开始，1代表1楼
-  room: Number,                   //从1开始，1代表01房
+  floor: Number,                  //从0开始，0代表1楼
+  room: Number,                   //从0开始，0代表01房
 
   name: String,
   mobile: String,
   idNo: String,
   subscription: Number,           //订金
-  createdAt: {                    //下定时间
-    type: Date,
-    default: Date.now
-  },
   expiredDate: Date,              //过期日期
   status: {                       //状态，normal正常状态，transfer为入住转移到押金，expired过期订金不退，
                                   //default我方违约，需要赔偿，migrate导入数据迁移
@@ -39,6 +35,11 @@ const SubscriberModel = new Schema({
     default: 'normal'
   },
   compensation: Number,                  //补偿状态，如果状态为expired，则为正数，default为负数，其它为零
+
+  createdAt: {                    //下定时间
+    type: Date,
+    default: Date.now
+  },
   createdBy: {
     type: ObjectId,
     ref: 'users'

@@ -50,7 +50,16 @@ const HouseLayoutsSchema = new Schema({
     type: Boolean,
     default: false
   },
-  order: Number
+  order: Number,
+
+  createdAt: {                //创建时间
+    type: Date,
+    default: Date.now
+  },
+  lastUpdatedAt: {              //最后修改时间
+    type: Date,
+    default: Date.now
+  }
 });
 const HouseLayoutsModel = mongoose.model('house_layouts', HouseLayoutsSchema);
 

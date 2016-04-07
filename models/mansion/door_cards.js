@@ -20,8 +20,8 @@ const DoorCardsModel = new Schema({
     type: ObjectId,
     ref: 'houses'
   },
-  floor: Number,                  //从1开始，1代表1楼
-  room: Number,                   //从1开始，1代表01房
+  floor: Number,                  //从0开始，0代表1楼
+  room: Number,                   //从0开始，0代表01房
 
   name: String,
   mobile: String,
@@ -34,14 +34,19 @@ const DoorCardsModel = new Schema({
     enum: ['sell', 'recover'],
     default: 'sell'
   },
+  total: Number,                //收费情况，如果为sell，则为正数，recover为负数
+
   createdAt: {                  //购买或回购时间
     type: Date,
     default: Date.now
   },
-  total: Number,                //收费情况，如果为sell，则为正数，recover为负数
-  createBy: {
+  createdBy: {
     type: ObjectId,
     ref: 'users'
+  },
+  lastUpdatedAt: {              //最后修改时间
+    type: Date,
+    default: Date.now
   }
 });
 

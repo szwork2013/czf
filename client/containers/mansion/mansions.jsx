@@ -113,7 +113,9 @@ class Mansions extends Component {
         return
       }
     } else if (this.state.forceUpdate) {
-      if (!mansions[this.state.mansion._id]) {
+      if (_.isEmpty(mansions)) {
+        this.setState({mansion: {}, houseLayouts: [], floor: [], shops: [], managersInfo: {}})
+      } else if (!mansions[this.state.mansion._id]) {
         for (let key in mansions) {
           this.selectMansion(mansions[key], users)
           return

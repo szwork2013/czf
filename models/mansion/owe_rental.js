@@ -20,8 +20,8 @@ const OweRentalModel = new Schema({
     type: ObjectId,
     ref: 'houses'
   },
-  floor: Number,                  //从1开始，1代表1楼
-  room: Number,                   //从1开始，1代表01房
+  floor: Number,                  //从0开始，0代表1楼
+  room: Number,                   //从0开始，0代表01房
   name: String,
   mobile: String,
   idNo: String,
@@ -33,8 +33,12 @@ const OweRentalModel = new Schema({
   rentalStartDate: Date,      //本次租金开始日期，闭区间
   rentalEndDate: Date,        //本次租金有效日期，开区间
 
-  createdAt: Date,                //补租金时间
-  createBy: {
+               
+  createdAt: {                //补租金时间
+    type: Date,
+    default: Date.now
+  },
+  createdBy: {
     type: ObjectId,
     ref: 'users'
   }

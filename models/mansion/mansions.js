@@ -160,7 +160,12 @@ const MansionsSchema = new Schema({
   //   ref: 'users'
   // },
   managers: [MansionManagersSchema],   //管理员
-  createdAt: {              //创建时间
+  
+  createdAt: {                //创建时间
+    type: Date,
+    default: Date.now
+  },
+  lastUpdatedAt: {              //最后修改时间
     type: Date,
     default: Date.now
   }

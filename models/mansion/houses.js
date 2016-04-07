@@ -13,8 +13,8 @@ const HousesSchema = new Schema({
     type: ObjectId,
     ref: 'mansions'
   },
-  floor: Number,                  //从1开始，1代表1楼
-  room: Number,                   //从1开始，1代表01房
+  floor: Number,                  //从0开始，0代表1楼
+  room: Number,                   //从0开始，0代表01房
   isExist: {
     type: Boolean,
     default: true
@@ -41,7 +41,16 @@ const HousesSchema = new Schema({
   },
   electricMeterEndNumber: Number,  //电表
   waterMeterEndNumber: Number,     //水表
-  remark: String                   //备注
+  remark: String,                   //备注
+  
+  createdAt: {                //创建时间
+    type: Date,
+    default: Date.now
+  },
+  lastUpdatedAt: {              //最后修改时间
+    type: Date,
+    default: Date.now
+  }
 });
 const HousesModel = mongoose.model('houses', HousesSchema);
 exports.Houses = HousesModel;

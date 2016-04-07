@@ -6,7 +6,7 @@ import utils from '../../utils';
 import config from '../../config';
 
 
-import { Users, UsersOmit, UsersPopulate, Mansions, HouseLayouts, defaultHouseLayouts, 
+import { Users, UsersOmit, Mansions, HouseLayouts, defaultHouseLayouts, 
         Houses, Tenant, Subscriber, Shops } from '../../models';
 
 import moment from 'moment';
@@ -109,7 +109,7 @@ const deleteMansion = async (req, res) => {
     if (!mansionId) {
       return res.handleResponse(400, {}, 'mansionId is require');
     }
-    await Mansions.update({_id: mansionId, ownerId: user._id, deleted: false}, {'$set': {deleted:true}});
+    await Mansions.update({_id: mansionId, ownerId: user._id, deleted: false}, {'$set': {deleted:true, lastUpdatedAt: new Date()}});
     return res.handleResponse(200, {id: mansionId});
   }catch(err) {
     log.error(err.name, erro.message)
@@ -140,7 +140,11 @@ const saveMansionBase = async (req, res) => {
     if (!oldMansion) {
       return res.handleResponse(403, {}, 'mansion not found');
     }
-    _.assign(oldMansion, _.pick(newMansion, pickArray));    
+    //较验数据是否过期
+    if (oldMansion.lastUpdatedAt.getTime() !==  (new Date(newMansion.lastUpdatedAt)).getTime()) {
+      return res.handleResponse(409, {}, 'old data');
+    }
+    _.assign(oldMansion, _.pick(newMansion, pickArray), {lastUpdatedAt: new Date()});
     await oldMansion.save()  
     return res.handleResponse(200, {mansion: oldMansion})
   }catch(err) {
@@ -197,9 +201,13 @@ const saveHouseLayouts = async (req, res) => {
       if (newHouseLayoutIdx>=0) {
         //修改
         newHouseLayout = newHouseLayouts[newHouseLayoutIdx]
+        //较验数据是否过期
+        if (oldHouseLayout.lastUpdatedAt.getTime() !==  (new Date(newHouseLayout.lastUpdatedAt)).getTime()) {
+          return res.handleResponse(409, {}, 'old data');
+        }
         if (!isEqualWith(oldHouseLayout, newHouseLayout, pickArray)) {
           //需要保存
-          _.assign(oldHouseLayout, _.pick(newHouseLayout, pickArray)); 
+          _.assign(oldHouseLayout, _.pick(newHouseLayout, pickArray), {lastUpdatedAt: new Date()}); 
           updateHouseLayouts.push(oldHouseLayout)   
         }
         newHouseLayouts.splice(newHouseLayoutIdx, 1)
@@ -209,6 +217,7 @@ const saveHouseLayouts = async (req, res) => {
         if (houseLayoutIsInUsed) {
           return res.handleResponse(400, {}, oldHouseLayout.description+' is in used, cann\'t delete')
         }
+        _.assign(oldHouseLayout, {lastUpdatedAt: new Date()}); 
         removeHouseLayouts.push(oldHouseLayout)
       }
     }
@@ -293,8 +302,11 @@ const saveFloor = async (req, res) => {
       if (newHouseIdx>-1) {
         newHouse = newFloor[oldHouse.floor][newHouseIdx]
         if (!isEqualWith(oldHouse, newHouse, pickArray)) {
+          if (oldHouse.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
+            return res.handleResponse(409, {}, 'old data');
+          }
           //需要保存
-          _.assign(oldHouse, _.pick(newHouse, pickArray)); 
+          _.assign(oldHouse, _.pick(newHouse, pickArray), {lastUpdatedAt: new Date()}); 
           updateHouses.push(oldHouse)   
         } else {
           if ((oldHouse.tenantId || oldHouse.subscriberId) && !newHouse.isExist) {
@@ -339,6 +351,7 @@ const saveFloor = async (req, res) => {
     mansion.floorCount = floorCount>mansion.shopsCount.length? floorCount: mansion.shopsCount.length;
     mansion.housesCount = housesCount;
     mansion.housesExistCount = housesExistCount;
+    mansion.lastUpdatedAt = new Date();
     mansion = await mansion.save()
 
     var retHouses = await Houses.find({mansionId: mansionId, deleted: false}).sort({floor: 1, room: 1}).exec()
@@ -577,7 +590,7 @@ const importHistoryVersionData = async (req, res) => {
             newTenant.electricKWhs = 0
             newTenant.summed = {}
 
-            newTenant.createdAt = new Date()
+            // newTenant.createdAt = new Date()
             newTenant.createdBy = user._id;
             newTenant = await Tenant.create(newTenant)
             newHouse.tenantId = newTenant._id;
@@ -596,7 +609,7 @@ const importHistoryVersionData = async (req, res) => {
             newSubscriber.subscription = subscriber.subscription
             newSubscriber.createdAt = subscriber.createdAt
             newSubscriber.expiredDate = subscriber.expiredDate
-            newSubscriber.createdBy = new Date()
+            newSubscriber.createdBy = user._id;
             newSubscriber = await Subscriber.create(newSubscriber)
             newHouse.subscriberId = newSubscriber._id;
           }
