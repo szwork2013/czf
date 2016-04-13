@@ -111,7 +111,7 @@ class MansionsHouse extends Component {
   }
   
 
-  onShowFloorChange(e, value) {
+  onShowFloorChange(value) {
     this.setState({showFloor: value})
   }
 

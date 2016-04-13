@@ -25,12 +25,18 @@ class CommonRadioButtonGroup extends Component {
     return true;
   }
 
+  onChange(e, value) {
+    if (this.props.onChange) {
+      this.props.onChange(value)
+    }
+  }
+
   render() {
 
     var props = this.props
     return (
       <RadioButtonGroup name={props.name} valueSelected={props.valueSelected} style={props.style}
-        onChange={this.props.onChange}>
+        onChange={this.onChange.bind(this)}>
         {
           this.props.children
         }

@@ -10,6 +10,7 @@ import NoFound from './containers/no_found'
 
 //Mansion
 import Mansions from './containers/mansion/mansions'
+import Houses from './containers/mansion/houses'
 
 import store from './store'
 
@@ -42,7 +43,7 @@ const routes = (
       <Route path='profile' component={Profile} />
 
       <Route path='mansions' component={Mansions} />
-      <Route path='authorization' component={Mansions} />
+      <Route path='houses' component={Houses} />
     </Route>
     <Route path="*" component={NoFound}/>
   </Router>

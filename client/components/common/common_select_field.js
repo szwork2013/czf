@@ -23,17 +23,23 @@ class CommonSelectField extends Component {
     return true;
   }
 
-  getMenuItems(items, key, value, primaryText) {
+  getMenuItems(items, key, value, primaryText, excludeKey) {
     var retMenuItems = []
     var item = {}
     if (key) {
       for (let idx in items) {
+        if (excludeKey && excludeKey.indexOf(idx)!==-1) {
+          continue;
+        }
         item = items[idx]
         retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={item[key]}/>)
       }
     } else {
       let now = (new Date()).getTime().toString()
       for (let idx in items) {
+        if (excludeKey && excludeKey.indexOf(idx)!==-1) {
+          continue;
+        }
         item = items[idx]
         retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={now+idx}/>)
       }
@@ -52,7 +58,7 @@ class CommonSelectField extends Component {
           onChange={this.onChange.bind(this)} 
           disabled={props.disabled} fullWidth={props.fullWidth}
           >
-          { this.getMenuItems(props.items, props.itemKey, props.itemValue, props.itemPrimaryText) }
+          { this.getMenuItems(props.items, props.itemKey, props.itemValue, props.itemPrimaryText, props.excludeKey) }
         </SelectField>
     )
   }

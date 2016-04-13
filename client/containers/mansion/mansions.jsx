@@ -8,8 +8,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { browserHistory } from 'react-router';
 
-import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } from '../../utils/location'
-
 import Colors from 'material-ui/lib/styles/colors';
 
 import { Paper, FontIcon, RaisedButton, SelectField, TextField, MenuItem, Tabs, Tab,
@@ -72,7 +70,6 @@ class Mansions extends Component {
     return true;
   }
 
-
   /*
    * 组件props更新
    */
@@ -107,13 +104,13 @@ class Mansions extends Component {
    * 当state中的Mansion为空时，设置为第一个
    */
   selectDefaultMansion(mansions, users) {
-    if (_.isEmpty(this.state.mansion) && !_.isEmpty(mansions)) {
+    if (_.isEmpty(this.state.mansion) && mansions.length>0) {
       for (let key in mansions) {
         this.selectMansion(mansions[key], users)
         return
       }
     } else if (this.state.forceUpdate) {
-      if (_.isEmpty(mansions)) {
+      if (mansions<=0) {
         this.setState({mansion: {}, houseLayouts: [], floor: [], shops: [], managersInfo: {}})
       } else if (!mansions[this.state.mansion._id]) {
         for (let key in mansions) {
@@ -402,7 +399,7 @@ class Mansions extends Component {
   /*
    * 切换物业的属性
    */
-  onShowTabChange(e, value) {
+  onShowTabChange(value) {
     this.setState({showTab: value})
   }
   getTab(styles) {

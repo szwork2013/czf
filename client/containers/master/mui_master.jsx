@@ -40,7 +40,7 @@ const MUIMaster = React.createClass({
 
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.deviceSize !== this.state.deviceSize) {
-      this.props.actions.setDeviceSize(nextState.deviceSize);
+      // this.props.actions.setDeviceSize(nextState.deviceSize);
     }
     return true;
   },
@@ -56,7 +56,7 @@ const MUIMaster = React.createClass({
   _updateDeviceSize2() {
     StyleResizable._updateDeviceSize.bind(this)();
     if (this.state.deviceSize !== this.props.deviceSize) {
-      this.props.actions.setDeviceSize(this.state.deviceSize);
+      // this.props.actions.setDeviceSize(this.state.deviceSize);
     }
   },
 

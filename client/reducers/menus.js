@@ -24,32 +24,15 @@ const menus = [
       name: '私有资产',
       leftIcon: 'location_city',
       key: '/mansions',
-    }]
-  }, {
-    type: 'DIVIDER',
-  }, {
-    type: 'MENU',
-    name: '例子父菜单',
-    key: '/test_parent_1',
-    menus: [{
+    }, {
       type: 'MENU',
-      name: '例子子菜单1',
-      key: '/test_child_1',
-      menus: [{
-        type: 'MENU',
-        name: '例子子子菜单1',
-        key: '/sub_1_sub_1',
-      }],
-    },{
-      type: 'MENU',
-      name: '例子子菜单2',
-      value: '/sub2',
-      key: '/test_child_2'
+      name: '房屋',
+      leftIcon: 'domain',
+      key: '/houses',
     }]
   }, {
     type: 'DIVIDER',
   },
-
 ]
 
 const initialState = {
