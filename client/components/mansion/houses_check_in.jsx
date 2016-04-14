@@ -28,12 +28,12 @@ class HousesCheckIn extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // if (nextState.forceUpdate) return true;
-    // let props = this.props
-    // log.error('--------------', _.isEqual(nextProps.house, props.house) && nextProps.open === props.open)
-    // if (_.isEqual(nextProps.house, props.house) && nextProps.open === props.open) {
-    //   return false;
-    // }
+    if (nextState.forceUpdate) return true;
+    let props = this.props
+    // log.error(_.isEqual(nextProps.house, props.house) && nextProps.open === props.open)
+    if (_.isEqual(nextProps.house, props.house) && nextProps.open === props.open) {
+      return false;
+    }
     return true;
   }
   componentDidUpdate(prevProps, prevState) {

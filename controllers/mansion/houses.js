@@ -104,9 +104,11 @@ const houseCheckIn = async (req, res) => {
     house.lastUpdatedAt = new Date()
     house = await house.save()
     house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
-    // log.info(house)
+    log.info(house)
 
     return res.handleResponse(200, {mansionId, house})
+
+    
   } catch(err) {
     log.error(err.name, err.message)
     if (tenant && tenant._id) {

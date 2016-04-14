@@ -153,7 +153,7 @@ class Houses extends Component {
 
 
   /*
-   * 取得物业的出租房、商铺信息
+   * 取得物业的出租房
    */
   getMansionAllInfo(mansion) {
     let formData = {}
@@ -364,7 +364,6 @@ class Houses extends Component {
                 oweRentalExpiredDate = new moment(house.tenantId.oweRentalExpiredDate).format('YYYY.MM.DD')
                 contractEndDate = new moment(house.tenantId.contractEndDate).format('YYYY.MM.DD')
 
-
                 actions.push(
                   <CommonRaisedButton label="交租" primary={true} key={house._id+'rent'}
                     style={styles.actionButton} backgroundColor={styles.actionButtonRent.backgroundColor}/>
@@ -401,7 +400,6 @@ class Houses extends Component {
                     style={styles.actionButton} backgroundColor={styles.actionButtonSubs.backgroundColor}/>
                 )
               }
-
 
               return (
                 <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+house+':'+idx}>

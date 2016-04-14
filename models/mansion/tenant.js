@@ -64,6 +64,7 @@ const TenantModel = new Schema({
   waterMeterEndNumber: Number,     //水表
   waterTons: Number,          //用水吨数
   electricKWhs: Number,       //用电度数
+  servicesCharges: Number,
   summed: TenantSummedModel,
   
   createdAt: {                    //交租时间
