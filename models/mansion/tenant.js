@@ -12,12 +12,12 @@ const ObjectId = Schema.ObjectId;
  * 租金总计
  */
 const TenantSummedModel = new Schema({
-  subscriber: Number,                 //订金
+  subscription: Number,                 //订金
   deposit: Number,                    //押金
   rental: Number,                     //租金
   waterCharges: Number,               //水费
   electricCharges: Number,            //电费
-  propertyMaintenanceCharges: Number, //物业费
+  servicesCharges: Number,            //物业费
   compensation: Number,               //损坏赔偿
   total: Number                       //总计
 });
@@ -44,7 +44,7 @@ const TenantModel = new Schema({
   mobile: String,
   idNo: String,
 
-  subscriber: Number,         //订金，如果有，为负数，作充抵用
+  subscription: Number,         //订金，作充抵用
   subscriberId: {
     type: ObjectId,
     ref: 'subscriber'
@@ -60,6 +60,8 @@ const TenantModel = new Schema({
   contractEndDate: Date,      //合同结束日期
   waterChargesPerTon: Number,           //房子单位水费
   electricChargesPerKWh: Number,        //房子单位电费
+  electricMeterEndNumber: Number,  //电表
+  waterMeterEndNumber: Number,     //水表
   waterTons: Number,          //用水吨数
   electricKWhs: Number,       //用电度数
   summed: TenantSummedModel,

@@ -23,6 +23,11 @@ import * as UsersActions from '../../actions/users';
 
 import CommonRadioButtonGroup from '../../components/common/common_radio_button_group'
 import CommonSelectField from '../../components/common/common_select_field'
+import CommonRaisedButton from '../../components/common/common_raised_button'
+
+
+import HousesCheckIn from '../../components/mansion/houses_check_in'
+// import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
 
 
 class Houses extends Component {
@@ -39,11 +44,13 @@ class Houses extends Component {
       houseLayoutsObj: {},
       houseLayout: 'all',
 
-      showHouse: 'all',
+      showHouse: 'tenantable',
 
       floor: [],
       forceUpdate: true,
-      showTab: "all",
+
+      checkInHouse: {},
+      checkInOpen: false
     }
   }
 
@@ -117,6 +124,9 @@ class Houses extends Component {
     if (mansion.houses) {
       floor = this.buildFloor(mansion, mansion.houses)
       mansion.houses = true;
+
+      //测试
+      // this.setState({checkInHouse: floor[1][12], checkInOpen: true})
     } 
     this.setState({mansion, houseLayouts, houseLayoutsObj, floor})
     this.getMansionAllInfo(mansion)
@@ -149,7 +159,7 @@ class Houses extends Component {
       formData.houses = true
       formData.tenant = true
       formData.subscriber = true
-    } 
+    }
     if (!mansion.houseLayouts) {
       formData.houseLayouts = true
     } 
@@ -188,11 +198,22 @@ class Houses extends Component {
   onShowHouseChange(value) {
     this.setState({showHouse: value})
   }
+
+
   /*
-   * 切换显示的房间类型
+   * 操作
    */
-  onShowTabChange(e, value) {
-    this.setState({showTab: value})
+  checkInClick(floorIdx, houseIdx) {
+    return function() {
+      log.info(floorIdx, houseIdx)
+      this.setState({checkInHouse: this.state.floor[floorIdx][houseIdx], checkInOpen: true})
+    }
+  }
+  checkInOk() {
+    // log.info(floorIdx, houseIdx)
+  }
+  checkInCancel() {
+    this.setState({checkInHouse: {}, checkInOpen: false})
   }
 
   getHouses() {
@@ -245,10 +266,6 @@ class Houses extends Component {
     } 
     return houses;
   }
-
-  // getHouseLayoutDescription(houseLayoutId) {
-  //   return 
-  // }
 
   render() {
     var styles = this.getStyles()
@@ -310,14 +327,16 @@ class Houses extends Component {
               <tr className='tr'>
                 <th style={{width: '5%'}} className='th'>楼层</th>
                 <th style={{width: '5%'}} className='th'>房间</th>
-                <th style={{width: '12%'}} className='th'>户型</th>
+                <th style={{width: '10%'}} className='th'>户型</th>
                 <th style={{width: '5%'}} className='th'>状态</th>
-                <th style={{width: '8%'}} className='th'>姓名</th>
-                <th style={{width: '12%'}} className='th'>手机</th>
-                <th style={{width: '10%'}} className='th'>下次交租</th>
-                <th style={{width: '10%'}} className='th'>合同终止</th>
+                <th style={{width: '7%'}} className='th'>姓名</th>
+                <th style={{width: '11%'}} className='th'>手机</th>
+                <th style={{width: '5%'}} className='th'>电表</th>
+                <th style={{width: '5%'}} className='th'>水表</th>
+                <th style={{width: '8%'}} className='th'>下次交租</th>
+                <th style={{width: '8%'}} className='th'>合同终止</th>
                 <th className='th'>备注</th>
-                <th style={{width: '15%'}} className='th'>操作</th>
+                <th style={{width: '20%'}} className='th'>操作</th>
               </tr>
             </thead>
             <tbody className='tbody'>
@@ -328,6 +347,7 @@ class Houses extends Component {
               var mobile = ''
               var oweRentalExpiredDate = ''
               var contractEndDate = ''
+              var actions = []
               // {manager.createdAt? new Date(manager.createdAt).toLocaleDateString(): ''}
               if (house.tenantId) {
                 state = '租'
@@ -335,11 +355,40 @@ class Houses extends Component {
                 mobile = house.tenantId.mobile
                 oweRentalExpiredDate = new moment(house.tenantId.oweRentalExpiredDate).format('YYYY.MM.DD')
                 contractEndDate = new moment(house.tenantId.contractEndDate).format('YYYY.MM.DD')
+
+                actions.push(
+                  <CommonRaisedButton label="交租" primary={true} key={house._id+'rent'}
+                    style={styles.actionButton} backgroundColor={styles.actionButtonRent.backgroundColor}/>
+                )
+                actions.push(
+                  <CommonRaisedButton label="退房" primary={true}  key={house._id+'out'}
+                    style={styles.actionButton} backgroundColor={styles.actionButtonOut.backgroundColor}/>
+                )
               } else if (house.subscriberId) {
                 state = '定'
                 name = house.subscriberId.name
                 mobile = house.subscriberId.mobile
+
+                actions.push(
+                  <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
+                    style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                )
+                actions.push(
+                  <CommonRaisedButton label="退定" primary={true} key={house._id+'out'}
+                    style={styles.actionButton} backgroundColor={styles.actionButtonOut.backgroundColor}/>
+                )
+              } else {
+                actions.push(
+                  <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
+                    style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                )
+                actions.push(
+                  <CommonRaisedButton label="预定" primary={true} key={house._id+'subs'}
+                    style={styles.actionButton} backgroundColor={styles.actionButtonSubs.backgroundColor}/>
+                )
               }
+
+
               return (
                 <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+house+':'+idx}>
                   <td className='td'> 
@@ -363,16 +412,22 @@ class Houses extends Component {
                     { mobile }
                   </td>
                   <td className='td'> 
+                    { house.electricMeterEndNumber }
+                  </td>
+                  <td className='td'> 
+                    { house.waterMeterEndNumber }
+                  </td>
+                  <td className='td'> 
                     { oweRentalExpiredDate }
                   </td>
                   <td className='td'> 
                     { contractEndDate }
                   </td>
                   <td className='td'> 
-                    
+                    { house.remark }
                   </td>
                   <td className='td'> 
-                    
+                    { actions }
                   </td>
                 </tr>
               )
@@ -381,6 +436,8 @@ class Houses extends Component {
             </tbody>
           </table>
         </div>
+        <HousesCheckIn mansion={state.mansion} houseLayouts={state.houseLayouts} house={state.checkInHouse} open={state.checkInOpen} 
+            ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)}/>
       </div>
     )
   }
@@ -393,7 +450,7 @@ class Houses extends Component {
     // const borderColor = palette.borderColor;
     // const textColor = palette.textColor;
     // const disabledColor = palette.disabledColor;
-    const styles = {
+    var styles = {
       tab: {
         marginLeft: 'auto',
         marginRight: 'auto',
@@ -430,7 +487,14 @@ class Houses extends Component {
         width: '100%',
         opacity: 0,
       },
+      actionButton: {
+        minWidth: '46px',
+        margin: '2px',
+      },
     }
+    styles.actionButtonRent = _.assign({}, styles.actionButton, {backgroundColor: '#2196f3'})
+    styles.actionButtonSubs = _.assign({}, styles.actionButton, {backgroundColor: '#43a047'})
+    styles.actionButtonOut = _.assign({}, styles.actionButton, {backgroundColor: '#009688'})
     return styles;
   }
 }

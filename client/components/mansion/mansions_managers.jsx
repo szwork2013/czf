@@ -204,7 +204,7 @@ class MansionsManagers extends Component {
                   {user.email}
                 </td>
                 <td className='td'> 
-                  {manager.createdAt? new Date(manager.createdAt).toLocaleDateString(): ''}
+                  {manager.createdAt? new moment(manager.createdAt).format('YYYY/MM/DD'): ''}
                 </td>
                 <td className='td'> 
                   <CommonTextField value={manager.remark} onChange={this.commonValueChange(user._id, 'remark').bind(this)} style={styles.tableCellTextField}/>

@@ -26,7 +26,7 @@ class CommonRaisedButton extends Component {
 
     var props = this.props
     return (
-      <RaisedButton label={props.label} labelPosition={props.labelPosition} style={props.style} primary={props.primary} 
+      <RaisedButton label={props.label} labelPosition={props.labelPosition} style={props.style} primary={props.primary} backgroundColor={props.backgroundColor}
         onTouchTap={this.props.onTouchTap} disabled={this.props.disabled}>
         {
           this.props.children

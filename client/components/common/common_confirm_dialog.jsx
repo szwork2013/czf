@@ -11,7 +11,7 @@ import { Dialog, RaisedButton } from 'material-ui/lib'
 
 import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } from '../../utils/location'
 
-class CommonIconButton extends Component {
+class CommonComfirmDialog extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     let props = this.props
@@ -44,4 +44,4 @@ class CommonIconButton extends Component {
   }
 }
 
-export default CommonIconButton;
+export default CommonComfirmDialog;

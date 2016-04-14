@@ -14,6 +14,9 @@ import { provinceAndCityAndArea, getCityByProvince, getAreaByProvinceAndCity } f
 class CommonTextField extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.forceUpdate) {
+      return true
+    }
     let props = this.props
     if (nextProps.value === props.value &&
         nextProps.disabled === props.disabled) {
