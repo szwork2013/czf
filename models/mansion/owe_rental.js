@@ -34,7 +34,7 @@ const OweRentalModel = new Schema({
   rentalEndDate: Date,        //本次租金有效日期，开区间
 
                
-  createdAt: {                //补租金时间
+  createdAt: {                //
     type: Date,
     default: Date.now
   },

@@ -63,3 +63,12 @@ exports.getPaginateCond = function(options) {
 }
 
 require('./playground')
+
+exports.parseDate = function(dateStr) {
+  var retDate = new Date(dateStr)
+  if ( Object.prototype.toString.call(retDate) !== "[object Date]" )
+    return null
+  if (isNaN(retDate.getTime()))
+    return null
+  return retDate
+}

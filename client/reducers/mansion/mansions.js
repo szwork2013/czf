@@ -7,18 +7,28 @@ import log from '../../utils/log'
 import { SIGNOUT, GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, 
   DELETE_MANSION_SUCCESS, IMPORT_HISTORY_VERSION_DATA_SUCCESS,
   SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS,
-  SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS } from '../../constants/actionTypes';
+  SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS,
+  HOUSE_CHECK_IN_SUCCESS } from '../../constants/actionTypes';
 
 
 
 const initialState = {
   length: 0
 };
-
+function findHouseIdx(houses = [], houseRet) {
+  return houses.findIndex( house => {
+    return house.floor===houseRet.floor && house.room===houseRet.room
+  })
+}
 
 export default (state = initialState, action) => {
   var newMansions = {}
+  var mansion = {}
+  var houses = []
+  var data = {}
   var mansionRet = {};
+  var houseRet = {}
+
   switch (action.type) {
     case GET_MANSIONS_SUCCESS:                  //取得全部
       for (let mansion of action.resData.data.mansions) {
@@ -28,8 +38,8 @@ export default (state = initialState, action) => {
       return newMansions
     case GET_MANSIONS_INFO_SUCCESS:             //取得详细
       newMansions = state
-      let data = action.resData.data
-      let mansion = state[data.mansionId]
+      data = action.resData.data
+      mansion = state[data.mansionId]
       if (mansion) {
         mansion = _.assign({}, mansion)
         if (data.managersInfo)
@@ -85,6 +95,18 @@ export default (state = initialState, action) => {
       mansionRet = action.resData.data.mansion
       newMansions[mansionRet._id] = _.assign({}, newMansions[mansionRet._id], mansionRet)
       newMansions[mansionRet._id].managersInfo = action.resData.data.managersInfo
+      return newMansions
+
+    case HOUSE_CHECK_IN_SUCCESS:
+      newMansions = _.assign({}, state)
+      data = action.resData.data
+      mansion = newMansions[data.mansionId]
+      houseRet = action.resData.data.house
+      var idx = findHouseIdx(mansion.houses, houseRet)
+      if (idx) {
+        // log.warn('find idx: ',idx)
+        mansion.houses[idx] = houseRet
+      }
       return newMansions
 
     case SIGNOUT:

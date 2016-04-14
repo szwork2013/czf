@@ -11,6 +11,8 @@ import { getHouseLayoutPatterns } from '../controllers/mansion/house_layout_patt
 import { mansionsAll, mansionInfo, addMansion, deleteMansion, importHistoryVersionData,
          saveMansionBase, saveHouseLayouts, saveFloor, saveManagersInfo } from '../controllers/mansion/mansions';
 
+import { houseCheckIn } from '../controllers/mansion/houses';
+
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/temp/' })
 
@@ -27,6 +29,9 @@ router.put('/mansion/base', jwtVerify, saveMansionBase);
 router.put('/mansion/houseLayouts', jwtVerify, saveHouseLayouts);
 router.put('/mansion/floor', jwtVerify, saveFloor);
 router.put('/mansion/managersInfo', jwtVerify, saveManagersInfo);
+
+
+router.post('/mansion/house/checkin', jwtVerify, houseCheckIn);
 
 export default router;
 

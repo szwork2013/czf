@@ -3,7 +3,8 @@
 import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, DELETE_MANSION_SUCCESS, 
          IMPORT_HISTORY_VERSION_DATA_SUCCESS,
          SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS, 
-         SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS} from '../../constants/actionTypes';
+         SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS,
+         HOUSE_CHECK_IN_SUCCESS} from '../../constants/actionTypes';
 import { CALL_API_V1 } from '../../middleware/api';
 import { APP_STATE } from '../../reducers/master/app_state'
 
@@ -194,7 +195,22 @@ export function saveManagersInfoClick(formData) {
 }
 
 
-
-
-
+/*
+ * 
+ */
+function houseCheckIn(formData) {
+  return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: HOUSE_CHECK_IN_SUCCESS
+      },
+      url: '/mansion/house/checkin',
+      method: 'POST',
+      data: formData
+    }
+  }
+}
+export function houseCheckInClick(formData) {
+  return dispatch => dispatch(houseCheckIn(formData));
+}
 

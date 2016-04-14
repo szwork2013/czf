@@ -1,6 +1,7 @@
 'use strict';
 import log from '../../utils/log'
 import _ from 'lodash'
+import utils from '../../utils'
 
 
 import React, { Component } from 'react';
@@ -17,7 +18,8 @@ class HousesCheckIn extends Component {
     super(props, context);
     this.state = {
       disabled: false,
-      okDisabled: true,
+      okDisable: false,
+      printDisabled: true,
 
       house: {},
       houseLayout: {},
@@ -26,18 +28,26 @@ class HousesCheckIn extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (nextState.forceUpdate) return true;
-    let props = this.props
-    // log.info(_.isEqual(nextProps.house, props.house) && _.isEqual(nextState.house, this.state.house) && nextProps.open === props.open)
-    if (_.isEqual(nextProps.house, props.house) && nextProps.open === props.open) {
-      return false;
-    }
+    // if (nextState.forceUpdate) return true;
+    // let props = this.props
+    // log.error('--------------', _.isEqual(nextProps.house, props.house) && nextProps.open === props.open)
+    // if (_.isEqual(nextProps.house, props.house) && nextProps.open === props.open) {
+    //   return false;
+    // }
     return true;
   }
   componentDidUpdate(prevProps, prevState) {
     if (this.state.forceUpdate) {
       this.setState({forceUpdate: false})
     }
+    setTimeout( () => { 
+      try {
+        this.refs.name.refs.commonTextField.setValue(this.state.house.tenantId.name || '')
+        this.refs.remark.refs.commonTextField.setValue(this.state.house.tenantId.remark || '')
+      } catch (err) {
+
+      }
+    }, 0)
   }
 
   componentWillMount() {
@@ -56,17 +66,17 @@ class HousesCheckIn extends Component {
     var house = _.clone(props.house)
     var disabled = false
     var houseLayout = houseLayouts.find( houseLayout => { return houseLayout._id === house.houseLayout})
-    var tenant = _.pick(house, ['mansionId', 'floor', 'room', ]) || {}
-    tenant.houseId = house._id
-    tenant.type = 'in'
-
+    var tenant = {}
     if (!house.tenantId) {
       disabled = false
+      tenant = _.pick(house, ['mansionId', 'floor', 'room', ]) || {}
       house.tenantId = tenant
+      tenant.houseId = house._id
+      tenant.type = 'in'
       tenant.rentalStartDate = new Date()
       tenant.rentalEndDate = new moment(tenant.rentalStartDate).add(1, 'M').subtract(1, 'day').toDate()
       tenant.contractStartDate = tenant.rentalStartDate
-      tenant.contractEndDate = new moment(tenant.contractStartDate).add(1, 'Y').toDate()
+      tenant.contractEndDate = new moment(tenant.contractStartDate).add(1, 'Y').subtract(1, 'day').toDate()
       tenant.electricMeterEndNumber = house.electricMeterEndNumber
       tenant.waterMeterEndNumber = house.waterMeterEndNumber
       if (house.subscriberId) {
@@ -96,8 +106,9 @@ class HousesCheckIn extends Component {
 
       tenant.summed = {}
       tenant.summed.total = 0;
-
+      this.setState({okDisable: false, printDisabled: true})
       // log.info(tenant.oweRentalExpiredDate)
+      this.calcAll(house)
     } else {
       disabled = true
       tenant = house.tenantId
@@ -111,12 +122,17 @@ class HousesCheckIn extends Component {
       tenant.servicesCharges = tenant.servicesCharges || 0
       tenant.isOwnRental = tenant.oweRental>0 ? true: false
       tenant.oweRental = tenant.oweRental || 0
-
+      if (tenant.isOwnRental) {
+        tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
+      }
+      tenant.electricMeterEndNumber = tenant.electricMeterEndNumber || 0
+      tenant.waterMeterEndNumber = tenant.waterMeterEndNumber || 0
       tenant.summed = tenant.summed || {}
       tenant.summed.total = tenant.summed.total || 0;
+      this.setState({okDisable: true, printDisabled: false})
     }
+    // log.info(_.clone(house))
     this.setState({house, houseLayout, disabled})
-    this.calcAll(house)
   }
 
   commonTextFiledChange(key, isNumber) {
@@ -127,6 +143,8 @@ class HousesCheckIn extends Component {
         value = Number(value)
         if (isNaN(value)) 
           value = 0
+        if (value<0)
+          value = -value
       } 
       tenant[key] = value
       this.setState({house, forceUpdate: true})
@@ -165,7 +183,7 @@ class HousesCheckIn extends Component {
     // summed.electricCharges = 0
     summed.servicesCharges = tenant.servicesCharges
     // summed.compensation = 0
-    log.info(summed.deposit ,summed.rental ,summed.servicesCharges , summed.subscription)
+    // log.info(summed.deposit ,summed.rental ,summed.servicesCharges , summed.subscription)
     summed.total = summed.deposit + summed.rental + summed.servicesCharges - summed.subscription
     this.setState({house, forceUpdate: true})
   }
@@ -174,9 +192,16 @@ class HousesCheckIn extends Component {
   }
 
   ok() {
-    if(this.props.ok) {
-      this.props.ok(this.state.house)
-    }
+    var actions = this.props.actions
+    var house = house || this.state.house
+    var tenant = house.tenantId
+    if (!tenant.name) return actions.openToast({msg: '姓名不能为空'})
+    if (!tenant.mobile) return actions.openToast({msg: '手机号不能为空'})
+    if (!utils.isMobileNumber(tenant.mobile)) return actions.openToast({msg: '手机号格式错误'})
+    actions.houseCheckInClick({house})
+    // if(this.props.ok) {
+    //   this.props.ok(this.state.house)
+    // }
   }
   cancel() {
     if(this.props.cancel) {
@@ -188,8 +213,12 @@ class HousesCheckIn extends Component {
 
   }
 
+  // componentDidUpdate() {
+  //   console.log('.......///////////////////')
+  // }
 
   render() {
+
     var styles = this.getStyles()
     var state = this.state
     // var props = this.props
@@ -199,6 +228,12 @@ class HousesCheckIn extends Component {
     var disabled = state.disabled
     var wordings = {ok: '确定', cancel: '取消'}
     var forceUpdate = state.forceUpdate
+
+    tenant.name = tenant.name || 'Welkinm'
+    tenant.mobile = tenant.mobile || '13710248411'
+    // log.info(this.refs.name)
+
+    //.value = tenant.name
     // var contractStartDate = tenant.contractStartDate? new Date(tenant.contractStartDate): new Date()
     // var contractEndDate = tenant.contractEndDate? new Date(tenant.contractEndDate): new moment(contractStartDate).add(1, 'Y').toDate()
     // var rentalEndDate = tenant.rentalEndDate? new Date(tenant.rentalEndDate): new moment().add(1, 'M').toDate()
@@ -213,9 +248,9 @@ class HousesCheckIn extends Component {
           
           <CommonTextField defaultValue={tenant.name} disabled={disabled} floatingLabelText='姓名' hintText='姓名' 
             style={styles.textField} onChange={this.commonTextFiledChange('name').bind(this)} ref='name'/>
-          <CommonTextField defaultValue={tenant.mobile} disabled={disabled} floatingLabelText='手机号' hintText='手机号' 
+          <CommonTextField value={tenant.mobile} disabled={disabled} floatingLabelText='手机号' hintText='手机号' 
             style={styles.textField} onChange={this.commonTextFiledChange('mobile').bind(this)}/>
-          <CommonTextField defaultValue={tenant.idNo} disabled={disabled} floatingLabelText='身份证' hintText='身份证' 
+          <CommonTextField value={tenant.idNo} disabled={disabled} floatingLabelText='身份证' hintText='身份证' 
             style={styles.textFieldLong} onChange={this.commonTextFiledChange('idNo').bind(this)}/>
           <br />
           
@@ -243,8 +278,8 @@ class HousesCheckIn extends Component {
             style={tenant.subscriberId? styles.textField: _.assign({}, styles.textField, {display: 'none'})}/>
 
           <br />
-          <Checkbox defaultChecked={tenant.isOwnRental} label="欠租金" 
-            style={styles.checkbox} onCheck={this.checkboxChange('isOwnRental').bind(this)}/>
+          <Checkbox defaultChecked={tenant.isOwnRental} label="欠租金" disabled={disabled}
+            style={styles.checkbox} onCheck={this.checkboxChange('isOwnRental').bind(this)} />
           <CommonTextField value={tenant.oweRental} disabled={disabled} floatingLabelText='欠租金' hintText='欠租金' forceUpdate={forceUpdate}
             style={tenant.isOwnRental? styles.textField: _.assign({}, styles.textField, {display: 'none'})} 
             onChange={this.commonTextFiledChange('oweRental', true).bind(this)}/>
@@ -259,11 +294,15 @@ class HousesCheckIn extends Component {
             style={styles.textField} onChange={this.commonTextFiledChange('electricMeterEndNumber', true).bind(this)}/>
           <CommonTextField value={tenant.waterMeterEndNumber} disabled={disabled} floatingLabelText='水表底数' hintText='水表底数' 
             style={styles.textField} onChange={this.commonTextFiledChange('waterMeterEndNumber', true).bind(this)}/>
+
+          <br />
+          <CommonTextField defaultValue={tenant.remark} disabled={disabled} floatingLabelText='备注' hintText='备注' 
+            style={styles.fullWidth} onChange={this.commonTextFiledChange('remark').bind(this)} fullWidth={true} ref='remark'/>
         </div>
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
-                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '365px'}}>
-          <div style={{height: '280px'}}>
+                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '410px'}}>
+          <div style={{height: '325px'}}>
           押金：{tenant.deposit}<br />
           租金：{tenant.rental}<br />
           管理费：{tenant.servicesCharges}<br />
@@ -278,13 +317,13 @@ class HousesCheckIn extends Component {
           <span style={{display: 'inline-block', minWidth: '150px', marginBottom: '10px', marginTop: '10px'}}>
             总计：<span style={{color: 'red'}}>{tenant.summed.total}</span> 元
           </span>
-          
-          <RaisedButton label="打印单据" primary={true} style={{}} onTouchTap={this.print.bind(this)} disabled={disabled} fullWidth={true}/>
+
+          <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>
+          <RaisedButton label="打印单据" primary={true} style={{}} onTouchTap={this.print.bind(this)} disabled={state.printDisabled} />
         </div>
         <div style={{clear: 'both'}}></div>
         <div style={{width: '100%', textAlign: 'right', paddingTop: '20px', marginTop: '10px', borderTop: '1px solid #e0e0e0'}}>
-          <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisabled}/>
-          <RaisedButton label="取消" primary={true} style={styles.marginRight} onTouchTap={this.cancel.bind(this)}/>
+          <RaisedButton label="关闭" style={styles.marginRight} onTouchTap={this.cancel.bind(this)}/>
         </div>
       </Dialog>
     )
@@ -299,6 +338,9 @@ class HousesCheckIn extends Component {
       },
       marginRight: {
         marginRight: '20px',
+      },
+      fullWidth: {
+        width: '480px'
       },
     }
     styles.textField = _.assign({}, styles.marginRight, {width: '130px', overflow: 'hidden',})

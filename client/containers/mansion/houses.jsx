@@ -49,8 +49,10 @@ class Houses extends Component {
       floor: [],
       forceUpdate: true,
 
-      checkInHouse: {},
-      checkInOpen: false
+      // checkInHouse: {},
+      checkInHouseFloor: -1,
+      checkInHouseRoom: -1,
+      checkInOpen: false,
     }
   }
 
@@ -124,9 +126,9 @@ class Houses extends Component {
     if (mansion.houses) {
       floor = this.buildFloor(mansion, mansion.houses)
       mansion.houses = true;
-
-      //测试
-      // this.setState({checkInHouse: floor[1][12], checkInOpen: true})
+      // if (this.state.checkInHouse) {
+      //   this.setState({checkInHouse: floor[this.state.checkInHouse.floor][this.state.checkInHouse.room]})
+      // }
     } 
     this.setState({mansion, houseLayouts, houseLayoutsObj, floor})
     this.getMansionAllInfo(mansion)
@@ -205,15 +207,16 @@ class Houses extends Component {
    */
   checkInClick(floorIdx, houseIdx) {
     return function() {
-      log.info(floorIdx, houseIdx)
-      this.setState({checkInHouse: this.state.floor[floorIdx][houseIdx], checkInOpen: true})
+      // log.info(floorIdx, houseIdx)
+      // this.setState({checkInHouse: this.state.floor[floorIdx][houseIdx], checkInOpen: true})
+      this.setState({checkInHouseFloor: floorIdx, checkInHouseRoom: houseIdx, checkInOpen: true})
     }
   }
   checkInOk() {
     // log.info(floorIdx, houseIdx)
   }
   checkInCancel() {
-    this.setState({checkInHouse: {}, checkInOpen: false})
+    this.setState({checkInHouseFloor: -1, checkInHouseRoom: -1, checkInOpen: false})
   }
 
   getHouses() {
@@ -297,6 +300,11 @@ class Houses extends Component {
 
     var houses = this.getHouses()
     var houseLayoutsObj = state.houseLayoutsObj
+
+    var checkInHouse = {}
+    if (state.checkInOpen) {
+      checkInHouse = state.floor[state.checkInHouseFloor][state.checkInHouseRoom]
+    }
     return (
       <div>
         <div style={{marginBottom: '20px'}}>
@@ -356,6 +364,7 @@ class Houses extends Component {
                 oweRentalExpiredDate = new moment(house.tenantId.oweRentalExpiredDate).format('YYYY.MM.DD')
                 contractEndDate = new moment(house.tenantId.contractEndDate).format('YYYY.MM.DD')
 
+
                 actions.push(
                   <CommonRaisedButton label="交租" primary={true} key={house._id+'rent'}
                     style={styles.actionButton} backgroundColor={styles.actionButtonRent.backgroundColor}/>
@@ -364,6 +373,11 @@ class Houses extends Component {
                   <CommonRaisedButton label="退房" primary={true}  key={house._id+'out'}
                     style={styles.actionButton} backgroundColor={styles.actionButtonOut.backgroundColor}/>
                 )
+                actions.push(
+                  <CommonRaisedButton label="打单据" primary={true} key={house._id+'in'}
+                    style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                )
+
               } else if (house.subscriberId) {
                 state = '定'
                 name = house.subscriberId.name
@@ -436,8 +450,8 @@ class Houses extends Component {
             </tbody>
           </table>
         </div>
-        <HousesCheckIn mansion={state.mansion} houseLayouts={state.houseLayouts} house={state.checkInHouse} open={state.checkInOpen} 
-            ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)}/>
+        <HousesCheckIn mansion={state.mansion} houseLayouts={state.houseLayouts} house={checkInHouse} open={state.checkInOpen} 
+            ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)} actions={props.actions}/>
       </div>
     )
   }

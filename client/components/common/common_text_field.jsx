@@ -26,14 +26,14 @@ class CommonTextField extends Component {
   }
 
   onChange(e) {
-    if (this.props.onChange) this.props.onChange(this.refs['commonTestField'].getValue());
+    if (this.props.onChange) this.props.onChange(this.refs['commonTextField'].getValue());
   }
 
   render() {
     var props = this.props
     return (
       <TextField hintText={props.hintText} floatingLabelText={props.floatingLabelText} 
-                 ref='commonTestField' onChange={this.onChange.bind(this)}
+                 ref='commonTextField' onChange={this.onChange.bind(this)}
                  style={props.style} value={props.value} disabled={props.disabled} fullWidth={props.fullWidth}/>
     )
   }

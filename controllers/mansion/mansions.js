@@ -33,7 +33,7 @@ const mansionInfo = async (req, res) => {
     var mansionId = query.mansionId;
     var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
     if (!mansion) {
-      return res.handleResponse(403, {}, 'mansion not found');
+      return res.handleResponse(400, {}, 'mansion not found');
     }
 
     var houseLayouts = null
@@ -138,7 +138,7 @@ const saveMansionBase = async (req, res) => {
     var newMansion = body.mansion;
     var oldMansion = await Mansions.findOne({_id: newMansion._id, ownerId: user._id, deleted: false}).exec();
     if (!oldMansion) {
-      return res.handleResponse(403, {}, 'mansion not found');
+      return res.handleResponse(400, {}, 'mansion not found');
     }
     //较验数据是否过期
     if (oldMansion.lastUpdatedAt.getTime() !==  (new Date(newMansion.lastUpdatedAt)).getTime()) {
@@ -186,7 +186,7 @@ const saveHouseLayouts = async (req, res) => {
     var newHouseLayouts = body.houseLayouts;
     var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
     if (!mansion) {
-      return res.handleResponse(403, {}, 'mansion not found');
+      return res.handleResponse(400, {}, 'mansion not found');
     }
     var oldHouseLayouts = await HouseLayouts.find({mansionId: mansionId, deleted: false}).sort({order: 1}).exec()
 
@@ -287,7 +287,7 @@ const saveFloor = async (req, res) => {
 
     var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
     if (!mansion) {
-      return res.handleResponse(403, {}, 'mansion not found');
+      return res.handleResponse(400, {}, 'mansion not found');
     }
 
     var updateHouses = []
@@ -377,7 +377,7 @@ const saveManagersInfo = async (req, res) => {
     var newManagersInfo = body.managersInfo;
     var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
     if (!mansion) {
-      return res.handleResponse(403, {}, 'mansion not found');
+      return res.handleResponse(400, {}, 'mansion not found');
     }
     var saveManagers = []
     var saveManager = {}
@@ -398,8 +398,6 @@ const saveManagersInfo = async (req, res) => {
   }
 }
 exports.saveManagersInfo = saveManagersInfo;
-
-
 
 
 
