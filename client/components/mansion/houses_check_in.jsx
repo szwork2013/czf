@@ -108,6 +108,8 @@ class HousesCheckIn extends Component {
       tenant.rental = tenant.rental || 0
       tenant.subscription = tenant.subscription || 0
       tenant.servicesCharges = tenant.servicesCharges || 0
+      tenant.electricCharges = tenant.electricCharges || 0
+      tenant.waterCharges = tenant.waterCharges || 0
       tenant.isOwnRental = tenant.oweRental>0 ? true: false
       tenant.oweRental = tenant.oweRental || 0
       if (tenant.isOwnRental) {
@@ -194,6 +196,8 @@ class HousesCheckIn extends Component {
     var houseLayout = state.houseLayout || {}
     var house = state.house
     var tenant = house.tenantId
+    log.error(tenant.servicesCharges)
+    // tenant.servicesCharges = 0
     var disabled = state.disabled
     var wordings = {ok: '确定', cancel: '取消'}
     var forceUpdate = state.forceUpdate
@@ -268,6 +272,8 @@ class HousesCheckIn extends Component {
           <div style={{height: '325px'}}>
           押金：{tenant.deposit}<br />
           租金：{tenant.rental}<br />
+          电费：{tenant.electricCharges}<br />
+          水费：{tenant.waterCharges}<br />
           管理费：{tenant.servicesCharges}<br />
           { tenant.isOwnRental && (
               <span>欠租金：{tenant.oweRental}<br /></span>

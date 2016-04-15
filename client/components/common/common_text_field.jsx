@@ -21,7 +21,7 @@ class CommonTextField extends Component {
     if (nextProps.defaultValue === props.defaultValue &&
         nextProps.value === props.value &&
         nextProps.disabled === props.disabled) {
-      return false;
+      return true;
     }
     return true;
   }
@@ -32,7 +32,7 @@ class CommonTextField extends Component {
 
   render() {
     var props = this.props
-    if (props.value) {
+    if (props.value !== undefined) {
       return (
         <TextField floatingLabelText={props.floatingLabelText} hintText={props.hintText}
                    ref='commonTextField' onChange={this.onChange.bind(this)} defaultValue={props.defaultValue}
