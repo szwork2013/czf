@@ -8,19 +8,19 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-/*
- * 租金总计
- */
-const TenantSummedModel = new Schema({
-  subscription: Number,                 //订金
-  deposit: Number,                    //押金
-  rental: Number,                     //租金
-  waterCharges: Number,               //水费
-  electricCharges: Number,            //电费
-  servicesCharges: Number,            //物业费
-  compensation: Number,               //损坏赔偿
-  total: Number                       //总计
-});
+// /*
+//  * 租金总计
+//  */
+// const TenantSummedModel = new Schema({
+//   subscription: Number,                 //订金
+//   deposit: Number,                    //押金
+//   rental: Number,                     //租金
+//   waterCharges: Number,               //水费
+//   electricCharges: Number,            //电费
+//   servicesCharges: Number,            //物业费
+//   compensation: Number,               //损坏赔偿
+//   total: Number                       //总计
+// });
 
 /*
  * 出租信息
@@ -65,7 +65,13 @@ const TenantModel = new Schema({
   waterTons: Number,          //用水吨数
   electricKWhs: Number,       //用电度数
   servicesCharges: Number,
-  summed: TenantSummedModel,
+  remark: String,                   //备注
+
+  electricCharges: Number,            //电费
+  servicesCharges: Number,            //物业费
+  compensation: Number,               //损坏赔偿
+  compensation: Number,               //损坏赔偿
+  summed: Number,                     //
   
   createdAt: {                    //交租时间
     type: Date,

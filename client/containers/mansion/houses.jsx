@@ -353,17 +353,18 @@ class Houses extends Component {
               var state = '空'
               var name = ''
               var mobile = ''
-              var oweRentalExpiredDate = ''
+              var rentalEndDate = ''
               var contractEndDate = ''
+              var remark = ''
               var actions = []
               // {manager.createdAt? new Date(manager.createdAt).toLocaleDateString(): ''}
               if (house.tenantId) {
                 state = '租'
                 name = house.tenantId.name
                 mobile = house.tenantId.mobile
-                oweRentalExpiredDate = new moment(house.tenantId.oweRentalExpiredDate).format('YYYY.MM.DD')
+                rentalEndDate = new moment(house.tenantId.rentalEndDate).format('YYYY.MM.DD')
                 contractEndDate = new moment(house.tenantId.contractEndDate).format('YYYY.MM.DD')
-
+                remark = house.tenantId.remark
                 actions.push(
                   <CommonRaisedButton label="交租" primary={true} key={house._id+'rent'}
                     style={styles.actionButton} backgroundColor={styles.actionButtonRent.backgroundColor}/>
@@ -381,7 +382,7 @@ class Houses extends Component {
                 state = '定'
                 name = house.subscriberId.name
                 mobile = house.subscriberId.mobile
-
+                remark = house.subscriberId.remark
                 actions.push(
                   <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
                     style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
@@ -430,13 +431,13 @@ class Houses extends Component {
                     { house.waterMeterEndNumber }
                   </td>
                   <td className='td'> 
-                    { oweRentalExpiredDate }
+                    { rentalEndDate }
                   </td>
                   <td className='td'> 
                     { contractEndDate }
                   </td>
                   <td className='td'> 
-                    { house.remark }
+                    { remark }
                   </td>
                   <td className='td'> 
                     { actions }

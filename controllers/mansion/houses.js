@@ -81,18 +81,24 @@ const houseCheckIn = async (req, res) => {
       tenant.subscriberId = subscriber._id
     }
     
-    var summed = tenant.summed = {}
+    // var summed = tenant.summed = {}
 
-    summed.subscription = tenant.subscription
-    summed.deposit = tenant.deposit
-    summed.rental = tenant.rental
-    summed.waterCharges = 0
-    summed.electricCharges = 0
-    summed.servicesCharges = tenant.servicesCharges
-    summed.compensation = 0
-    summed.total = summed.deposit + summed.rental + summed.servicesCharges - summed.subscription
-    if (isNaN(summed.total)) {
+    // tenant.subscription = tenant.subscription
+    // tenant.deposit = tenant.deposit
+    // tenant.rental = tenant.rental
+    // tenant.servicesCharges = tenant.servicesCharges
+    tenant.waterCharges = 0
+    tenant.electricCharges = 0
+    tenant.compensation = 0
+
+    // log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
+    tenant.summed = tenant.deposit + tenant.rental + tenant.servicesCharges - tenant.subscription
+
+    if (isNaN(tenant.summed)) {
       return res.handleResponse(400, {}, 'calc summed return NaN');
+    }
+    if (tenant.summed !== newTenant.summed) {
+      return res.handleResponse(400, {}, 'calc summed diff');
     }
     tenant.createdBy = user._id
     tenant = await Tenant.create(tenant)
@@ -108,7 +114,7 @@ const houseCheckIn = async (req, res) => {
 
     return res.handleResponse(200, {mansionId, house})
 
-    
+
   } catch(err) {
     log.error(err.name, err.message)
     if (tenant && tenant._id) {

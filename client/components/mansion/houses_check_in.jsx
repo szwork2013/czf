@@ -40,14 +40,14 @@ class HousesCheckIn extends Component {
     if (this.state.forceUpdate) {
       this.setState({forceUpdate: false})
     }
-    setTimeout( () => { 
-      try {
-        this.refs.name.refs.commonTextField.setValue(this.state.house.tenantId.name || '')
-        this.refs.remark.refs.commonTextField.setValue(this.state.house.tenantId.remark || '')
-      } catch (err) {
+    // setTimeout( () => { 
+    //   try {
+    //     this.refs.name.refs.commonTextField.setValue(this.state.house.tenantId.name || '')
+    //     this.refs.remark.refs.commonTextField.setValue(this.state.house.tenantId.remark || '')
+    //   } catch (err) {
 
-      }
-    }, 0)
+    //   }
+    // }, 0)
   }
 
   componentWillMount() {
@@ -79,10 +79,11 @@ class HousesCheckIn extends Component {
       tenant.contractEndDate = new moment(tenant.contractStartDate).add(1, 'Y').subtract(1, 'day').toDate()
       tenant.electricMeterEndNumber = house.electricMeterEndNumber
       tenant.waterMeterEndNumber = house.waterMeterEndNumber
+      tenant.subscription = 0
       if (house.subscriberId) {
         var subscriber = house.subscriberId
         tenant.subscriberId = subscriber._id
-        tenant.subscription = subscriber.subscription || 0
+        subscriber.subscription = subscriber.subscription || 0
         tenant.name = subscriber.name
         tenant.mobile = subscriber.mobile
         tenant.idNo = subscriber.idNo
@@ -104,8 +105,8 @@ class HousesCheckIn extends Component {
       tenant.oweRental = 0
       tenant.oweRentalExpiredDate = new moment(tenant.rentalStartDate).add(7, 'day').toDate()
 
-      tenant.summed = {}
-      tenant.summed.total = 0;
+      tenant.summed = 0
+      // tenant.summed.total = 0;
       this.setState({okDisable: false, printDisabled: true})
       // log.info(tenant.oweRentalExpiredDate)
       this.calcAll(house)
@@ -127,8 +128,8 @@ class HousesCheckIn extends Component {
       }
       tenant.electricMeterEndNumber = tenant.electricMeterEndNumber || 0
       tenant.waterMeterEndNumber = tenant.waterMeterEndNumber || 0
-      tenant.summed = tenant.summed || {}
-      tenant.summed.total = tenant.summed.total || 0;
+      tenant.summed = tenant.summed || 0
+      // tenant.summed.total = tenant.summed.total || 0;
       this.setState({okDisable: true, printDisabled: false})
     }
     // log.info(_.clone(house))
@@ -175,16 +176,16 @@ class HousesCheckIn extends Component {
   calcAll(house) {
     var house = house || this.state.house
     var tenant = house.tenantId
-    var summed = tenant.summed || {}
-    summed.subscription = tenant.subscription || 0
-    summed.deposit = tenant.deposit
-    summed.rental = tenant.rental
+    // tenant.summed = tenant.summed || 0
+    // tenant.subscription = tenant.subscription || 0
+    // tenant.deposit = tenant.deposit
+    // tenant.rental = tenant.rental
     // summed.waterCharges = 0
     // summed.electricCharges = 0
-    summed.servicesCharges = tenant.servicesCharges
+    // tenant.servicesCharges = tenant.servicesCharges
     // summed.compensation = 0
-    // log.info(summed.deposit ,summed.rental ,summed.servicesCharges , summed.subscription)
-    summed.total = summed.deposit + summed.rental + summed.servicesCharges - summed.subscription
+    log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
+    tenant.summed = tenant.deposit + tenant.rental + tenant.servicesCharges - tenant.subscription
     this.setState({house, forceUpdate: true})
   }
   print() {
@@ -239,7 +240,7 @@ class HousesCheckIn extends Component {
     // var rentalEndDate = tenant.rentalEndDate? new Date(tenant.rentalEndDate): new moment().add(1, 'M').toDate()
 
     return (
-      <Dialog title={'登记：'+(house.floor+1)+'楼'+(house.room+1)+'房'+'  [  '+houseLayout.description+'  ]'} modal={true} 
+      <Dialog title={'入住登记：'+(house.floor+1)+'楼'+(house.room+1)+'房'+'  [  '+houseLayout.description+'  ]'} modal={true} 
         open={this.props.open} autoDetectWindowHeight={false} 
         contentStyle={{transform: 'translate3d(0px, 0px, 0px)'}} 
         titleStyle={{borderBottom: '2px solid #e0e0e0', padding: '10px 24px 5px 24px'}} 
@@ -315,7 +316,7 @@ class HousesCheckIn extends Component {
           
           </div>
           <span style={{display: 'inline-block', minWidth: '150px', marginBottom: '10px', marginTop: '10px'}}>
-            总计：<span style={{color: 'red'}}>{tenant.summed.total}</span> 元
+            总计：<span style={{color: 'red'}}>{tenant.summed}</span> 元
           </span>
 
           <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>
