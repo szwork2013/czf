@@ -64,15 +64,16 @@ const TenantModel = new Schema({
   waterMeterEndNumber: Number,     //水表
   waterTons: Number,          //用水吨数
   electricKWhs: Number,       //用电度数
-  servicesCharges: Number,
-  remark: String,                   //备注
+  servicesCharges: Number,          //物业费
+  
 
   electricCharges: Number,            //电费
-  servicesCharges: Number,            //物业费
+  waterCharges: Number,               //水费          
   compensation: Number,               //损坏赔偿
   compensation: Number,               //损坏赔偿
-  summed: Number,                     //
-  
+  summed: Number,                     //费用总计
+
+  remark: String,                   //备注
   createdAt: {                    //交租时间
     type: Date,
     default: Date.now

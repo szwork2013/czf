@@ -27,6 +27,8 @@ import CommonRaisedButton from '../../components/common/common_raised_button'
 
 
 import HousesCheckIn from '../../components/mansion/houses_check_in'
+import HousesPayRent from '../../components/mansion/houses_pay_rent'
+
 // import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
 
 
@@ -53,6 +55,10 @@ class Houses extends Component {
       checkInHouseFloor: -1,
       checkInHouseRoom: -1,
       checkInOpen: false,
+
+      payRentHouseFloor: -1,
+      payRentHouseRoom: -1,
+      payRentOpen: false,
     }
   }
 
@@ -207,16 +213,21 @@ class Houses extends Component {
    */
   checkInClick(floorIdx, houseIdx) {
     return function() {
-      // log.info(floorIdx, houseIdx)
-      // this.setState({checkInHouse: this.state.floor[floorIdx][houseIdx], checkInOpen: true})
       this.setState({checkInHouseFloor: floorIdx, checkInHouseRoom: houseIdx, checkInOpen: true})
     }
   }
-  checkInOk() {
+  checkInOk(house) {
     // log.info(floorIdx, houseIdx)
+    this.props.actions.houseCheckInClick({house})
   }
   checkInCancel() {
     this.setState({checkInHouseFloor: -1, checkInHouseRoom: -1, checkInOpen: false})
+  }
+
+  payRentClick(floorIdx, houseIdx) {
+    return function() {
+      this.setState({payRentHouseFloor: floorIdx, payRentHouseRoom: houseIdx, payRentOpen: true})
+    }
   }
 
   getHouses() {
@@ -450,7 +461,7 @@ class Houses extends Component {
           </table>
         </div>
         <HousesCheckIn mansion={state.mansion} houseLayouts={state.houseLayouts} house={checkInHouse} open={state.checkInOpen} 
-            ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)} actions={props.actions}/>
+            ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)} openToast={props.actions.openToast}/>
       </div>
     )
   }

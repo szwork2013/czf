@@ -18,7 +18,7 @@ class CommonTextField extends Component {
       return true
     }
     let props = this.props
-    if (nextProps.defaultValue = props.defaultValue &&
+    if (nextProps.defaultValue === props.defaultValue &&
         nextProps.value === props.value &&
         nextProps.disabled === props.disabled) {
       return false;
@@ -32,11 +32,19 @@ class CommonTextField extends Component {
 
   render() {
     var props = this.props
-    return (
-      <TextField hintText={props.hintText} floatingLabelText={props.floatingLabelText} 
-                 ref='commonTextField' onChange={this.onChange.bind(this)} defaultValue={props.defaultValue}
-                 style={props.style} value={props.value} disabled={props.disabled} fullWidth={props.fullWidth}/>
-    )
+    if (props.value) {
+      return (
+        <TextField floatingLabelText={props.floatingLabelText} hintText={props.hintText}
+                   ref='commonTextField' onChange={this.onChange.bind(this)} defaultValue={props.defaultValue}
+                   style={props.style} value={props.value} disabled={props.disabled} fullWidth={props.fullWidth}/>
+      )
+    } else {
+      return (
+        <TextField floatingLabelText={props.floatingLabelText} 
+                   ref='commonTextField' onChange={this.onChange.bind(this)} defaultValue={props.defaultValue}
+                   style={props.style} disabled={props.disabled} fullWidth={props.fullWidth}/>
+      )
+    }
   }
 }
 

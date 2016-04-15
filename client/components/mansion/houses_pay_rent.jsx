@@ -13,7 +13,7 @@ import { Dialog, RaisedButton, Divider, TextField, DatePicker, Checkbox } from '
 import CommonTextField from '../common/common_text_field'
 
 
-class HousesCheckIn extends Component {
+class HousesPayRent extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -313,7 +313,7 @@ class HousesCheckIn extends Component {
   }
 }
 
-export default HousesCheckIn;
+export default HousesPayRent;
 
 
 
