@@ -2,7 +2,7 @@
 import log from '../../utils/log'
 import _ from 'lodash'
 import utils from '../../utils'
-
+import moment from 'moment'
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -57,14 +57,17 @@ class MansionsManagers extends Component {
 
   commonValueChange(idx, key, isNumber) {
     return function (value) {
-      if (isNumber) {
-        value = Number(value)
-        if (isNaN(value)) 
-          value = 0
-      } 
+      // if (isNumber) {
+      //   value = Number(value)
+      //   if (isNaN(value)) 
+      //     value = 0
+      // } 
       let managersInfo = this.props.managersInfo
-      managersInfo[idx][key] = value
-      this.props.updateParentState({managersInfo})
+      if (isNumber && !utils.isPositiveNumber(value)) {
+      } else {
+        managersInfo[idx][key] = value
+        this.props.updateParentState({managersInfo})
+      }
     }
   }
 

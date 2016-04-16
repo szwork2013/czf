@@ -1,13 +1,23 @@
 'use strict';
 
+const positiveNumberReg = /^[0-9]*[.]*[0-9]*$/
+exports.isPositiveNumber = function isPositiveNumber(str) {
+  return positiveNumberReg.test(str)
+}
+
+const numberReg = /^[\-]?[0-9]*[.]*[0-9]*$/
+exports.isNumber = function isNumber(str) {
+  return numberReg.test(str)
+}
+
 /**
  * 判断手机号码格式
  * @function
  * @param {string} mobile - 手机号码
  */
+const mobileReg = /^1\d{10}$/;
 exports.isMobileNumber = function isMobileNumber(mobileNumber) {
-  var re = /^1\d{10}$/;
-  return re.test(mobileNumber);
+  return mobileReg.test(mobileNumber);
 }
 
 /**
@@ -62,6 +72,15 @@ exports.decodeGender = function decodeGender(gender) {
   return GENDER_MAP[gender] || ''
 }
 
+
+exports.parseDate = function parseDate(dateStr) {
+  var retDate = new Date(dateStr)
+  if ( Object.prototype.toString.call(retDate) !== "[object Date]" )
+    return null
+  if (isNaN(retDate.getTime()))
+    return null
+  return retDate
+}
 
 
 

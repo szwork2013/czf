@@ -70,7 +70,6 @@ const TenantModel = new Schema({
   electricCharges: Number,            //电费
   waterCharges: Number,               //水费          
   compensation: Number,               //损坏赔偿
-  compensation: Number,               //损坏赔偿
   summed: Number,                     //费用总计
 
   remark: String,                   //备注
@@ -81,6 +80,10 @@ const TenantModel = new Schema({
   createdBy: {
     type: ObjectId,
     ref: 'users'
+  },
+  lastUpdatedAt: {              //最后修改时间
+    type: Date,
+    default: Date.now
   }
 });
 

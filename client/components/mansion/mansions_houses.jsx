@@ -1,7 +1,7 @@
 'use strict';
 import log from '../../utils/log'
 import _ from 'lodash'
-
+import utils from '../../utils'
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -81,14 +81,17 @@ class MansionsHouse extends Component {
 
   commonValueChange(floorIdx, roomIdx, key, isNumber) {
     return function (value) {
-      if (isNumber) {
-        value = Number(value)
-        if (isNaN(value)) 
-          value = 0
-      } 
+      // if (isNumber) {
+      //   value = Number(value)
+      //   if (isNaN(value)) 
+      //     value = 0
+      // } 
       var house = this.state.floor[floorIdx][roomIdx]
-      house[key] = value
-      this.props.updateParentState({floor: this.state.floor})
+      if (isNumber && !utils.isPositiveNumber(value)) {
+      } else {
+        house[key] = value
+        this.props.updateParentState({floor: this.state.floor})
+      }
     }
   }
 
@@ -225,7 +228,7 @@ class MansionsHouse extends Component {
               <th style={{width: '15%'}} className='th'>户型</th>
               <th style={{width: '10%'}} className='th'>电表底表</th>
               <th style={{width: '10%'}} className='th'>水表底表</th>
-              <th style={{width: '8%'}} className='th'>已出租</th>
+              <th style={{width: '5%'}} className='th'>状态</th>
               <th className='th'>备注</th>
               <th style={{width: '12%'}} className='th'>操作</th>
             </tr>
@@ -233,6 +236,12 @@ class MansionsHouse extends Component {
           <tbody className='tbody'>
           {houses.map((house, idx) => {
             var keyString = (house.isExist+house.floor)+house.room
+            var state = ''
+            if (house.tenantId) {
+              state = '租'
+            } else if(house.tenantId) {
+              state = '定'
+            }
             var tr = house.isExist? (
               <tr className={idx%2===0? 'tr odd': 'tr even'} key={'houses:'+house+':'+idx}>
                 <td className='td'> 
@@ -252,15 +261,18 @@ class MansionsHouse extends Component {
                   <CommonTextField value={house.waterMeterEndNumber} onChange={this.commonValueChange(house.floor, house.room, 'waterMeterEndNumber', true).bind(this)} style={styles.tableCellTextField}/>
                 </td>
                 <td className='td'> 
-                  {house.tenantId? (
-                    <CommonIconButton keyString={keyString} iconStyle={{color: '#0CC022'}}>
-                      <FontIcon className="material-icons">perm_identity</FontIcon>
-                    </CommonIconButton>
-                  ): (
-                    <CommonIconButton keyString={keyString} iconStyle={{color: '#E1E9E2'}}>
-                      <FontIcon className="material-icons" >perm_identity</FontIcon>
-                    </CommonIconButton>
-                  )}
+                  {
+                    state
+                    // house.tenantId? (
+                    //   <CommonIconButton keyString={keyString} iconStyle={{color: '#0CC022'}}>
+                    //     <FontIcon className="material-icons">perm_identity</FontIcon>
+                    //   </CommonIconButton>
+                    // ): (
+                    //   <CommonIconButton keyString={keyString} iconStyle={{color: '#E1E9E2'}}>
+                    //     <FontIcon className="material-icons" >perm_identity</FontIcon>
+                    //   </CommonIconButton>
+                    // )
+                  }
                 </td>
                 <td className='td'> 
                   <CommonTextField value={house.remark} onChange={this.commonValueChange(house.floor, house.room, 'remark').bind(this)} style={styles.tableCellTextField}/>

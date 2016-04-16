@@ -4,7 +4,7 @@ import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, D
          IMPORT_HISTORY_VERSION_DATA_SUCCESS,
          SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS, 
          SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS,
-         HOUSE_CHECK_IN_SUCCESS} from '../../constants/actionTypes';
+         HOUSE_CHECK_IN_SUCCESS, HOUSE_PAY_RENT_SUCCESS} from '../../constants/actionTypes';
 import { CALL_API_V1 } from '../../middleware/api';
 import { APP_STATE } from '../../reducers/master/app_state'
 
@@ -196,7 +196,7 @@ export function saveManagersInfoClick(formData) {
 
 
 /*
- * 
+ * 入住
  */
 function houseCheckIn(formData) {
   return {
@@ -213,4 +213,24 @@ function houseCheckIn(formData) {
 export function houseCheckInClick(formData) {
   return dispatch => dispatch(houseCheckIn(formData));
 }
+
+/*
+ * 交租
+ */
+function housePayRent(formData) {
+return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: HOUSE_PAY_RENT_SUCCESS
+      },
+      url: '/mansion/house/payRent',
+      method: 'POST',
+      data: formData
+    }
+  }
+}
+export function housePayRentClick(formData) {
+  return dispatch => dispatch(housePayRent(formData));
+}
+
 

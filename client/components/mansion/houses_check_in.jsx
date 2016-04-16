@@ -2,6 +2,7 @@
 import log from '../../utils/log'
 import _ from 'lodash'
 import utils from '../../utils'
+import IDCard from '../../../utils/identitycard'
 
 
 import React, { Component } from 'react';
@@ -54,12 +55,12 @@ class HousesCheckIn extends Component {
   stateHouse(props) {
     var mansion = props.mansion
     var houseLayouts = props.houseLayouts
-    var house = _.clone(props.house)
+    var house = _.cloneDeep(props.house)
     var disabled = false
     var houseLayout = houseLayouts.find( houseLayout => { return houseLayout._id === house.houseLayout})
     var tenant = {}
     if (!house.tenantId) {
-      disabled = false
+      disabled = props.disabled!==undefined? props.disabled: false
       tenant = _.pick(house, ['mansionId', 'floor', 'room', ]) || {}
       house.tenantId = tenant
       tenant.houseId = house._id
@@ -73,6 +74,7 @@ class HousesCheckIn extends Component {
       tenant.electricCharges = 0
       tenant.waterCharges = 0
       tenant.subscription = 0
+      tenant.doorCardCount = 0
       if (house.subscriberId) {
         var subscriber = house.subscriberId
         tenant.subscriberId = subscriber._id
@@ -90,7 +92,7 @@ class HousesCheckIn extends Component {
         tenant.rental = 0
         tenant.servicesCharges = 0
       }
-      tenant.isOwnRental = false
+      tenant.isOweRental = false
       tenant.oweRental = 0
       tenant.oweRentalExpiredDate = new moment(tenant.rentalStartDate).add(7, 'day').toDate()
 
@@ -98,7 +100,7 @@ class HousesCheckIn extends Component {
       this.setState({okDisable: false, printDisabled: true})
       this.calcAll(house)
     } else {
-      disabled = true
+      disabled = props.disabled!==undefined? props.disabled: true
       tenant = house.tenantId
       tenant.rentalStartDate = new Date(tenant.rentalStartDate)
       tenant.rentalEndDate = new Date(tenant.rentalEndDate)
@@ -110,9 +112,9 @@ class HousesCheckIn extends Component {
       tenant.servicesCharges = tenant.servicesCharges || 0
       tenant.electricCharges = tenant.electricCharges || 0
       tenant.waterCharges = tenant.waterCharges || 0
-      tenant.isOwnRental = tenant.oweRental>0 ? true: false
+      tenant.isOweRental = tenant.oweRental>0 ? true: false
       tenant.oweRental = tenant.oweRental || 0
-      if (tenant.isOwnRental) {
+      if (tenant.isOweRental) {
         tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
       }
       tenant.electricMeterEndNumber = tenant.electricMeterEndNumber || 0
@@ -127,16 +129,19 @@ class HousesCheckIn extends Component {
     return function (value) {
       var house = this.state.house
       var tenant = house.tenantId
-      if (isNumber) {
-        value = Number(value)
-        if (isNaN(value)) 
-          value = 0
-        if (value<0)
-          value = -value
-      } 
-      tenant[key] = value
-      this.setState({house, forceUpdate: true})
-      this.calcAll()
+      // if (isNumber) {
+      //   value = Number(value)
+      //   if (isNaN(value)) 
+      //     value = 0
+      //   if (value<0)
+      //     value = -value
+      // } 
+      if (isNumber && !utils.isPositiveNumber(value)) {
+      } else {
+        tenant[key] = value
+        this.setState({house, forceUpdate: true})
+        this.calcAll()
+      }
     }
   }
   datePickerChange(key) {
@@ -161,10 +166,12 @@ class HousesCheckIn extends Component {
   }
 
   calcAll(house) {
+    var mansion = this.props.mansion
     var house = house || this.state.house
     var tenant = house.tenantId
     // log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
-    tenant.summed = tenant.deposit + tenant.rental + tenant.servicesCharges - tenant.subscription
+    tenant.summed = Number(tenant.deposit) + Number(tenant.rental) + Number(tenant.servicesCharges) - Number(tenant.subscription) +
+      (Number(tenant.doorCardCount) * mansion.doorCardSellCharges)
     this.setState({house, forceUpdate: true})
   }
   print() {
@@ -175,9 +182,36 @@ class HousesCheckIn extends Component {
     var openToast = this.props.openToast || function() {}
     var house = this.state.house
     var tenant = house.tenantId
+
     if (!tenant.name) return openToast({msg: '姓名不能为空'})
     if (!tenant.mobile) return openToast({msg: '手机号不能为空'})
     if (!utils.isMobileNumber(tenant.mobile)) return openToast({msg: '手机号格式错误'})
+    if (tenant.idNo && !IDCard.IDIsValid(tenant.idNo)) return openToast({msg: '身份证格式错误'})
+
+    if (!utils.parseDate(tenant.contractStartDate)) return openToast({msg: '请选择合同开始日期'})
+    if (!utils.parseDate(tenant.contractEndDate)) return openToast({msg: '请选择合同结束日期'})
+    if (!utils.parseDate(tenant.rentalStartDate)) return openToast({msg: '请选择本次交租日期'})
+    if (!utils.parseDate(tenant.rentalEndDate)) return openToast({msg: '请选择下次交租日期'})
+
+    if (tenant.deposit==='' || tenant.deposit===undefined) return openToast({msg: '请输入押金'})
+    if (tenant.rental==='' || tenant.rental===undefined) return openToast({msg: '请输入租金'})
+    if (tenant.servicesCharges==='' || tenant.servicesCharges===undefined) return openToast({msg: '请输入管理费'})
+    if (tenant.isOweRental) {
+      if (tenant.oweRental==='' || tenant.oweRental===undefined) return openToast({msg: '请输入欠租金'})
+      if (!utils.parseDate(tenant.oweRentalExpiredDate)) return openToast({msg: '请选择租金补齐日期'})
+    } 
+
+    if (tenant.electricMeterEndNumber==='' || tenant.electricMeterEndNumber===undefined) return openToast({msg: '请输入电表底数'})
+    if (tenant.waterMeterEndNumber==='' || tenant.waterMeterEndNumber===undefined) return openToast({msg: '请输入水表底数'})
+    if (tenant.doorCardCount==='' || tenant.doorCardCount===undefined) return openToast({msg: '请输入购门卡数'})
+
+    tenant.deposit = Number(tenant.deposit)
+    tenant.rental = Number(tenant.rental)
+    tenant.servicesCharges = Number(tenant.servicesCharges)
+    tenant.electricMeterEndNumber = Number(tenant.electricMeterEndNumber)
+    tenant.waterMeterEndNumber = Number(tenant.waterMeterEndNumber)
+    tenant.doorCardCount = Number(tenant.doorCardCount)
+    this.setState({tenant, forceUpdate: true})
     if(this.props.ok) {
       this.props.ok(house)
     }
@@ -194,9 +228,9 @@ class HousesCheckIn extends Component {
     var state = this.state
     var props = this.props
     var houseLayout = state.houseLayout || {}
+    var mansion = this.props.mansion
     var house = state.house
     var tenant = house.tenantId
-    log.error(tenant.servicesCharges)
     // tenant.servicesCharges = 0
     var disabled = state.disabled
     var wordings = {ok: '确定', cancel: '取消'}
@@ -213,58 +247,62 @@ class HousesCheckIn extends Component {
         bodyStyle={{overflowY: 'auto', maxHeight: 'calc(100vh - 110px)', padding: '5px 24px 24px 24px'}}>
         <div style={{display: 'inline-block', float: 'left', width: '500px'}}>
           
-          <CommonTextField defaultValue={tenant.name} disabled={disabled} floatingLabelText='姓名' hintText='姓名' 
+          <CommonTextField defaultValue={tenant.name} disabled={disabled} floatingLabelText='姓名'
             style={styles.textField} onChange={this.commonTextFiledChange('name').bind(this)} ref='name'/>
-          <CommonTextField value={tenant.mobile} disabled={disabled} floatingLabelText='手机号' hintText='手机号' 
+          <CommonTextField value={tenant.mobile} disabled={disabled} floatingLabelText='手机号'  
             style={styles.textField} onChange={this.commonTextFiledChange('mobile').bind(this)}/>
-          <CommonTextField value={tenant.idNo} disabled={disabled} floatingLabelText='身份证' hintText='身份证' 
+          <CommonTextField value={tenant.idNo} disabled={disabled} floatingLabelText='身份证' 
             style={styles.textFieldLong} onChange={this.commonTextFiledChange('idNo').bind(this)}/>
           <br />
           
           <DatePicker value={tenant.contractStartDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='合同开始日期' hintText='合同开始日期' autoOk={true}
+            floatingLabelText='合同开始日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('contractStartDate').bind(this)}/>
           <DatePicker value={tenant.contractEndDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='合同结束日期' hintText='合同结束日期' autoOk={true}
+            floatingLabelText='合同结束日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('contractEndDate').bind(this)}/>
           <DatePicker value={tenant.rentalEndDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='下次交租日期' hintText='下次交租日期' autoOk={true}
+            floatingLabelText='下次交租日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('rentalEndDate').bind(this)}/>
           <br />
 
-          <CommonTextField value={tenant.deposit} disabled={disabled} floatingLabelText='押金' hintText='押金' 
+          <CommonTextField value={tenant.deposit} disabled={disabled} floatingLabelText='押金' 
             style={styles.textField} onChange={this.commonTextFiledChange('deposit', true).bind(this)}/>
-          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='租金' hintText='租金' 
+          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='租金' 
             style={styles.textField} onChange={this.commonTextFiledChange('rental', true).bind(this)}/>
-          <CommonTextField value={tenant.servicesCharges} disabled={disabled} floatingLabelText='管理费' hintText='管理费' 
+          <CommonTextField value={tenant.servicesCharges} disabled={disabled} floatingLabelText='管理费' 
             style={styles.textField} onChange={this.commonTextFiledChange('servicesCharges', true).bind(this)}/>
-          <CommonTextField value={tenant.subscription} disabled={true} floatingLabelText='已收定金' hintText='已收定金' 
-            style={tenant.subscriberId? styles.textField: _.assign({}, styles.textField, {display: 'none'})}/>
 
           <br />
-          <Checkbox defaultChecked={tenant.isOwnRental} label="欠租金" disabled={disabled}
-            style={styles.checkbox} onCheck={this.checkboxChange('isOwnRental').bind(this)} />
-          <CommonTextField value={tenant.oweRental} disabled={disabled} floatingLabelText='欠租金' hintText='欠租金' forceUpdate={forceUpdate}
-            style={tenant.isOwnRental? styles.textField: _.assign({}, styles.textField, {display: 'none'})} 
+          <Checkbox defaultChecked={tenant.isOweRental} label="欠租金" disabled={disabled}
+            style={styles.checkbox} onCheck={this.checkboxChange('isOweRental').bind(this)} />
+          <CommonTextField value={tenant.oweRental} disabled={disabled} floatingLabelText='欠租金' forceUpdate={forceUpdate}
+            style={tenant.isOweRental? styles.textField: _.assign({}, styles.textField, {display: 'none'})} 
             onChange={this.commonTextFiledChange('oweRental', true).bind(this)}/>
           <DatePicker value={tenant.oweRentalExpiredDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='租金补齐日期' hintText='租金补齐日期' autoOk={true}
-            style={tenant.isOwnRental? styles.dataPicker: _.assign({}, styles.dataPicker, {display: 'none'})} 
+            floatingLabelText='租金补齐日期' autoOk={true}
+            style={tenant.isOweRental? styles.dataPicker: _.assign({}, styles.dataPicker, {display: 'none'})} 
             wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('oweRentalExpiredDate').bind(this)}/>
 
           <br />
-          <CommonTextField value={tenant.electricMeterEndNumber} disabled={disabled} floatingLabelText='电表底数' hintText='电表底数' 
+          <CommonTextField value={tenant.electricMeterEndNumber} disabled={disabled} 
+            floatingLabelText={'电表底数:'+house.electricMeterEndNumber} 
             style={styles.textField} onChange={this.commonTextFiledChange('electricMeterEndNumber', true).bind(this)}/>
-          <CommonTextField value={tenant.waterMeterEndNumber} disabled={disabled} floatingLabelText='水表底数' hintText='水表底数' 
+          <CommonTextField value={tenant.waterMeterEndNumber} disabled={disabled} 
+            floatingLabelText={'水表底数:'+house.waterMeterEndNumber} 
             style={styles.textField} onChange={this.commonTextFiledChange('waterMeterEndNumber', true).bind(this)}/>
+          <CommonTextField value={tenant.subscription} disabled={true} floatingLabelText='已收定金' 
+            style={tenant.subscriberId? styles.textField: _.assign({}, styles.textField, {display: 'none'})}/>
 
           <br />
+          <CommonTextField value={tenant.doorCardCount} disabled={disabled} floatingLabelText='购门卡数' forceUpdate={forceUpdate}
+            style={styles.textField} onChange={this.commonTextFiledChange('doorCardCount', true).bind(this)}/>
           <CommonTextField defaultValue={tenant.remark} disabled={disabled} floatingLabelText='备注'
-            style={styles.fullWidth} onChange={this.commonTextFiledChange('remark').bind(this)} fullWidth={true} ref='remark'/>
+            style={styles.twoColunmTextField} onChange={this.commonTextFiledChange('remark').bind(this)} fullWidth={true} ref='remark'/>
         </div>
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
@@ -275,11 +313,11 @@ class HousesCheckIn extends Component {
           电费：{tenant.electricCharges}<br />
           水费：{tenant.waterCharges}<br />
           管理费：{tenant.servicesCharges}<br />
-          { tenant.isOwnRental && (
-              <span>欠租金：{tenant.oweRental}<br /></span>
-          )}
           { tenant.subscriberId && (
               <span>定金：{tenant.subscription}<br /></span>
+          )}
+          { Number(tenant.doorCardCount)>0 && (
+              <span>门卡：{Number(tenant.doorCardCount) * mansion.doorCardSellCharges}<br /></span>
           )}
           
           </div>
@@ -312,6 +350,7 @@ class HousesCheckIn extends Component {
       },
     }
     styles.textField = _.assign({}, styles.marginRight, {width: '130px', overflow: 'hidden',})
+    styles.twoColunmTextField = _.assign({}, styles.marginRight, {width: '280px', overflow: 'hidden',})
     styles.textFieldLong = _.assign({}, styles.marginRight, {width: '180px', overflow: 'hidden',})
     styles.dataPicker = _.assign({}, styles.textField, {display: 'inline-block', overflowX: 'hidden', overflowY: 'hidden'})
     styles.checkbox = _.assign({}, styles.marginRight, {width: '130px', display: 'inline-block', whiteSpace: 'nowrap', fontSize: '15px', top: '30px', minHeight: '72px'})

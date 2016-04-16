@@ -75,7 +75,6 @@ class MansionsHeader extends Component {
   }
   commonTextFiledChange(key) {
     return function (value) {
-      log.error(value)
       if(this.refs[key] && this.refs[key].getValue)
         return this.setState({[key]: this.refs[key].getValue()})
       return this.setState({[key]: value})

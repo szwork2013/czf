@@ -217,7 +217,6 @@ class Houses extends Component {
     }
   }
   checkInOk(house) {
-    // log.info(floorIdx, houseIdx)
     this.props.actions.houseCheckInClick({house})
   }
   checkInCancel() {
@@ -228,6 +227,12 @@ class Houses extends Component {
     return function() {
       this.setState({payRentHouseFloor: floorIdx, payRentHouseRoom: houseIdx, payRentOpen: true})
     }
+  }
+  payRentOk(house) {
+    this.props.actions.housePayRentClick({house})
+  }
+  payRentCancel() {
+    this.setState({payRentHouseFloor: -1, payRentHouseRoom: -1, payRentOpen: false})
   }
 
   getHouses() {
@@ -316,6 +321,11 @@ class Houses extends Component {
     if (state.checkInOpen) {
       checkInHouse = state.floor[state.checkInHouseFloor][state.checkInHouseRoom]
     }
+    var payRentHouse = {}
+    if (state.payRentOpen) {
+      payRentHouse = state.floor[state.payRentHouseFloor][state.payRentHouseRoom]
+    }
+
     return (
       <div>
         <div style={{marginBottom: '20px'}}>
@@ -344,18 +354,18 @@ class Houses extends Component {
           <table className='table'>
             <thead className='thead'>
               <tr className='tr'>
-                <th style={{width: '5%'}} className='th'>楼层</th>
-                <th style={{width: '5%'}} className='th'>房间</th>
+                <th style={{width: '4.5%'}} className='th'>楼层</th>
+                <th style={{width: '4.5%'}} className='th'>房间</th>
                 <th style={{width: '10%'}} className='th'>户型</th>
-                <th style={{width: '5%'}} className='th'>状态</th>
+                <th style={{width: '4.5%'}} className='th'>状态</th>
                 <th style={{width: '7%'}} className='th'>姓名</th>
-                <th style={{width: '11%'}} className='th'>手机</th>
+                <th style={{width: '10%'}} className='th'>手机</th>
                 <th style={{width: '5%'}} className='th'>电表</th>
                 <th style={{width: '5%'}} className='th'>水表</th>
                 <th style={{width: '8%'}} className='th'>下次交租</th>
                 <th style={{width: '8%'}} className='th'>合同终止</th>
                 <th className='th'>备注</th>
-                <th style={{width: '20%'}} className='th'>操作</th>
+                <th style={{width: '22%'}} className='th'>操作</th>
               </tr>
             </thead>
             <tbody className='tbody'>
@@ -376,40 +386,68 @@ class Houses extends Component {
                 rentalEndDate = new moment(house.tenantId.rentalEndDate).format('YYYY.MM.DD')
                 contractEndDate = new moment(house.tenantId.contractEndDate).format('YYYY.MM.DD')
                 remark = house.tenantId.remark
+                // actions.push(
+                //   <CommonRaisedButton label="交租" primary={true} key={house._id+'rent1'}
+                //     style={styles.actionButton} backgroundColor={styles.actionButtonRent.backgroundColor}
+                //     onTouchTap={this.payRentClick(house.floor, house.room).bind(this)}/>
+                // )
+                // actions.push(
+                //   <CommonRaisedButton label="退房" primary={true}  key={house._id+'out'}
+                //     style={styles.actionButton} backgroundColor={styles.actionButtonOut.backgroundColor}/>
+                // )
+                // actions.push(
+                //   <CommonRaisedButton label="打单据" primary={true} key={house._id+'in'}
+                //     style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                // )
                 actions.push(
-                  <CommonRaisedButton label="交租" primary={true} key={house._id+'rent'}
-                    style={styles.actionButton} backgroundColor={styles.actionButtonRent.backgroundColor}/>
+                  <button key={house._id+'rent'} style={styles.button} 
+                    onTouchTap={this.payRentClick(house.floor, house.room).bind(this)}>交租</button>
                 )
                 actions.push(
-                  <CommonRaisedButton label="退房" primary={true}  key={house._id+'out'}
-                    style={styles.actionButton} backgroundColor={styles.actionButtonOut.backgroundColor}/>
+                  <button key={house._id+'out'} style={styles.button} 
+                    onTouchTap={null}>退房</button>
                 )
                 actions.push(
-                  <CommonRaisedButton label="打单据" primary={true} key={house._id+'in'}
-                    style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                  <button key={house._id+'in'} style={styles.button} 
+                    onTouchTap={this.payRentClick(house.floor, house.room).bind(this)}>打印</button>
                 )
-
               } else if (house.subscriberId) {
                 state = '定'
                 name = house.subscriberId.name
                 mobile = house.subscriberId.mobile
                 remark = house.subscriberId.remark
+                // actions.push(
+                //   <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
+                //     style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                // )
+                // actions.push(
+                //   <CommonRaisedButton label="退定" primary={true} key={house._id+'out'}
+                //     style={styles.actionButton} backgroundColor={styles.actionButtonOut.backgroundColor}/>
+                // )
                 actions.push(
-                  <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
-                    style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                  <button key={house._id+'rent'} style={styles.button} 
+                    onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}>入住</button>
                 )
                 actions.push(
-                  <CommonRaisedButton label="退定" primary={true} key={house._id+'out'}
-                    style={styles.actionButton} backgroundColor={styles.actionButtonOut.backgroundColor}/>
+                  <button key={house._id+'out'} style={styles.button} 
+                    onTouchTap={null}>退订</button>
                 )
               } else {
+                // actions.push(
+                //   <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
+                //     style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                // )
+                // actions.push(
+                //   <CommonRaisedButton label="预定" primary={true} key={house._id+'subs'}
+                //     style={styles.actionButton} backgroundColor={styles.actionButtonSubs.backgroundColor}/>
+                // )
                 actions.push(
-                  <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
-                    style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
+                  <button key={house._id+'in'} style={styles.button} 
+                    onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}>入住</button>
                 )
                 actions.push(
-                  <CommonRaisedButton label="预定" primary={true} key={house._id+'subs'}
-                    style={styles.actionButton} backgroundColor={styles.actionButtonSubs.backgroundColor}/>
+                  <button key={house._id+'subs'} style={styles.button} 
+                    onTouchTap={null}>预定</button>
                 )
               }
 
@@ -462,6 +500,8 @@ class Houses extends Component {
         </div>
         <HousesCheckIn mansion={state.mansion} houseLayouts={state.houseLayouts} house={checkInHouse} open={state.checkInOpen} 
             ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)} openToast={props.actions.openToast}/>
+        <HousesPayRent mansion={state.mansion} houseLayouts={state.houseLayouts} house={payRentHouse} open={state.payRentOpen} 
+            ok={this.payRentOk.bind(this)} cancel={this.payRentCancel.bind(this)} openToast={props.actions.openToast}/>
       </div>
     )
   }
@@ -514,6 +554,19 @@ class Houses extends Component {
       actionButton: {
         minWidth: '46px',
         margin: '2px',
+      },
+      button: {
+        border: '10px',
+        fontFamily: 'Roboto, sans-serif',
+        cursor: 'pointer',
+        backgroundColor: '#2196f3',
+        overflow: 'hidden',
+        borderRadius: '2px',
+        fontSize: '14px',
+        color: 'white',
+        padding: '6px 10px',
+        marginLeft: '4px',
+        marginRight: '4px',
       },
     }
     styles.actionButtonRent = _.assign({}, styles.actionButton, {backgroundColor: '#2196f3'})

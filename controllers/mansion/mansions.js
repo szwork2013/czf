@@ -31,7 +31,7 @@ const mansionInfo = async (req, res) => {
     let query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
     var user = req.user
     var mansionId = query.mansionId;
-    var mansion = await Mansions.findOne({_id: mansionId, ownerId: user._id, deleted: false}).exec();
+    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
     if (!mansion) {
       return res.handleResponse(400, {}, 'mansion not found');
     }
@@ -92,7 +92,7 @@ const addMansion = async (req, res) => {
     let mansion = await Mansions.create({name, ownerId: user._id});
     return res.handleResponse(200, mansion);
   }catch(err) {
-    log.error(err.name, erro.message)
+    log.error(err.name, err.message)
     return res.handleResponse(500, {});
   }
 }
@@ -112,7 +112,7 @@ const deleteMansion = async (req, res) => {
     await Mansions.update({_id: mansionId, ownerId: user._id, deleted: false}, {'$set': {deleted:true, lastUpdatedAt: new Date()}});
     return res.handleResponse(200, {id: mansionId});
   }catch(err) {
-    log.error(err.name, erro.message)
+    log.error(err.name, err.message)
     return res.handleResponse(500, {});
   }
 }
@@ -148,7 +148,7 @@ const saveMansionBase = async (req, res) => {
     await oldMansion.save()  
     return res.handleResponse(200, {mansion: oldMansion})
   }catch(err) {
-    log.error(err.name, erro.message)
+    log.error(err.name, err.message)
     return res.handleResponse(500, {});
   }
 }
@@ -507,8 +507,11 @@ const importHistoryVersionData = async (req, res) => {
     houseLayouts[5].overdueFine = hisObj.houseOverdueFineForLayoutPerDay2
     houseLayouts[6].overdueFine = hisObj.houseOverdueFineForLayoutPerDay3
     houseLayouts[7].overdueFine = hisObj.houseOverdueFineForLayoutPerDay3
-    houseLayouts = await insertBatch(HouseLayouts, houseLayouts);
-    houseLayouts = houseLayouts.ops
+    // houseLayouts = await insertBatch(HouseLayouts, houseLayouts);
+    // houseLayouts = houseLayouts.ops
+    for (var i=0; i<houseLayouts.length; i++) {
+      houseLayouts[i] = await HouseLayouts.create(houseLayouts[i])
+    }
 
     mansion.housePropertyMaintenanceChargesType = 0
     mansion.houseOverdueFineType = 0
@@ -586,10 +589,14 @@ const importHistoryVersionData = async (req, res) => {
             newTenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
             newTenant.waterTons = 0
             newTenant.electricKWhs = 0
-            newTenant.summed = {}
+            newTenant.servicesCharges = houseLayouts[house.roomNum*2 + Number(house.brightness)].servicesCharges
+            newTenant.summed = Number(newTenant.servicesCharges) + Number(newTenant.deposit) + Number(newTenant.rental)
+
 
             // newTenant.createdAt = new Date()
             newTenant.createdBy = user._id;
+            // log.info(newTenant)
+            // log.info(newTenant.summed , '   ', newTenant.servicesCharges ,  '   ', newTenant.deposit ,  '   ', newTenant.rental)
             newTenant = await Tenant.create(newTenant)
             newHouse.tenantId = newTenant._id;
           }

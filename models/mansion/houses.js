@@ -41,6 +41,8 @@ const HousesSchema = new Schema({
   },
   electricMeterEndNumber: Number,  //电表
   waterMeterEndNumber: Number,     //水表
+  electricMeterMax: Number,
+  waterMeterMax: Number,
   remark: String,                   //备注
   
   createdAt: {                //创建时间

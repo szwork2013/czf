@@ -57,13 +57,14 @@ class Mansions extends Component {
       //取得公共布局
       this.props.actions.requestHouseLayoutPatternsClick();
     }
-    if (!this.props.mansions || this.props.mansions.length === 0) {
-      //取得所有资产
-      this.props.actions.requestMansionsClick();
-    } else {
-      //物业单位默认选择第一个
-      this.stateOwnMansions(this.props.mansions, this.props.users)
-    }
+    // if (!this.props.mansions || this.props.mansions.length === 0) {
+    //   //取得所有资产
+    //   this.props.actions.requestMansionsClick();
+    // } else {
+    //   //物业单位默认选择第一个
+    //   this.stateOwnMansions(this.props.mansions, this.props.users)
+    // }
+    this.props.actions.requestMansionsClick();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -200,6 +201,8 @@ class Mansions extends Component {
     }
     if (!mansion.houses) {
       formData.houses = true
+      formData.tenant = true
+      formData.subscriber = true
     } 
     if (!mansion.houseLayouts) {
       formData.houseLayouts = true

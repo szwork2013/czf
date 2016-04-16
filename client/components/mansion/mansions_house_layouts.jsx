@@ -1,7 +1,7 @@
 'use strict';
 import log from '../../utils/log'
 import _ from 'lodash'
-
+import utils from '../../utils'
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -60,14 +60,12 @@ class MansionsHouseLayouts extends Component {
 
   commonValueChange(idx, key, isNumber) {
     return function (value) {
-      if (isNumber) {
-        value = Number(value)
-        if (isNaN(value)) 
-          value = 0
-      } 
-      let houseLayouts = this.props.houseLayouts
-      houseLayouts[idx][key] = value
-      this.props.updateParentState({houseLayouts})
+      var houseLayouts = this.props.houseLayouts
+      if (isNumber && !utils.isPositiveNumber(value)) {
+      } else {
+        houseLayouts[idx][key] = value
+        this.props.updateParentState({houseLayouts})
+      }
     }
   }
 
