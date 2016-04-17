@@ -78,7 +78,7 @@ class HousesCheckIn extends Component {
       if (house.subscriberId) {
         var subscriber = house.subscriberId
         tenant.subscriberId = subscriber._id
-        subscriber.subscription = subscriber.subscription || 0
+        tenant.subscription = subscriber.subscription || 0
         tenant.name = subscriber.name
         tenant.mobile = subscriber.mobile
         tenant.idNo = subscriber.idNo
@@ -122,6 +122,7 @@ class HousesCheckIn extends Component {
       tenant.summed = tenant.summed || 0
       this.setState({okDisable: true, printDisabled: false})
     }
+    log.info(house)
     this.setState({house, houseLayout, disabled})
   }
 

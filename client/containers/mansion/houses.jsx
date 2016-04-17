@@ -28,6 +28,7 @@ import CommonRaisedButton from '../../components/common/common_raised_button'
 
 import HousesCheckIn from '../../components/mansion/houses_check_in'
 import HousesPayRent from '../../components/mansion/houses_pay_rent'
+import HousesSubscribe from '../../components/mansion/houses_subscribe'
 
 // import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
 
@@ -59,6 +60,10 @@ class Houses extends Component {
       payRentHouseFloor: -1,
       payRentHouseRoom: -1,
       payRentOpen: false,
+
+      subscribeHouseFloor: -1,
+      subscribeHouseRoom: -1,
+      subscribeOpen: false,
     }
   }
 
@@ -235,6 +240,18 @@ class Houses extends Component {
     this.setState({payRentHouseFloor: -1, payRentHouseRoom: -1, payRentOpen: false})
   }
 
+  subscribeClick(floorIdx, houseIdx) {
+    return function() {
+      this.setState({subscribeHouseFloor: floorIdx, subscribeHouseRoom: houseIdx, subscribeOpen: true})
+    }
+  }
+  subscribeOk(house) {
+    this.props.actions.houseSubscribeClick({house})
+  }
+  subscribeCancel() {
+    this.setState({subscribeHouseFloor: -1, subscribeHouseRoom: -1, subscribeOpen: false})
+  }
+
   getHouses() {
     var state = this.state
     var floor = state.floor
@@ -278,7 +295,7 @@ class Houses extends Component {
           break;
         case 'subscribed':
           houses = houses.filter( house => {
-            return house.subscriber
+            return house.subscriberId
           })
           break;
       }
@@ -324,6 +341,11 @@ class Houses extends Component {
     var payRentHouse = {}
     if (state.payRentOpen) {
       payRentHouse = state.floor[state.payRentHouseFloor][state.payRentHouseRoom]
+    }
+
+    var subscribeHouse = {}
+    if (state.subscribeOpen) {
+      subscribeHouse = state.floor[state.subscribeHouseFloor][state.subscribeHouseRoom]
     }
 
     return (
@@ -447,7 +469,7 @@ class Houses extends Component {
                 )
                 actions.push(
                   <button key={house._id+'subs'} style={styles.button} 
-                    onTouchTap={null}>预定</button>
+                    onTouchTap={this.subscribeClick(house.floor, house.room).bind(this)}>预定</button>
                 )
               }
 
@@ -502,6 +524,8 @@ class Houses extends Component {
             ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)} openToast={props.actions.openToast}/>
         <HousesPayRent mansion={state.mansion} houseLayouts={state.houseLayouts} house={payRentHouse} open={state.payRentOpen} 
             ok={this.payRentOk.bind(this)} cancel={this.payRentCancel.bind(this)} openToast={props.actions.openToast}/>
+        <HousesSubscribe mansion={state.mansion} houseLayouts={state.houseLayouts} house={subscribeHouse} open={state.subscribeOpen} 
+            ok={this.subscribeOk.bind(this)} cancel={this.subscribeCancel.bind(this)} openToast={props.actions.openToast}/>
       </div>
     )
   }

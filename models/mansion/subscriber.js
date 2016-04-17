@@ -36,6 +36,7 @@ const SubscriberModel = new Schema({
   },
   compensation: Number,                  //补偿状态，如果状态为expired，则为正数，default为负数，其它为零
 
+  remark: String,                  //备注
   createdAt: {                    //下定时间
     type: Date,
     default: Date.now

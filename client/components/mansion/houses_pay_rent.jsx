@@ -199,7 +199,7 @@ class HousesPayRent extends Component {
     }
     tenant.summed = Number(tenant.summed.toFixed(1))
 
-    this.setState({tenant, forceUpdate: true})
+    this.setState({house, forceUpdate: true})
   }
   print() {
 

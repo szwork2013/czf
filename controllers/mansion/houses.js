@@ -29,7 +29,7 @@ const houseCheckIn = async (req, res) => {
     if (!mansion) {
       return res.handleResponse(400, {}, 'mansion not found');
     }
-    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).populate('subscriberId').exec();
+    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).exec();
     if (!house) {
       return res.handleResponse(400, {}, 'house not found');
     }
@@ -78,8 +78,9 @@ const houseCheckIn = async (req, res) => {
     }
 
     tenant.subscription = 0
+    var subscriber = null
     if (house.subscriberId) {
-      var subscriber = house.subscriberId
+      subscriber = await Subscriber.findOne({_id: house.subscriberId}).exec() //
       tenant.subscription = subscriber.subscription
       tenant.subscriberId = subscriber._id
     }
@@ -110,6 +111,10 @@ const houseCheckIn = async (req, res) => {
     house = await house.save()
     house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
 
+    if (subscriber) {
+      subscriber.status = 'transfer'
+      await subscriber.save()
+    }
     return res.handleResponse(200, {mansionId, house})
   } catch(err) {
     log.error(err.name, err.message)
@@ -273,6 +278,89 @@ const housePayRent = async (req, res) => {
 exports.housePayRent = housePayRent;
 
 
+/*
+ * 定房
+ */
+const houseSubscribe = async (req, res) => {
+  try{
+    var body = req.body || {};
+    var newHouse = body.house
+    var newSubscriber = newHouse.subscriberId
+    log.info(newSubscriber)
+    var mansionId = newHouse.mansionId
+    var user = req.user;
+    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(400, {}, 'mansion not found');
+    }
+    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).populate('subscriberId').exec();
+    if (!house) {
+      return res.handleResponse(400, {}, 'house not found');
+    }
+    if (house.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
+      return res.handleResponse(409, {}, 'old data');
+    }
+    if (house.tenantId) {
+      return res.handleResponse(400, {}, 'house has tenant');
+    }
+    if (house.subscriberId) {
+      return res.handleResponse(400, {}, 'house has subscribe');
+    }
+
+    var subscriber = {}
+    subscriber.name = newSubscriber.name
+    subscriber.mobile = newSubscriber.mobile
+    subscriber.idNo = newSubscriber.idNo || ''
+    subscriber.remark = newSubscriber.remark || ''
+    if (!subscriber.name) return res.handleResponse(400, {}, 'name is require');
+    if (!subscriber.mobile) return res.handleResponse(400, {}, 'mobile is require');
+    if (!utils.isMobileNumber(subscriber.mobile)) return res.handleResponse(400, {}, 'mobile wrong');
+    if (subscriber.idNo && !IDCard.IDIsValid(subscriber.idNo)) return openToast({msg: 'idNo wrong'})
+
+    subscriber.mansionId = house.mansionId
+    subscriber.floor = house.floor
+    subscriber.room = house.room
+    subscriber.houseId = house._id
+    subscriber.status = 'normal'
+
+    subscriber.createdAt = utils.parseDate(newSubscriber.createdAt) 
+    if (!subscriber.rentalStartDate) subscriber.createdAt = new Date()
+    subscriber.expiredDate = utils.parseDate(newSubscriber.expiredDate)
+    if (!subscriber.expiredDate) return res.handleResponse(400, {}, 'expiredDate is Invalid Date');
+
+    subscriber.subscription = Number(newSubscriber.subscription)
+
+
+    subscriber.summed = newSubscriber.subscription
+
+    if (isNaN(subscriber.summed)) {
+      return res.handleResponse(400, {}, 'calc summed return NaN');
+    }
+    if (subscriber.summed !== newSubscriber.summed) {
+      return res.handleResponse(400, {}, 'calc summed diff');
+    }
+    subscriber.createdBy = user._id
+    subscriber = await Subscriber.create(subscriber)
+
+    house.subscriberId = subscriber._id
+    house.lastUpdatedAt = new Date()
+    house = await house.save()
+    house = await Houses.findOne({_id: house._id}).populate('subscriberId').exec()
+
+    return res.handleResponse(200, {mansionId, house})
+  } catch(err) {
+    log.error(err.name, err.message)
+    if (subscriber && subscriber._id) {
+      //删除新Subscriber
+      try {
+        await Subscriber.remove({_id: subscriber._id})
+      } catch(error) {}
+      //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
+    }
+    return res.handleResponse(500, {});
+  }
+}
+exports.houseSubscribe = houseSubscribe;
 
 
 
