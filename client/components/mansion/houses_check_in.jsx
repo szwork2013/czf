@@ -122,7 +122,7 @@ class HousesCheckIn extends Component {
       tenant.summed = tenant.summed || 0
       this.setState({okDisable: true, printDisabled: false})
     }
-    log.info(house)
+    // log.info(house)
     this.setState({house, houseLayout, disabled})
   }
 
@@ -315,7 +315,7 @@ class HousesCheckIn extends Component {
           水费：{tenant.waterCharges}<br />
           管理费：{tenant.servicesCharges}<br />
           { tenant.subscriberId && (
-              <span>定金：{tenant.subscription}<br /></span>
+              <span>定金：{-tenant.subscription}<br /></span>
           )}
           { Number(tenant.doorCardCount)>0 && (
               <span>门卡：{Number(tenant.doorCardCount) * mansion.doorCardSellCharges}<br /></span>

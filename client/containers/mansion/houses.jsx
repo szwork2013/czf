@@ -252,6 +252,12 @@ class Houses extends Component {
     this.setState({subscribeHouseFloor: -1, subscribeHouseRoom: -1, subscribeOpen: false})
   }
 
+  print(floorIdx, houseIdx) {
+    return function(e) {
+
+    }
+  }
+
   getHouses() {
     var state = this.state
     var floor = state.floor
@@ -402,12 +408,26 @@ class Houses extends Component {
               var actions = []
               // {manager.createdAt? new Date(manager.createdAt).toLocaleDateString(): ''}
               if (house.tenantId) {
-                state = '租'
+                if (house.tenantId.oweRental) {
+                  state = '欠'
+                  remark = house.tenantId.remark + '（欠租' + house.tenantId.oweRental+'元）'
+                  actions.push(
+                    <button key={house._id+'payrent'} style={styles.button} 
+                      onTouchTap={null}>补租</button>
+                  )
+                } else {
+                  state = '租'
+                  remark = house.tenantId.remark
+                  actions.push(
+                    <button key={house._id+'rent'} style={styles.button} 
+                      onTouchTap={this.payRentClick(house.floor, house.room).bind(this)}>交租</button>
+                  )
+                }
                 name = house.tenantId.name
                 mobile = house.tenantId.mobile
                 rentalEndDate = new moment(house.tenantId.rentalEndDate).format('YYYY.MM.DD')
                 contractEndDate = new moment(house.tenantId.contractEndDate).format('YYYY.MM.DD')
-                remark = house.tenantId.remark
+                
                 // actions.push(
                 //   <CommonRaisedButton label="交租" primary={true} key={house._id+'rent1'}
                 //     style={styles.actionButton} backgroundColor={styles.actionButtonRent.backgroundColor}
@@ -421,23 +441,21 @@ class Houses extends Component {
                 //   <CommonRaisedButton label="打单据" primary={true} key={house._id+'in'}
                 //     style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
                 // )
-                actions.push(
-                  <button key={house._id+'rent'} style={styles.button} 
-                    onTouchTap={this.payRentClick(house.floor, house.room).bind(this)}>交租</button>
-                )
+                
                 actions.push(
                   <button key={house._id+'out'} style={styles.button} 
                     onTouchTap={null}>退房</button>
                 )
                 actions.push(
-                  <button key={house._id+'in'} style={styles.button} 
-                    onTouchTap={this.payRentClick(house.floor, house.room).bind(this)}>打印</button>
+                  <button key={house._id+'print'} style={styles.button} 
+                    onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
                 )
               } else if (house.subscriberId) {
                 state = '定'
                 name = house.subscriberId.name
                 mobile = house.subscriberId.mobile
-                remark = house.subscriberId.remark
+                remark = house.subscriberId.remark + '（定金' + house.subscriberId.subscription+'元）'
+                contractEndDate = new moment(house.subscriberId.expiredDate).format('YYYY.MM.DD')
                 // actions.push(
                 //   <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
                 //     style={styles.actionButton} onTouchTap={this.checkInClick(house.floor, house.room).bind(this)}/>
@@ -453,6 +471,10 @@ class Houses extends Component {
                 actions.push(
                   <button key={house._id+'out'} style={styles.button} 
                     onTouchTap={null}>退订</button>
+                )
+                actions.push(
+                  <button key={house._id+'print'} style={styles.button} 
+                    onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
                 )
               } else {
                 // actions.push(
@@ -470,6 +492,10 @@ class Houses extends Component {
                 actions.push(
                   <button key={house._id+'subs'} style={styles.button} 
                     onTouchTap={this.subscribeClick(house.floor, house.room).bind(this)}>预定</button>
+                )
+                actions.push(
+                  <button key={house._id+'print'} style={styles.button} 
+                    onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
                 )
               }
 
