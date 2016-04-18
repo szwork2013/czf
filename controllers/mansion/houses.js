@@ -364,5 +364,76 @@ exports.houseSubscribe = houseSubscribe;
 
 
 
+/*
+ * 补交欠款
+ */
+const houseRepay = async (req, res) => {
+  // var pickArray = ['remark']
+  try{
+    var body = req.body || {};
+    var newHouse = body.house
+    var newTenant = newHouse.tenantId
+    // log.info(newTenant)
+    var mansionId = newHouse.mansionId
+    var user = req.user;
+    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(400, {}, 'mansion not found');
+    }
+    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).populate('tenantId subscriberId').exec();
+    if (!house) {
+      return res.handleResponse(400, {}, 'house not found');
+    }
+    if (house.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
+      return res.handleResponse(409, {}, 'old data');
+    }
+    var oldTenant = house.tenantId
+    if (_.isEmpty(oldTenant)) {
+      return res.handleResponse(400, {}, 'house has not tenant')
+    }
+    if (!oldTenant.oweRental) {
+      return res.handleResponse(400, {}, 'house has not owe rental');
+    }
+
+    newTenant.oweRental = Number(newTenant.oweRental)
+    newTenant.oweRentalRepay = Number(newTenant.oweRentalRepay)
+    if (newTenant.oweRental !== newTenant.oweRentalRepay) {
+      return res.handleResponse(400, {}, 'the owe rental must pay all once');
+    }
+    if (newTenant.oweRental !== oldTenant.oweRental) {
+      return res.handleResponse(400, {}, 'old data');
+    }
+    oldTenant.oweRentalRepay = newTenant.oweRentalRepay
+    oldTenant.oweRental = 0
+    oldTenant.remark = newTenant.remark
+
+    oldTenant = await oldTenant.save()
+
+    // house.tenantId = tenant._id
+    // house.subscriberId = null
+    // house.electricMeterEndNumber = newTenant.electricMeterEndNumber
+    // house.waterMeterEndNumber = newTenant.waterMeterEndNumber
+    house.lastUpdatedAt = new Date()
+    house = await house.save()
+    house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
+
+    return res.handleResponse(200, {mansionId, house})
+  } catch(err) {
+    log.error(err.name, err.message)
+    if (tenant && tenant._id) {
+      //删除新Tenant
+      try {
+        await Tenant.remove({_id: tenant._id})
+      } catch(error) {}
+      //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
+    }
+    return res.handleResponse(500, {});
+  }
+}
+exports.houseRepay = houseRepay;
+
+
+
+
 
 

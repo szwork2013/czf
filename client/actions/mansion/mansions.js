@@ -4,7 +4,8 @@ import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, D
          IMPORT_HISTORY_VERSION_DATA_SUCCESS,
          SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS, 
          SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS,
-         HOUSE_CHECK_IN_SUCCESS, HOUSE_PAY_RENT_SUCCESS, HOUSE_SUBSCRIBE_SUCCESS} from '../../constants/actionTypes';
+         HOUSE_CHECK_IN_SUCCESS, HOUSE_PAY_RENT_SUCCESS, HOUSE_SUBSCRIBE_SUCCESS, 
+         HOUSE_REPAY_SUCCESS} from '../../constants/actionTypes';
 import { CALL_API_V1 } from '../../middleware/api';
 import { APP_STATE } from '../../reducers/master/app_state'
 
@@ -251,6 +252,26 @@ return {
 export function houseSubscribeClick(formData) {
   return dispatch => dispatch(houseSubscribe(formData));
 }
+/*
+ * 补欠款
+ */
+function houseRepay(formData) {
+return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: HOUSE_REPAY_SUCCESS
+      },
+      url: '/mansion/house/repay',
+      method: 'POST',
+      data: formData
+    }
+  }
+}
+export function houseRepayClick(formData) {
+  return dispatch => dispatch(houseRepay(formData));
+}
+
+
 
 
 

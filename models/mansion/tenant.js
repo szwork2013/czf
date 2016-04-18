@@ -53,8 +53,6 @@ const TenantModel = new Schema({
   rental: Number,             //租金
   rentalStartDate: Date,      //本次租金开始日期，闭区间
   rentalEndDate: Date,        //本次租金有效日期，开区间
-  oweRental: Number,              //欠租金
-  oweRentalExpiredDate: Date,   //欠租金补交最迟时间，开区间
   doorCardCount: Number,      //持有门卡数
   contractStartDate: Date,    //合同开始
   contractEndDate: Date,      //合同结束日期
@@ -66,6 +64,9 @@ const TenantModel = new Schema({
   electricKWhs: Number,       //用电度数
   servicesCharges: Number,          //物业费
   
+  oweRental: Number,              //欠租金
+  oweRentalRepay: Number,         //补欠租金
+  oweRentalExpiredDate: Date,     //欠租金补交最迟时间，开区间
 
   electricCharges: Number,            //电费
   waterCharges: Number,               //水费          

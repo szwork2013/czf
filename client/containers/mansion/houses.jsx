@@ -29,6 +29,7 @@ import CommonRaisedButton from '../../components/common/common_raised_button'
 import HousesCheckIn from '../../components/mansion/houses_check_in'
 import HousesPayRent from '../../components/mansion/houses_pay_rent'
 import HousesSubscribe from '../../components/mansion/houses_subscribe'
+import HousesRepay from '../../components/mansion/houses_repay'
 
 // import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
 
@@ -64,6 +65,10 @@ class Houses extends Component {
       subscribeHouseFloor: -1,
       subscribeHouseRoom: -1,
       subscribeOpen: false,
+
+      repayHouseFloor: -1,
+      repayHouseRoom: -1,
+      repayOpen: false,
     }
   }
 
@@ -252,6 +257,18 @@ class Houses extends Component {
     this.setState({subscribeHouseFloor: -1, subscribeHouseRoom: -1, subscribeOpen: false})
   }
 
+  repayClick(floorIdx, houseIdx) {
+    return function() {
+      this.setState({repayHouseFloor: floorIdx, repayHouseRoom: houseIdx, repayOpen: true})
+    }
+  }
+  repayOk(house) {
+    this.props.actions.houseRepayClick({house})
+  }
+  repayCancel() {
+    this.setState({repayHouseFloor: -1, repayHouseRoom: -1, repayOpen: false})
+  }
+
   print(floorIdx, houseIdx) {
     return function(e) {
 
@@ -354,6 +371,11 @@ class Houses extends Component {
       subscribeHouse = state.floor[state.subscribeHouseFloor][state.subscribeHouseRoom]
     }
 
+    var repayHouse = {}
+    if (state.repayOpen) {
+      repayHouse = state.floor[state.repayHouseFloor][state.repayHouseRoom]
+    }
+
     return (
       <div>
         <div style={{marginBottom: '20px'}}>
@@ -413,7 +435,7 @@ class Houses extends Component {
                   remark = house.tenantId.remark + '（欠租' + house.tenantId.oweRental+'元）'
                   actions.push(
                     <button key={house._id+'payrent'} style={styles.button} 
-                      onTouchTap={null}>补租</button>
+                      onTouchTap={this.repayClick(house.floor, house.room).bind(this)}>补租</button>
                   )
                 } else {
                   state = '租'
@@ -552,6 +574,8 @@ class Houses extends Component {
             ok={this.payRentOk.bind(this)} cancel={this.payRentCancel.bind(this)} openToast={props.actions.openToast}/>
         <HousesSubscribe mansion={state.mansion} houseLayouts={state.houseLayouts} house={subscribeHouse} open={state.subscribeOpen} 
             ok={this.subscribeOk.bind(this)} cancel={this.subscribeCancel.bind(this)} openToast={props.actions.openToast}/>
+        <HousesRepay mansion={state.mansion} houseLayouts={state.houseLayouts} house={repayHouse} open={state.repayOpen} 
+            ok={this.repayOk.bind(this)} cancel={this.repayCancel.bind(this)} openToast={props.actions.openToast}/>
       </div>
     )
   }

@@ -83,8 +83,8 @@ class HousesPayRent extends Component {
           tenant.rentalEndDate = new moment(new Date(oldTenant.rentalEndDate)).add(1, 'M').toDate()
           tenant.contractStartDate = new Date(tenant.contractStartDate)
           tenant.contractEndDate = new Date(tenant.contractEndDate)
-          delete tenant.electricMeterEndNumber
-          delete tenant.waterMeterEndNumber
+          tenant.electricMeterEndNumber
+          tenant.waterMeterEndNumber
           tenant.waterTons = 0
           tenant.electricKWhs = 0
           tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
@@ -273,33 +273,33 @@ class HousesPayRent extends Component {
         bodyStyle={{overflowY: 'auto', maxHeight: 'calc(100vh - 110px)', padding: '5px 24px 24px 24px'}}>
         <div style={{display: 'inline-block', float: 'left', width: '500px'}}>
           
-          <CommonTextField defaultValue={tenant.name} disabled={true} floatingLabelText='姓名' hintText='姓名' 
+          <CommonTextField defaultValue={tenant.name} disabled={true} floatingLabelText='姓名'
             style={styles.textField} onChange={this.commonTextFiledChange('name').bind(this)} ref='name'/>
-          <CommonTextField value={tenant.mobile} disabled={true} floatingLabelText='手机号' hintText='手机号' 
+          <CommonTextField value={tenant.mobile} disabled={true} floatingLabelText='手机号'
             style={styles.textField} onChange={this.commonTextFiledChange('mobile').bind(this)}/>
-          <CommonTextField value={tenant.idNo} disabled={true} floatingLabelText='身份证' hintText='身份证' 
+          <CommonTextField value={tenant.idNo} disabled={true} floatingLabelText='身份证'
             style={styles.textFieldLong} onChange={this.commonTextFiledChange('idNo').bind(this)}/>
           <br />
           
           <DatePicker value={tenant.contractStartDate} disabled={true} formatDate={this.formatDate}
-            floatingLabelText='合同开始日期' hintText='合同开始日期' autoOk={true}
+            floatingLabelText='合同开始日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('contractStartDate').bind(this)}/>
           <DatePicker value={tenant.contractEndDate} disabled={true} formatDate={this.formatDate}
-            floatingLabelText='合同结束日期' hintText='合同结束日期' autoOk={true}
+            floatingLabelText='合同结束日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('contractEndDate').bind(this)}/>
           <DatePicker value={new Date(oldTenant.rentalEndDate)} disabled={true} formatDate={this.formatDate}
-            floatingLabelText='上次交租期限' hintText='上次交租期限' autoOk={true}
+            floatingLabelText='上次交租期限' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}/>
           <br />
 
-          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='租金' hintText='租金' 
+          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='租金' 
             style={styles.textField} onChange={this.commonTextFiledChange('rental', true).bind(this)}/>
-          <CommonTextField value={tenant.servicesCharges} disabled={disabled} floatingLabelText='管理费' hintText='管理费' 
+          <CommonTextField value={tenant.servicesCharges} disabled={disabled} floatingLabelText='管理费'
             style={styles.textField} onChange={this.commonTextFiledChange('servicesCharges', true).bind(this)}/>
           <DatePicker value={tenant.rentalEndDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='下次交租日期' hintText='下次交租日期' autoOk={true}
+            floatingLabelText='下次交租日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('rentalEndDate').bind(this)}/>
           <br />
@@ -314,11 +314,11 @@ class HousesPayRent extends Component {
 
           <Checkbox defaultChecked={tenant.isOweRental} label="欠租金" disabled={disabled}
             style={styles.checkbox} onCheck={this.checkboxChange('isOweRental').bind(this)} />
-          <CommonTextField value={tenant.oweRental} disabled={disabled} floatingLabelText='欠租金' hintText='欠租金' forceUpdate={forceUpdate}
+          <CommonTextField value={tenant.oweRental} disabled={disabled} floatingLabelText='欠租金' forceUpdate={forceUpdate}
             style={tenant.isOweRental? styles.textField: _.assign({}, styles.textField, {display: 'none'})} 
             onChange={this.commonTextFiledChange('oweRental', true).bind(this)}/>
           <DatePicker value={tenant.oweRentalExpiredDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='租金补齐日期' hintText='租金补齐日期' autoOk={true}
+            floatingLabelText='租金补齐期限' autoOk={true}
             style={tenant.isOweRental? styles.dataPicker: _.assign({}, styles.dataPicker, {display: 'none'})} 
             wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('oweRentalExpiredDate').bind(this)}/>

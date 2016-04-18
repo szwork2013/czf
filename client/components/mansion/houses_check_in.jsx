@@ -284,7 +284,7 @@ class HousesCheckIn extends Component {
             style={tenant.isOweRental? styles.textField: _.assign({}, styles.textField, {display: 'none'})} 
             onChange={this.commonTextFiledChange('oweRental', true).bind(this)}/>
           <DatePicker value={tenant.oweRentalExpiredDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='租金补齐日期' autoOk={true}
+            floatingLabelText='租金补齐期限' autoOk={true}
             style={tenant.isOweRental? styles.dataPicker: _.assign({}, styles.dataPicker, {display: 'none'})} 
             wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
             onChange={this.datePickerChange('oweRentalExpiredDate').bind(this)}/>
