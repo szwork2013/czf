@@ -587,8 +587,12 @@ const importHistoryVersionData = async (req, res) => {
             newTenant.rentalStartDate = moment(tenant.rentalEndDate).add(-1, 'month').toDate()
             newTenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
             newTenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
+            newTenant.electricMeterEndNumber = house.electricMeterEndNumber
+            newTenant.waterMeterEndNumber = house.waterMeterEndNumber
             newTenant.waterTons = 0
             newTenant.electricKWhs = 0
+            newTenant.electricCharges = 0
+            newTenant.waterCharges = 0
             newTenant.servicesCharges = houseLayouts[house.roomNum*2 + Number(house.brightness)].servicesCharges
             newTenant.summed = Number(newTenant.servicesCharges) + Number(newTenant.deposit) + Number(newTenant.rental)
 

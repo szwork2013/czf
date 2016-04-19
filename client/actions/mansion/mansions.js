@@ -5,7 +5,7 @@ import { GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_SUCCESS, D
          SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS, 
          SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS,
          HOUSE_CHECK_IN_SUCCESS, HOUSE_PAY_RENT_SUCCESS, HOUSE_SUBSCRIBE_SUCCESS, 
-         HOUSE_REPAY_SUCCESS} from '../../constants/actionTypes';
+         HOUSE_REPAY_SUCCESS, HOUSE_UNSUBSCRIBE_SUCCESS, HOUSE_CHECK_OUT_SUCCESS} from '../../constants/actionTypes';
 import { CALL_API_V1 } from '../../middleware/api';
 import { APP_STATE } from '../../reducers/master/app_state'
 
@@ -271,6 +271,43 @@ export function houseRepayClick(formData) {
   return dispatch => dispatch(houseRepay(formData));
 }
 
+/*
+ * 退订房
+ */
+function houseUnsubscribe(formData) {
+return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: HOUSE_UNSUBSCRIBE_SUCCESS
+      },
+      url: '/mansion/house/unsubscribe',
+      method: 'POST',
+      data: formData
+    }
+  }
+}
+export function houseUnsubscribeClick(formData) {
+  return dispatch => dispatch(houseUnsubscribe(formData));
+}
+
+/*
+ * 退房
+ */
+function houseCheckOut(formData) {
+return {
+    [CALL_API_V1]: {
+      actions: {
+        successType: HOUSE_CHECK_OUT_SUCCESS
+      },
+      url: '/mansion/house/checkout',
+      method: 'POST',
+      data: formData
+    }
+  }
+}
+export function houseCheckOutClick(formData) {
+  return dispatch => dispatch(houseCheckOut(formData));
+}
 
 
 

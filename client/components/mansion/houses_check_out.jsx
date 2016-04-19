@@ -15,7 +15,7 @@ import { Dialog, RaisedButton, Divider, TextField, DatePicker, Checkbox } from '
 import CommonTextField from '../common/common_text_field'
 
 
-class HousesPayRent extends Component {
+class HousesCheckOut extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -24,7 +24,6 @@ class HousesPayRent extends Component {
       printDisabled: true,
 
       house: {},
-      // tenant: {},
       houseLayout: {},
       changeDeposit: 0,
       forceUpdate: true,
@@ -63,24 +62,25 @@ class HousesPayRent extends Component {
     var houseLayout = houseLayouts.find( houseLayout => { return houseLayout._id === house.houseLayout})
     var stateHouse = this.state.house || {}
     var tenant = stateHouse.tenantId || {}
-    if (house.tenantId) {
-      disabled = props.disabled!==undefined? props.disabled: false
-      if (_.isEmpty(stateHouse)) {
-        stateHouse = _.cloneDeep(house)
-        tenant = stateHouse.tenantId
-        if (tenant.oweRental) {
-          //还欠上次租金的不允许交租，需要先补齐所欠租金
-          disabled = true
-          tenant.isOweRental = true
-          tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
-          this.setState({okDisable: true, printDisabled: true})
-        } else {
-          var oldTenant = house.tenantId
-          delete tenant._id
+    if (!_.isEmpty(house)) {
+      if (house.tenantId) {
+        disabled = false
+        if (_.isEmpty(stateHouse)) {
+          stateHouse = _.cloneDeep(house)
+          tenant = stateHouse.tenantId
+          if (tenant.oweRental) {
+            // 还欠上次租金的不允许交租，需要先补齐所欠租金
+            // disabled = true
+            tenant.isOweRental = true
+            tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
+            // this.setState({okDisable: true, printDisabled: true})
+          }
+          tenant._id
           tenant.subscription = 0
           delete tenant.subscriberId
-          tenant.rentalStartDate = new moment(new Date(oldTenant.rentalEndDate)).add(1, 'day').startOf('day').toDate()
-          tenant.rentalEndDate = new moment(new Date(oldTenant.rentalEndDate)).add(1, 'M').endOf('day').toDate()
+          tenant.rental = 0
+          tenant.rentalStartDate = new Date(tenant.rentalEndDate)
+          tenant.rentalEndDate = new Date(tenant.rentalEndDate)
           tenant.contractStartDate = new Date(tenant.contractStartDate)
           tenant.contractEndDate = new Date(tenant.contractEndDate)
           tenant.electricMeterEndNumber
@@ -89,23 +89,29 @@ class HousesPayRent extends Component {
           tenant.electricKWhs = 0
           tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
           tenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
-          tenant.isOweRental = false
-          tenant.oweRental = 0
-          tenant.oweRentalExpiredDate = new moment().add(7, 'day').endOf('day').toDate()
-          tenant.isChangeDeposit = false
+          // tenant.isOweRental = false
+          // tenant.oweRental = 0
+          // tenant.oweRentalExpiredDate = new moment().add(7, 'day').toDate()
+          tenant.servicesCharges = 0
+          tenant.compensation = 0
+          tenant.overdueDays = new moment().diff(tenant.rentalEndDate, 'days')
+          if (tenant.overdueDays<0) tenant.overdueDays = 0
+          tenant.overdueFinePerDay = 0
           if (houseLayout) {
-            tenant.servicesCharges = houseLayout.servicesCharges
+            tenant.overdueFinePerDay = houseLayout.overdueFine
           }
+          tenant.overdueCharges = tenant.overdueDays * tenant.overdueFinePerDay
+          tenant.doorCardRecoverCount = tenant.doorCardCount || 0
+          tenant.doorCardRecoverCharges = tenant.doorCardRecoverCount * mansion.doorCardRecoverCharges
+
+          this.state.house = stateHouse
           this.setState({okDisable: false, printDisabled: true})
+          this.calcAll(tenant)
         }
-        this.state.house = stateHouse
-        this.calcAll(tenant)
+        this.setState({okDisable: false, printDisabled: true})
       } else {
-        if (new Date(house.lastUpdatedAt).getTime() !== new Date(stateHouse.lastUpdatedAt).getTime()) {
-          //说明是保存过本次的交租信息，不能再修改信息
-          disabled = true
-          this.setState({okDisable: true, printDisabled: false})
-        }
+        disabled = true
+        this.setState({okDisable: true, printDisabled: false})
       }
     } else {
       stateHouse = {}
@@ -127,11 +133,11 @@ class HousesPayRent extends Component {
       }
     }
   }
-  datePickerChange(key, startOrEnd='endOf') {
+  datePickerChange(key) {
     return function(e, value) {
       var house = this.state.house || {}
       var tenant = house.tenantId || {}
-      tenant[key] = new moment(value)[startOrEnd]('day').toDate()
+      tenant[key] = value
       this.setState({house, forceUpdate: true})
     }
   }
@@ -190,14 +196,14 @@ class HousesPayRent extends Component {
     tenant.waterCharges = Number(tenant.waterCharges.toFixed(1))
 
     // log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
-    tenant.summed = Number(tenant.rental) + Number(tenant.servicesCharges) + Number(tenant.electricCharges) + Number(tenant.waterCharges)
-    if (tenant.isChangeDeposit) {
-      var changeDeposit = Number(tenant.deposit) - Number(oldTenant.deposit)
-      tenant.summed += changeDeposit
-      this.setState({changeDeposit})
-    } else {
-      this.setState({changeDeposit: 0})
+    tenant.summed = Number(tenant.electricCharges) + Number(tenant.waterCharges) - Number(tenant.deposit)
+    if (tenant.isOweRental) tenant.summed -= Number(tenant.oweRental)
+    if (Number(tenant.doorCardRecoverCount)>0) {
+      tenant.doorCardRecoverCharges = Number(tenant.doorCardRecoverCount)*mansion.doorCardRecoverCharges
+      tenant.summed -= tenant.doorCardRecoverCharges
     }
+    tenant.summed += Number(tenant.overdueCharges) + Number(tenant.compensation)
+    
     tenant.summed = Number(tenant.summed.toFixed(1))
 
     this.setState({house, forceUpdate: true})
@@ -211,47 +217,24 @@ class HousesPayRent extends Component {
     var house = this.state.house || {}
     var tenant = house.tenantId || {}
 
-    if (!tenant.mobile) return openToast({msg: '手机号不能为空'})
-    if (!utils.isMobileNumber(tenant.mobile)) return openToast({msg: '手机号格式错误'})
-    if (tenant.idNo && !IDCard.IDIsValid(tenant.idNo)) return openToast({msg: '身份证格式错误'})
-
-    if (!utils.parseDate(tenant.contractStartDate)) return openToast({msg: '请选择合同开始日期'})
-    if (!utils.parseDate(tenant.contractEndDate)) return openToast({msg: '请选择合同结束日期'})
-    if (!utils.parseDate(tenant.rentalStartDate)) return openToast({msg: '请选择本次交租日期'})
-    if (!utils.parseDate(tenant.rentalEndDate)) return openToast({msg: '请选择下次交租日期'})
-
-    if (tenant.rental==='' || tenant.rental===undefined) return openToast({msg: '请输入租金'})
-    if (tenant.servicesCharges==='' || tenant.servicesCharges===undefined) return openToast({msg: '请输入管理费'})
-
     if (tenant.electricMeterEndNumber==='' || tenant.electricMeterEndNumber===undefined) return openToast({msg: '请输入电表读数'})
     if (tenant.waterMeterEndNumber==='' || tenant.waterMeterEndNumber===undefined) return openToast({msg: '请输入水表读数'})
 
-    if (tenant.isOweRental) {
-      if (tenant.oweRental==='' || tenant.oweRental===undefined) return openToast({msg: '请输入欠租金'})
-      if (!utils.parseDate(tenant.oweRentalExpiredDate)) return openToast({msg: '请选择租金补齐日期'})
-    } 
-
-    if (tenant.isChangeDeposit && (tenant.deposit==='' || tenant.deposit===undefined)) return openToast({msg: '请输入押金'})
-
-    tenant.rental = Number(tenant.rental)
-    if (isNaN(tenant.rental)) tenant.rental = ''
-    tenant.servicesCharges = Number(tenant.servicesCharges)
-    if (isNaN(tenant.servicesCharges)) tenant.servicesCharges = ''
+    
     tenant.electricMeterEndNumber = Number(tenant.electricMeterEndNumber)
     if (isNaN(tenant.electricMeterEndNumber)) tenant.electricMeterEndNumber = ''
     tenant.waterMeterEndNumber = Number(tenant.waterMeterEndNumber)
     if (isNaN(tenant.waterMeterEndNumber)) tenant.waterMeterEndNumber = ''
-    if (tenant.isChangeDeposit) {
-      tenant.deposit = Number(tenant.deposit)
-      if (isNaN(tenant.deposit)) tenant.deposit = ''
-    }
-    if (tenant.isOweRental) {
-      tenant.oweRental = Number(tenant.oweRental)
-      if (isNaN(tenant.oweRental)) tenant.oweRental = ''
-    }
-
+    tenant.doorCardRecoverCount = Number(tenant.doorCardRecoverCount)
+    if (isNaN(tenant.doorCardRecoverCount)) tenant.doorCardRecoverCount = ''
+    tenant.doorCardRecoverCharges = Number(tenant.doorCardRecoverCharges)
+    if (isNaN(tenant.doorCardRecoverCharges)) tenant.doorCardRecoverCharges = ''
+    tenant.overdueCharges = Number(tenant.overdueCharges)
+    if (isNaN(tenant.overdueCharges)) tenant.overdueCharges = ''
+    tenant.compensation = Number(tenant.compensation)
+    if (isNaN(tenant.compensation)) tenant.compensation = ''
+  
     this.setState({house, forceUpdate: true})
-
     if (isNaN(tenant.summed)) {
       return openToast({msg: '非法数字，总计错误'})
     }
@@ -283,42 +266,27 @@ class HousesPayRent extends Component {
     var changeDeposit = state.changeDeposit
 
     return (
-      <Dialog title={'交租登记：'+(tenant.floor+1)+'楼'+(tenant.room+1)+'房'+'  [  '+houseLayout.description+'  ]'} modal={true} 
+      <Dialog title={'退房：'+(tenant.floor+1)+'楼'+(tenant.room+1)+'房'+'  [  '+houseLayout.description+'  ]'} modal={true} 
         open={this.props.open} autoDetectWindowHeight={false} 
         contentStyle={{transform: 'translate3d(0px, 0px, 0px)'}} 
         titleStyle={{borderBottom: '2px solid #e0e0e0', padding: '10px 24px 5px 24px'}} 
         bodyStyle={{overflowY: 'auto', maxHeight: 'calc(100vh - 110px)', padding: '5px 24px 24px 24px'}}>
         <div style={{display: 'inline-block', float: 'left', width: '500px'}}>
           
-          <CommonTextField defaultValue={tenant.name} disabled={true} floatingLabelText='姓名'
-            style={styles.textField} onChange={this.commonTextFiledChange('name').bind(this)} ref='name'/>
-          <CommonTextField value={tenant.mobile} disabled={true} floatingLabelText='手机号'
-            style={styles.textField} onChange={this.commonTextFiledChange('mobile').bind(this)}/>
-          <CommonTextField value={tenant.idNo} disabled={true} floatingLabelText='身份证'
-            style={styles.textFieldLong} onChange={this.commonTextFiledChange('idNo').bind(this)}/>
+          <CommonTextField value={tenant.name} disabled={true} floatingLabelText='姓名' style={styles.textField} />
+          <CommonTextField value={tenant.mobile} disabled={true} floatingLabelText='手机号' style={styles.textField} />
+          <CommonTextField value={tenant.idNo} disabled={true} floatingLabelText='身份证' style={styles.textFieldLong} />
           <br />
           
           <DatePicker value={tenant.contractStartDate} disabled={true} formatDate={this.formatDate}
             floatingLabelText='合同开始日期' autoOk={true}
-            style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('contractStartDate', 'startOf').bind(this)}/>
+            style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat} />
           <DatePicker value={tenant.contractEndDate} disabled={true} formatDate={this.formatDate}
             floatingLabelText='合同结束日期' autoOk={true}
-            style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('contractEndDate', 'endOf').bind(this)}/>
+            style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat} />
           <DatePicker value={new Date(oldTenant.rentalEndDate)} disabled={true} formatDate={this.formatDate}
             floatingLabelText='上次交租期限' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}/>
-          <br />
-
-          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='租金' 
-            style={styles.textField} onChange={this.commonTextFiledChange('rental', true).bind(this)}/>
-          <CommonTextField value={tenant.servicesCharges} disabled={disabled} floatingLabelText='管理费'
-            style={styles.textField} onChange={this.commonTextFiledChange('servicesCharges', true).bind(this)}/>
-          <DatePicker value={tenant.rentalEndDate} disabled={disabled} formatDate={this.formatDate}
-            floatingLabelText='下次交租日期' autoOk={true}
-            style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('rentalEndDate', 'endOf').bind(this)}/>
           <br />
 
           <CommonTextField value={tenant.electricMeterEndNumber} disabled={disabled} 
@@ -327,42 +295,51 @@ class HousesPayRent extends Component {
           <CommonTextField value={tenant.waterMeterEndNumber} disabled={disabled} 
             floatingLabelText={'水表底数:'+house.waterMeterEndNumber} 
             style={styles.textField} onChange={this.commonTextFiledChange('waterMeterEndNumber', true).bind(this)}/>
+          <CommonTextField value={tenant.deposit} disabled={true} floatingLabelText='押金' style={styles.textField}/>
           <br />
 
-          <Checkbox defaultChecked={tenant.isOweRental} label="欠租金" disabled={disabled}
-            style={styles.checkbox} onCheck={this.checkboxChange('isOweRental').bind(this)} />
-          <CommonTextField value={tenant.oweRental} disabled={disabled} floatingLabelText='欠租金' forceUpdate={forceUpdate}
+          <CommonTextField value={tenant.doorCardRecoverCount} disabled={disabled} floatingLabelText={'退门卡('+tenant.doorCardCount+'个)' }
+            style={styles.textField} onChange={this.commonTextFiledChange('doorCardRecoverCount', true).bind(this)}/>
+          <CommonTextField value={tenant.overdueCharges} disabled={disabled || tenant.overdueDays<=0} floatingLabelText={'逾期罚款('+tenant.overdueDays+'天)'}
+            style={styles.textField} onChange={this.commonTextFiledChange('overdueCharges', true).bind(this)}/>
+          <CommonTextField value={tenant.compensation} disabled={disabled} floatingLabelText='损坏赔偿' 
+            style={styles.textField} onChange={this.commonTextFiledChange('compensation', true).bind(this)}/>
+          <br />
+
+          <Checkbox defaultChecked={tenant.isOweRental} label="欠租金" disabled={true}
+            style={styles.checkbox}/>
+          <CommonTextField value={tenant.oweRental} disabled={true} floatingLabelText='欠租金' forceUpdate={forceUpdate}
             style={tenant.isOweRental? styles.textField: _.assign({}, styles.textField, {display: 'none'})} 
             onChange={this.commonTextFiledChange('oweRental', true).bind(this)}/>
-          <DatePicker value={tenant.oweRentalExpiredDate} disabled={disabled} formatDate={this.formatDate}
+          <DatePicker value={tenant.oweRentalExpiredDate} disabled={true} formatDate={this.formatDate}
             floatingLabelText='租金补齐期限' autoOk={true}
             style={tenant.isOweRental? styles.dataPicker: _.assign({}, styles.dataPicker, {display: 'none'})} 
             wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('oweRentalExpiredDate', 'endOf').bind(this)}/>
+            onChange={this.datePickerChange('oweRentalExpiredDate').bind(this)}/>
           <br />
 
-          <Checkbox defaultChecked={tenant.isChangeDeposit} label="修改押金" disabled={disabled}
-            style={styles.checkbox} onCheck={this.checkboxChange('isChangeDeposit').bind(this)} />
-          <CommonTextField value={tenant.isChangeDeposit? tenant.deposit: oldTenant.deposit} 
-            disabled={disabled || !tenant.isChangeDeposit} 
-            floatingLabelText={tenant.isChangeDeposit? '已收押金:'+oldTenant.deposit+'元': '押金'}
-            hintText={tenant.isChangeDeposit? '已收押金：'+oldTenant.deposit+'元': '押金'} 
-            style={styles.textField} onChange={this.commonTextFiledChange('deposit', true).bind(this)}/>
-          <br />
 
           <CommonTextField defaultValue={tenant.remark} disabled={disabled} floatingLabelText='备注'
             style={styles.fullWidth} onChange={this.commonTextFiledChange('remark').bind(this)} fullWidth={true} ref='remark'/>
         </div>
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
-                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '485px'}}>
-          <div style={{height: '400px'}}>
-          租金：{tenant.rental}<br />
+                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '410px'}}>
+          <div style={{height: '325px'}}>
           电费：{tenant.electricCharges}<br />
           水费：{tenant.waterCharges}<br />
-          管理费：{tenant.servicesCharges}<br />
-          { tenant.isChangeDeposit && (
-              <span>修改押金：{changeDeposit.toFixed(1)}<br /></span>
+          退押金：{-tenant.deposit}<br />
+          { tenant.isOweRental && (
+              <span>欠租金：{tenant.oweRental}<br /></span>
+          )}
+          { Number(tenant.doorCardRecoverCount)>0 && (
+              <span>退门卡：{-tenant.doorCardRecoverCharges}<br /></span>
+          )}
+          { Number(tenant.overdueDays)>0 && (
+              <span>逾期罚款：{tenant.overdueCharges}<br /></span>
+          )}
+          { Number(tenant.compensation)>0 && (
+              <span>损坏赔偿：{tenant.compensation}<br /></span>
           )}
           
           </div>
@@ -402,7 +379,7 @@ class HousesPayRent extends Component {
   }
 }
 
-export default HousesPayRent;
+export default HousesCheckOut;
 
 
 

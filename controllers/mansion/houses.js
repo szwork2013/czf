@@ -113,6 +113,7 @@ const houseCheckIn = async (req, res) => {
 
     if (subscriber) {
       subscriber.status = 'transfer'
+      subscriber.lastUpdatedAt = new Date()
       await subscriber.save()
     }
     return res.handleResponse(200, {mansionId, house})
@@ -286,7 +287,7 @@ const houseSubscribe = async (req, res) => {
     var body = req.body || {};
     var newHouse = body.house
     var newSubscriber = newHouse.subscriberId
-    log.info(newSubscriber)
+    // log.info(newSubscriber)
     var mansionId = newHouse.mansionId
     var user = req.user;
     var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
@@ -324,6 +325,7 @@ const houseSubscribe = async (req, res) => {
     subscriber.status = 'normal'
 
     subscriber.createdAt = utils.parseDate(newSubscriber.createdAt) 
+    subscriber.lastUpdatedAt = new Date()
     if (!subscriber.rentalStartDate) subscriber.createdAt = new Date()
     subscriber.expiredDate = utils.parseDate(newSubscriber.expiredDate)
     if (!subscriber.expiredDate) return res.handleResponse(400, {}, 'expiredDate is Invalid Date');
@@ -403,6 +405,9 @@ const houseRepay = async (req, res) => {
     if (newTenant.oweRental !== oldTenant.oweRental) {
       return res.handleResponse(400, {}, 'old data');
     }
+    if (isNaN(newTenant.oweRentalRepay)) {
+      return res.handleResponse(400, {}, 'calc summed return NaN');
+    }
     oldTenant.oweRentalRepay = newTenant.oweRentalRepay
     oldTenant.oweRental = 0
     oldTenant.remark = newTenant.remark
@@ -434,6 +439,209 @@ exports.houseRepay = houseRepay;
 
 
 
+/*
+ * 退定房
+ */
+const houseUnsubscribe = async (req, res) => {
+  try{
+    var body = req.body || {};
+    var newHouse = body.house
+    var newSubscriber = newHouse.subscriberId
+    var mansionId = newHouse.mansionId
+    var user = req.user;
+    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(400, {}, 'mansion not found');
+    }
+    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).exec();
+    if (!house) {
+      return res.handleResponse(400, {}, 'house not found');
+    }
+    if (house.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
+      return res.handleResponse(409, {}, 'old data');
+    }
+    if (house.tenantId) {
+      return res.handleResponse(400, {}, 'house has tenant');
+    }
+    if (!house.subscriberId) {
+      return res.handleResponse(400, {}, 'house has not subscribe');
+    }
 
+    var subscriber = await Subscriber.findOne({_id: house.subscriberId}).exec()
+    var oldSubscriber = _.pick(subscriber, ['remark', 'status', 'refund', 'lastUpdatedAt'])
+    subscriber.remark = newSubscriber.remark || ''
+    subscriber.status = 'unsubscribe'
+    subscriber.summed = 0
+    if (newSubscriber.isRefund) {
+      subscriber.refund = Number(newSubscriber.refund)
+      subscriber.summed = -subscriber.refund
+    }
+
+    if (isNaN(subscriber.summed)) {
+      return res.handleResponse(400, {}, 'calc summed return NaN');
+    }
+    if (subscriber.summed !== newSubscriber.summed) {
+      return res.handleResponse(400, {}, 'calc summed diff');
+    }
+    subscriber.lastUpdatedAt = new Date()
+    await subscriber.save()
+
+    house.subscriberId = null
+    house.lastUpdatedAt = new Date()
+    house = await house.save()
+    house = await Houses.findOne({_id: house._id}).exec()
+
+    return res.handleResponse(200, {mansionId, house})
+  } catch(err) {
+    log.error(err.name, err.message)
+    if (subscriber && subscriber._id) {
+      //删除新Subscriber
+      try {
+        _.assign(subscriber, oldSubscriber)
+        await subscriber.save()
+      } catch(error) {}
+      //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
+    }
+    return res.handleResponse(500, {});
+  }
+}
+exports.houseUnsubscribe = houseUnsubscribe;
+
+
+
+
+/*
+ * 退房
+ */
+const houseCheckOut = async (req, res) => {
+  try{
+    var body = req.body || {};
+    var newHouse = body.house
+    var newTenant = newHouse.tenantId
+    // log.info(newTenant)
+    var mansionId = newHouse.mansionId
+    var user = req.user;
+    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(400, {}, 'mansion not found');
+    }
+    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).populate('tenantId').exec();
+    if (!house) {
+      return res.handleResponse(400, {}, 'house not found');
+    }
+    if (house.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
+      return res.handleResponse(409, {}, 'old data');
+    }
+    var oldTenant = house.tenantId
+    if (_.isEmpty(oldTenant)) {
+      return res.handleResponse(400, {}, 'house has not tenant')
+    }
+    // if (oldTenant.oweRental) {
+    //   return res.handleResponse(400, {}, 'house has owe rental');
+    // }
+
+    var tenant = _.pick(oldTenant, ['name', 'mobile', 'idNo', 'rentalStartDate', 'rentalEndDate', 
+      'contractStartDate', 'contractEndDate', 'deposit', 'doorCardCount', 'oweRental', 'oweRentalExpiredDate'])
+    tenant.remark = newTenant.remark || ''
+    tenant.mansionId = house.mansionId
+    tenant.floor = house.floor
+    tenant.room = house.room
+    tenant.houseId = house._id
+    tenant.type = 'out'
+
+    tenant.rental = 0
+    tenant.servicesCharges = 0
+
+    tenant.electricMeterEndNumber = Number(newTenant.electricMeterEndNumber)
+    tenant.waterMeterEndNumber = Number(newTenant.waterMeterEndNumber)
+    tenant.doorCardRecoverCount = Number(newTenant.doorCardRecoverCount)
+    tenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
+    tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
+
+    tenant.overdueDays = new moment().diff(tenant.rentalEndDate, 'days')
+    tenant.overdueCharges = Number(newTenant.overdueCharges)
+    tenant.compensation = Number(newTenant.compensation)
+    tenant.doorCardRecoverCharges = 0
+
+    //计算电费
+    var tenantElectricMeterEndNumber = Number(tenant.electricMeterEndNumber)
+    if (tenantElectricMeterEndNumber < house.electricMeterEndNumber) {
+      var electricMeterMax = house.electricMeterMax? house.electricMeterMax: mansion.houseElectricMeterMax
+      tenant.electricKWhs = electricMeterMax - house.electricMeterEndNumber + tenantElectricMeterEndNumber + 1
+    } else {
+      tenant.electricKWhs = tenantElectricMeterEndNumber - house.electricMeterEndNumber
+    }
+    //限制最小用电量
+    if (mansion.houseElectricChargesMinimalKWhs && tenant.electricKWhs<mansion.houseElectricChargesMinimalKWhs) {
+      tenant.electricCharges = mansion.houseElectricChargesMinimalKWhs * tenant.electricChargesPerKWh
+    } else {
+      tenant.electricCharges = tenant.electricKWhs * tenant.electricChargesPerKWh
+    }
+    tenant.electricCharges = Number(tenant.electricCharges.toFixed(1))
+    
+    //计算水费
+    var tenantWaterMeterEndNumber = Number(tenant.waterMeterEndNumber)
+    if (tenantWaterMeterEndNumber < house.waterMeterEndNumber) {
+      var waterMeterMax = house.waterMeterMax || mansion.houseWaterMeterMax
+      tenant.waterTons = waterMeterMax - house.waterMeterEndNumber + tenantWaterMeterEndNumber + 1
+    } else {
+      tenant.waterTons = tenantWaterMeterEndNumber - house.waterMeterEndNumber
+    }
+    //限制最小用水量
+    if (mansion.houseWaterChargesMinimalTons && tenant.waterTons<mansion.houseWaterChargesMinimalTons) {
+      tenant.waterCharges = mansion.houseWaterChargesMinimalTons * tenant.waterChargesPerTon
+    } else {
+      tenant.waterCharges = tenant.waterTons * tenant.waterChargesPerTon
+    }
+    tenant.waterCharges = Number(tenant.waterCharges.toFixed(1))
+
+    
+    tenant.summed = Number(tenant.electricCharges) + Number(tenant.waterCharges) - Number(tenant.deposit)
+    if (tenant.oweRental>0) {
+      tenant.summed -= tenant.oweRental
+      tenant.oweRentalRepay = tenant.oweRental
+      tenant.oweRental = 0
+    }
+    
+    if (tenant.doorCardRecoverCount>0) {
+      tenant.doorCardRecoverCharges = tenant.doorCardRecoverCount*mansion.doorCardRecoverCharges
+      tenant.summed -= tenant.doorCardRecoverCharges
+    }
+    tenant.summed +=  tenant.overdueCharges + tenant.compensation
+    
+    tenant.summed = Number(tenant.summed.toFixed(1))
+
+    if (isNaN(tenant.summed)) {
+      return res.handleResponse(400, {}, 'calc summed return NaN');
+    }
+    log.info(tenant)
+    if (tenant.summed !== newTenant.summed) {
+      return res.handleResponse(400, {}, 'calc summed diff');
+    }
+    tenant.createdBy = user._id
+    tenant = await Tenant.create(tenant)
+
+    house.tenantId = null
+    house.subscriberId = null
+    house.electricMeterEndNumber = newTenant.electricMeterEndNumber
+    house.waterMeterEndNumber = newTenant.waterMeterEndNumber
+    house.lastUpdatedAt = new Date()
+    house = await house.save()
+    house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
+
+    return res.handleResponse(200, {mansionId, house})
+  } catch(err) {
+    log.error(err.name, err.message)
+    if (tenant && tenant._id) {
+      //删除新Tenant
+      try {
+        await Tenant.remove({_id: tenant._id})
+      } catch(error) {}
+      //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
+    }
+    return res.handleResponse(500, {});
+  }
+}
+exports.houseCheckOut = houseCheckOut;
 
 

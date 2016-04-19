@@ -9,7 +9,7 @@ import { SIGNOUT, GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_S
   SAVE_MANSION_BASE_SUCCESS, SAVE_HOUSE_LAYOUTS_SUCCESS,
   SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS,
   HOUSE_CHECK_IN_SUCCESS, HOUSE_PAY_RENT_SUCCESS, HOUSE_SUBSCRIBE_SUCCESS,
-  HOUSE_REPAY_SUCCESS } from '../../constants/actionTypes';
+  HOUSE_REPAY_SUCCESS, HOUSE_UNSUBSCRIBE_SUCCESS, HOUSE_CHECK_OUT_SUCCESS } from '../../constants/actionTypes';
 
 
 
@@ -102,11 +102,12 @@ export default (state = initialState, action) => {
     case HOUSE_PAY_RENT_SUCCESS:
     case HOUSE_SUBSCRIBE_SUCCESS:
     case HOUSE_REPAY_SUCCESS:
+    case HOUSE_UNSUBSCRIBE_SUCCESS:
+    case HOUSE_CHECK_OUT_SUCCESS:
       newMansions = _.assign({}, state)
       data = action.resData.data
       mansion = newMansions[data.mansionId]
       houseRet = action.resData.data.house
-      log.info(mansion, houseRet)
       var idx = findHouseIdx(mansion.houses, houseRet)
       if (idx>-1) {
         mansion.houses[idx] = houseRet

@@ -65,10 +65,10 @@ class HousesCheckIn extends Component {
       house.tenantId = tenant
       tenant.houseId = house._id
       tenant.type = 'in'
-      tenant.rentalStartDate = new Date()
-      tenant.rentalEndDate = new moment(tenant.rentalStartDate).add(1, 'M').subtract(1, 'day').toDate()
+      tenant.rentalStartDate = new moment().startOf('day').toDate()
+      tenant.rentalEndDate = new moment(tenant.rentalStartDate).add(1, 'M').subtract(1, 'day').endOf('day').toDate()
       tenant.contractStartDate = tenant.rentalStartDate
-      tenant.contractEndDate = new moment(tenant.contractStartDate).add(1, 'Y').subtract(1, 'day').toDate()
+      tenant.contractEndDate = new moment(tenant.contractStartDate).add(1, 'Y').subtract(1, 'day').endOf('day').toDate()
       tenant.electricMeterEndNumber = house.electricMeterEndNumber
       tenant.waterMeterEndNumber = house.waterMeterEndNumber
       tenant.electricCharges = 0
@@ -94,7 +94,7 @@ class HousesCheckIn extends Component {
       }
       tenant.isOweRental = false
       tenant.oweRental = 0
-      tenant.oweRentalExpiredDate = new moment(tenant.rentalStartDate).add(7, 'day').toDate()
+      tenant.oweRentalExpiredDate = new moment(tenant.rentalStartDate).add(7, 'day').endOf('day').toDate()
 
       tenant.summed = 0
       this.setState({okDisable: false, printDisabled: true})
@@ -145,11 +145,11 @@ class HousesCheckIn extends Component {
       }
     }
   }
-  datePickerChange(key) {
+  datePickerChange(key, startOrEnd='endOf') {
     return function(e, value) {
       var house = this.state.house
       var tenant = house.tenantId
-      tenant[key] = value
+      tenant[key] = new moment(value)[startOrEnd]('day').toDate()
       this.setState({house, forceUpdate: true})
     }
   }
@@ -207,12 +207,24 @@ class HousesCheckIn extends Component {
     if (tenant.doorCardCount==='' || tenant.doorCardCount===undefined) return openToast({msg: '请输入购门卡数'})
 
     tenant.deposit = Number(tenant.deposit)
+    if (isNaN(tenant.deposit)) tenant.deposit = ''
     tenant.rental = Number(tenant.rental)
+    if (isNaN(tenant.rental)) tenant.rental = ''
     tenant.servicesCharges = Number(tenant.servicesCharges)
+    if (isNaN(tenant.servicesCharges)) tenant.servicesCharges = ''
     tenant.electricMeterEndNumber = Number(tenant.electricMeterEndNumber)
+    if (isNaN(tenant.electricMeterEndNumber)) tenant.electricMeterEndNumber = ''
     tenant.waterMeterEndNumber = Number(tenant.waterMeterEndNumber)
+    if (isNaN(tenant.waterMeterEndNumber)) tenant.waterMeterEndNumber = ''
     tenant.doorCardCount = Number(tenant.doorCardCount)
+    if (isNaN(tenant.doorCardCount)) tenant.doorCardCount = ''
+
     this.setState({tenant, forceUpdate: true})
+  
+    if (isNaN(tenant.summed)) {
+      return openToast({msg: '非法数字，总计错误'})
+    }
+
     if(this.props.ok) {
       this.props.ok(house)
     }
@@ -239,7 +251,7 @@ class HousesCheckIn extends Component {
 
     // tenant.name = tenant.name || 'Welkinm'
     // tenant.mobile = tenant.mobile || '13710248411'
-
+    // log.info(tenant)
     return (
       <Dialog title={'入住登记：'+(house.floor+1)+'楼'+(house.room+1)+'房'+'  [  '+houseLayout.description+'  ]'} modal={true} 
         open={this.props.open} autoDetectWindowHeight={false} 
@@ -259,15 +271,15 @@ class HousesCheckIn extends Component {
           <DatePicker value={tenant.contractStartDate} disabled={disabled} formatDate={this.formatDate}
             floatingLabelText='合同开始日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('contractStartDate').bind(this)}/>
+            onChange={this.datePickerChange('contractStartDate', 'startOf').bind(this)}/>
           <DatePicker value={tenant.contractEndDate} disabled={disabled} formatDate={this.formatDate}
             floatingLabelText='合同结束日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('contractEndDate').bind(this)}/>
+            onChange={this.datePickerChange('contractEndDate', 'endOf').bind(this)}/>
           <DatePicker value={tenant.rentalEndDate} disabled={disabled} formatDate={this.formatDate}
             floatingLabelText='下次交租日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('rentalEndDate').bind(this)}/>
+            onChange={this.datePickerChange('rentalEndDate', 'endOf').bind(this)}/>
           <br />
 
           <CommonTextField value={tenant.deposit} disabled={disabled} floatingLabelText='押金' 
@@ -287,7 +299,7 @@ class HousesCheckIn extends Component {
             floatingLabelText='租金补齐期限' autoOk={true}
             style={tenant.isOweRental? styles.dataPicker: _.assign({}, styles.dataPicker, {display: 'none'})} 
             wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('oweRentalExpiredDate').bind(this)}/>
+            onChange={this.datePickerChange('oweRentalExpiredDate', 'endOf').bind(this)}/>
 
           <br />
           <CommonTextField value={tenant.electricMeterEndNumber} disabled={disabled} 

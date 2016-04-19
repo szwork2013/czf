@@ -69,8 +69,15 @@ const TenantModel = new Schema({
   oweRentalExpiredDate: Date,     //欠租金补交最迟时间，开区间
 
   electricCharges: Number,            //电费
-  waterCharges: Number,               //水费          
+  waterCharges: Number,               //水费   
+
   compensation: Number,               //损坏赔偿
+  overdueDays: Number,                //逾期天数
+  overdueFinePerDay: Number,          //逾期罚款/每天
+  overdueCharges: Number,             //逾期罚款
+  doorCardRecoverCount: Number,       //门卡回收个数
+  doorCardRecoverCharges: Number,     //
+
   summed: Number,                     //费用总计
 
   remark: String,                   //备注

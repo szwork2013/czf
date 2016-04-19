@@ -29,6 +29,8 @@ import CommonRaisedButton from '../../components/common/common_raised_button'
 import HousesCheckIn from '../../components/mansion/houses_check_in'
 import HousesPayRent from '../../components/mansion/houses_pay_rent'
 import HousesSubscribe from '../../components/mansion/houses_subscribe'
+import HousesUnsubscribe from '../../components/mansion/houses_unsubscribe'
+import HousesCheckOut from '../../components/mansion/houses_check_out'
 import HousesRepay from '../../components/mansion/houses_repay'
 
 // import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
@@ -69,6 +71,14 @@ class Houses extends Component {
       repayHouseFloor: -1,
       repayHouseRoom: -1,
       repayOpen: false,
+
+      unsubscribeHouseFloor: -1,
+      unsubscribeHouseRoom: -1,
+      unsubscribeOpen: false, 
+
+      checkoutHouseFloor: -1,
+      checkoutHouseRoom: -1,
+      checkoutOpen: false,
     }
   }
 
@@ -269,6 +279,30 @@ class Houses extends Component {
     this.setState({repayHouseFloor: -1, repayHouseRoom: -1, repayOpen: false})
   }
 
+  unsubscribeClick(floorIdx, houseIdx) {
+    return function() {
+      this.setState({unsubscribeHouseFloor: floorIdx, unsubscribeHouseRoom: houseIdx, unsubscribeOpen: true})
+    }
+  }
+  unsubscribeOk(house) {
+    this.props.actions.houseUnsubscribeClick({house})
+  }
+  unsubscribeCancel() {
+    this.setState({unsubscribeHouseFloor: -1, unsubscribeHouseRoom: -1, unsubscribeOpen: false})
+  }
+
+  checkoutClick(floorIdx, houseIdx) {
+    return function() {
+      this.setState({checkoutHouseFloor: floorIdx, checkoutHouseRoom: houseIdx, checkoutOpen: true})
+    }
+  }
+  checkoutOk(house) {
+    this.props.actions.houseCheckOutClick({house})
+  }
+  checkoutCancel() {
+    this.setState({checkoutHouseFloor: -1, checkoutHouseRoom: -1, checkoutOpen: false})
+  }
+
   print(floorIdx, houseIdx) {
     return function(e) {
 
@@ -376,6 +410,16 @@ class Houses extends Component {
       repayHouse = state.floor[state.repayHouseFloor][state.repayHouseRoom]
     }
 
+    var unsubscribeHouse = {}
+    if (state.unsubscribeOpen) {
+      unsubscribeHouse = state.floor[state.unsubscribeHouseFloor][state.unsubscribeHouseRoom]
+    }
+
+    var checkoutHouse= {}
+    if (state.checkoutOpen) {
+      checkoutHouse = state.floor[state.checkoutHouseFloor][state.checkoutHouseRoom]
+    }
+
     return (
       <div>
         <div style={{marginBottom: '20px'}}>
@@ -466,7 +510,7 @@ class Houses extends Component {
                 
                 actions.push(
                   <button key={house._id+'out'} style={styles.button} 
-                    onTouchTap={null}>退房</button>
+                    onTouchTap={this.checkoutClick(house.floor, house.room).bind(this)}>退房</button>
                 )
                 actions.push(
                   <button key={house._id+'print'} style={styles.button} 
@@ -492,7 +536,7 @@ class Houses extends Component {
                 )
                 actions.push(
                   <button key={house._id+'out'} style={styles.button} 
-                    onTouchTap={null}>退订</button>
+                    onTouchTap={this.unsubscribeClick(house.floor, house.room).bind(this)}>退订</button>
                 )
                 actions.push(
                   <button key={house._id+'print'} style={styles.button} 
@@ -576,6 +620,10 @@ class Houses extends Component {
             ok={this.subscribeOk.bind(this)} cancel={this.subscribeCancel.bind(this)} openToast={props.actions.openToast}/>
         <HousesRepay mansion={state.mansion} houseLayouts={state.houseLayouts} house={repayHouse} open={state.repayOpen} 
             ok={this.repayOk.bind(this)} cancel={this.repayCancel.bind(this)} openToast={props.actions.openToast}/>
+        <HousesUnsubscribe mansion={state.mansion} houseLayouts={state.houseLayouts} house={unsubscribeHouse} open={state.unsubscribeOpen} 
+            ok={this.unsubscribeOk.bind(this)} cancel={this.unsubscribeCancel.bind(this)} openToast={props.actions.openToast}/>
+        <HousesCheckOut mansion={state.mansion} houseLayouts={state.houseLayouts} house={checkoutHouse} open={state.checkoutOpen} 
+            ok={this.checkoutOk.bind(this)} cancel={this.checkoutCancel.bind(this)} openToast={props.actions.openToast}/>
       </div>
     )
   }

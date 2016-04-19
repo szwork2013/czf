@@ -77,11 +77,11 @@ class HousesSubscribe extends Component {
           subscriber.houseId = house._id
           subscriber.floor = house.floor
           subscriber.room = house.room
-          subscriber.expiredDate = new moment().add(mansion.houseSubscriptionValidityCount, 'day').toDate()
+          subscriber.expiredDate = new moment().add(mansion.houseSubscriptionValidityCount, 'day').endOf('day').toDate()
           if (houseLayout) {
             subscriber.subscription = houseLayout.defaultSubscription
           }
-          subscriber.createdAt = new Date()
+          subscriber.createdAt = new moment().startOf('day').toDate()
           this.setState({okDisable: false, printDisabled: true})
           this.calcAll(subscriber)
         } else {
@@ -112,11 +112,11 @@ class HousesSubscribe extends Component {
       }
     }
   }
-  datePickerChange(key) {
+  datePickerChange(key, startOrEnd='endOf') {
     return function(e, value) {
       var house = this.state.house || {}
       var subscriber = house.subscriberId || {}
-      subscriber[key] = value
+      subscriber[key] = new moment(value)[startOrEnd]('day').toDate()
       this.setState({house, forceUpdate: true})
     }
   }
@@ -160,7 +160,14 @@ class HousesSubscribe extends Component {
     if (subscriber.subscription==='' || subscriber.subscription===undefined) return openToast({msg: '请输入定金'})
 
     subscriber.subscription = Number(subscriber.subscription)
+    if (isNaN(subscriber.subscription)) subscriber.subscription = ''
+
     this.setState({house, forceUpdate: true})
+
+    if (isNaN(subscriber.summed)) {
+      return openToast({msg: '非法数字，总计错误'})
+    }
+
     if(this.props.ok) {
       this.props.ok(house)
     }
@@ -193,11 +200,11 @@ class HousesSubscribe extends Component {
         bodyStyle={{overflowY: 'auto', maxHeight: 'calc(100vh - 110px)', padding: '5px 24px 24px 24px'}}>
         <div style={{display: 'inline-block', float: 'left', width: '500px'}}>
           
-          <CommonTextField defaultValue={subscriber.name} disabled={disabled} floatingLabelText='姓名' hintText='姓名' 
+          <CommonTextField defaultValue={subscriber.name} disabled={disabled} floatingLabelText='姓名' 
             style={styles.textField} onChange={this.commonTextFiledChange('name').bind(this)} ref='name'/>
-          <CommonTextField value={subscriber.mobile} disabled={disabled} floatingLabelText='手机号' hintText='手机号' 
+          <CommonTextField value={subscriber.mobile} disabled={disabled} floatingLabelText='手机号' 
             style={styles.textField} onChange={this.commonTextFiledChange('mobile').bind(this)}/>
-          <CommonTextField value={subscriber.idNo} disabled={disabled} floatingLabelText='身份证' hintText='身份证' 
+          <CommonTextField value={subscriber.idNo} disabled={disabled} floatingLabelText='身份证' 
             style={styles.textFieldLong} onChange={this.commonTextFiledChange('idNo').bind(this)}/>
           <br />
           
@@ -208,7 +215,7 @@ class HousesSubscribe extends Component {
           <DatePicker value={subscriber.expiredDate} disabled={disabled} formatDate={this.formatDate}
             floatingLabelText='定房失效日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('expiredDate').bind(this)}/>
+            onChange={this.datePickerChange('expiredDate', 'endOf').bind(this)}/>
           <br />
 
           <CommonTextField value={subscriber.subscription} disabled={disabled} floatingLabelText='定金'
