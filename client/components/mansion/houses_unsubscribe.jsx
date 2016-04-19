@@ -221,7 +221,7 @@ class HousesUnsubscribe extends Component {
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
                      fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '265px'}}>
           <div style={{height: '180px'}}>
-          { subscriber.expiredDate>new Date()? '有效': '失效'}<br />
+          { subscriber.expiredDate>=new Date()? '计金有效': '订金过期'}<br />
           { subscriber.isRefund? '退款：-'+subscriber.refund: ''}<br />
           
           </div>

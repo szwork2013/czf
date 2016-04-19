@@ -197,7 +197,7 @@ class HousesCheckOut extends Component {
 
     // log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
     tenant.summed = Number(tenant.electricCharges) + Number(tenant.waterCharges) - Number(tenant.deposit)
-    if (tenant.isOweRental) tenant.summed -= Number(tenant.oweRental)
+    if (tenant.isOweRental) tenant.summed += Number(tenant.oweRental)
     if (Number(tenant.doorCardRecoverCount)>0) {
       tenant.doorCardRecoverCharges = Number(tenant.doorCardRecoverCount)*mansion.doorCardRecoverCharges
       tenant.summed -= tenant.doorCardRecoverCharges
@@ -284,7 +284,7 @@ class HousesCheckOut extends Component {
           <DatePicker value={tenant.contractEndDate} disabled={true} formatDate={this.formatDate}
             floatingLabelText='合同结束日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat} />
-          <DatePicker value={new Date(oldTenant.rentalEndDate)} disabled={true} formatDate={this.formatDate}
+          <DatePicker value={new Date(tenant.rentalEndDate)} disabled={true} formatDate={this.formatDate}
             floatingLabelText='上次交租期限' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}/>
           <br />

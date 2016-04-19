@@ -249,6 +249,14 @@ class HousesCheckIn extends Component {
     var wordings = {ok: '确定', cancel: '取消'}
     var forceUpdate = state.forceUpdate
 
+    var subscriberStr = false 
+    if (tenant.subscriberId) {
+      if (new Date(house.subscriberId.expiredDate) >= new Date()) {
+        subscriberStr = '定房有效'
+      } else {
+        subscriberStr = '定房过期'
+      }
+    }
     // tenant.name = tenant.name || 'Welkinm'
     // tenant.mobile = tenant.mobile || '13710248411'
     // log.info(tenant)
@@ -321,6 +329,9 @@ class HousesCheckIn extends Component {
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
                      fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '410px'}}>
           <div style={{height: '325px'}}>
+          { subscriberStr && (
+              <span>{subscriberStr}<br /></span>
+          )}
           押金：{tenant.deposit}<br />
           租金：{tenant.rental}<br />
           电费：{tenant.electricCharges}<br />

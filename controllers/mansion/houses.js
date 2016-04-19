@@ -598,7 +598,7 @@ const houseCheckOut = async (req, res) => {
     
     tenant.summed = Number(tenant.electricCharges) + Number(tenant.waterCharges) - Number(tenant.deposit)
     if (tenant.oweRental>0) {
-      tenant.summed -= tenant.oweRental
+      tenant.summed += tenant.oweRental
       tenant.oweRentalRepay = tenant.oweRental
       tenant.oweRental = 0
     }

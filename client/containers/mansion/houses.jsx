@@ -520,7 +520,9 @@ class Houses extends Component {
                 state = '定'
                 name = house.subscriberId.name
                 mobile = house.subscriberId.mobile
-                remark = house.subscriberId.remark + '（定金' + house.subscriberId.subscription+'元）'
+                remark = house.subscriberId.remark + '(定金' + house.subscriberId.subscription+'元'
+                if (new Date(house.subscriberId.expiredDate) < new Date()) remark+='，过期'
+                remark += ')'
                 contractEndDate = new moment(house.subscriberId.expiredDate).format('YYYY.MM.DD')
                 // actions.push(
                 //   <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
