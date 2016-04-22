@@ -24,7 +24,6 @@ class HousesPayRent extends Component {
       printDisabled: true,
 
       house: {},
-      // tenant: {},
       houseLayout: {},
       changeDeposit: 0,
       forceUpdate: true,
@@ -64,7 +63,7 @@ class HousesPayRent extends Component {
     var stateHouse = this.state.house || {}
     var tenant = stateHouse.tenantId || {}
     if (house.tenantId) {
-      disabled = props.disabled!==undefined? props.disabled: false
+      disabled = false
       if (_.isEmpty(stateHouse)) {
         stateHouse = _.cloneDeep(house)
         tenant = stateHouse.tenantId
@@ -99,7 +98,7 @@ class HousesPayRent extends Component {
           this.setState({okDisable: false, printDisabled: true})
         }
         this.state.house = stateHouse
-        this.calcAll(tenant)
+        this.calcAll(stateHouse)
       } else {
         if (new Date(house.lastUpdatedAt).getTime() !== new Date(stateHouse.lastUpdatedAt).getTime()) {
           //说明是保存过本次的交租信息，不能再修改信息
@@ -149,10 +148,10 @@ class HousesPayRent extends Component {
     return new moment(date).format('YYYY/MM/DD')
   }
 
-  calcAll(tenant) {
-    var house = this.state.house || {}
-    tenant = tenant || house.tenantId || {}
-    // var house = this.props.house || {}
+  calcAll(house) {
+    var mansion = this.props.mansion
+    var house = house || this.state.house
+    var tenant = house.tenantId
     var oldTenant = this.props.house.tenantId || {}
     var mansion = this.props.mansion
     
@@ -172,7 +171,6 @@ class HousesPayRent extends Component {
     }
     tenant.electricCharges = Number(tenant.electricCharges.toFixed(1))
     
-
     //计算水费
     var tenantWaterMeterEndNumber = Number(tenant.waterMeterEndNumber)
     if (tenantWaterMeterEndNumber < house.waterMeterEndNumber) {

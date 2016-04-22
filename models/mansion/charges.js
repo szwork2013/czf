@@ -44,14 +44,15 @@ const ChargesModel = new Schema({
   },
   floor: Number,                  //从0开始，0代表1楼
   room: Number,                   //从0开始，0代表01房
-  type: {                         //类型，in新入住，out退房，rental租金，migrate导入数据迁移
+  type: {                         //类型
     type: String,
     enum: ['subscribe', 'unsubscribe', 'checkin', 'repay', 'rental', 'migrate']
   },
 
   subscription: Number,               //定金
   refund: Number,                     //退定金
-  deposit: Number,                    //押金
+  deposit: Number,                    //当前实际押金
+  changeDeposit: Number,              //补交或退还的押金
   rental: Number,                     //租金
   oweRental: Number,                  //欠租金
   oweRentalRepay: Number,             //补欠租金

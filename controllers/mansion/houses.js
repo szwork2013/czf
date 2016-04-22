@@ -509,7 +509,6 @@ const housePayRent = async (req, res) => {
     tenant.name = oldTenant.name
     tenant.mobile = newTenant.mobile
     tenant.idNo = newTenant.idNo || ''
-    tenant.remark = newTenant.remark || ''
     if (!tenant.name) return res.handleResponse(400, {}, 'name is require');
     if (!tenant.mobile) return res.handleResponse(400, {}, 'mobile is require');
     if (!utils.isMobileNumber(tenant.mobile)) return res.handleResponse(400, {}, 'mobile wrong');
@@ -578,7 +577,6 @@ const housePayRent = async (req, res) => {
     }
     tenant.waterCharges = Number(tenant.waterCharges.toFixed(1))
 
-    
     tenant.summed = Number(tenant.rental) + Number(tenant.servicesCharges) + Number(tenant.electricCharges) + Number(tenant.waterCharges)
     if (newTenant.isChangeDeposit) {
       tenant.deposit = Number(newTenant.deposit)
@@ -594,9 +592,26 @@ const housePayRent = async (req, res) => {
     if (tenant.summed !== newTenant.summed) {
       return res.handleResponse(400, {}, 'calc summed diff');
     }
+    tenant.remark = newTenant.remark || ''
     tenant.createdBy = user._id
+    tenant.createdAt = new Date()
+    tenant.lastUpdatedAt = tenant.createdAt
+
     tenant = await Tenant.create(tenant)
 
+    //保存计费信息
+    var charges = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
+      'rental','servicesCharges', 'waterCharges', 'electricCharges', 
+      'oweRental', 'deposit', 'summed', 'remark',])
+    charges.tenantId = tenant._id
+    charges.type = 'rental'
+    charges.changeDeposit = Number(tenant.deposit) - Number(oldTenant.deposit)
+    charges.createdBy = user._id
+    charges.createdAt = new Date()
+    await Charges.create(charges)
+
+    //修改房间相关信息
+    var houseBackup = _.pick(house, ['tenantId', 'subscriberId', 'electricMeterEndNumber', 'waterMeterEndNumber', 'lastUpdatedAt'])
     house.tenantId = tenant._id
     house.subscriberId = null
     house.electricMeterEndNumber = newTenant.electricMeterEndNumber
@@ -613,6 +628,9 @@ const housePayRent = async (req, res) => {
       //删除新Tenant
       try {
         await Tenant.remove({_id: tenant._id})
+      } catch(error) {}
+      try {
+        await Charges.remove({_id: charges._id})
       } catch(error) {}
       //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
     }
