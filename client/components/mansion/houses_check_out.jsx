@@ -65,57 +65,53 @@ class HousesCheckOut extends Component {
     if (!_.isEmpty(house)) {
       if (house.tenantId) {
         disabled = false
-        if (_.isEmpty(stateHouse)) {
-          stateHouse = _.cloneDeep(house)
-          tenant = stateHouse.tenantId
-          if (tenant.oweRental) {
-            // 还欠上次租金的不允许交租，需要先补齐所欠租金
-            // disabled = true
-            tenant.isOweRental = true
-            tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
-            // this.setState({okDisable: true, printDisabled: true})
-          }
-          tenant._id
-          tenant.subscription = 0
-          delete tenant.subscriberId
-          tenant.rental = 0
-          tenant.rentalStartDate = new Date(tenant.rentalEndDate)
-          tenant.rentalEndDate = new Date(tenant.rentalEndDate)
-          tenant.contractStartDate = new Date(tenant.contractStartDate)
-          tenant.contractEndDate = new Date(tenant.contractEndDate)
-          tenant.electricMeterEndNumber
-          tenant.waterMeterEndNumber
-          tenant.waterTons = 0
-          tenant.electricKWhs = 0
-          tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
-          tenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
-          // tenant.isOweRental = false
-          // tenant.oweRental = 0
-          // tenant.oweRentalExpiredDate = new moment().add(7, 'day').toDate()
-          tenant.servicesCharges = 0
-          tenant.compensation = 0
-          tenant.overdueDays = new moment().diff(tenant.rentalEndDate, 'days')
-          if (tenant.overdueDays<0) tenant.overdueDays = 0
-          tenant.overdueFinePerDay = 0
-          if (houseLayout) {
-            tenant.overdueFinePerDay = houseLayout.overdueFine
-          }
-          tenant.overdueCharges = tenant.overdueDays * tenant.overdueFinePerDay
-          tenant.doorCardRecoverCount = tenant.doorCardCount || 0
-          tenant.doorCardRecoverCharges = tenant.doorCardRecoverCount * mansion.doorCardRecoverCharges
-
-          this.state.house = stateHouse
-          this.setState({okDisable: false, printDisabled: true})
-          this.calcAll(tenant)
-        }
         this.setState({okDisable: false, printDisabled: true})
       } else {
         disabled = true
         this.setState({okDisable: true, printDisabled: false})
       }
+      if (_.isEmpty(stateHouse)) {
+        stateHouse = _.cloneDeep(house)
+        tenant = stateHouse.tenantId
+        if (tenant.oweRental) {
+          // 还欠上次租金的，需要冲抵
+          // disabled = true
+          tenant.isOweRental = true
+          tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
+          // this.setState({okDisable: true, printDisabled: true})
+        }
+        tenant._id
+        tenant.subscription = 0
+        delete tenant.subscriberId
+        tenant.rental = 0
+        tenant.rentalStartDate = new Date(tenant.rentalEndDate)
+        tenant.rentalEndDate = new Date(tenant.rentalEndDate)
+        tenant.contractStartDate = new Date(tenant.contractStartDate)
+        tenant.contractEndDate = new Date(tenant.contractEndDate)
+        tenant.electricMeterEndNumber
+        tenant.waterMeterEndNumber
+        tenant.waterTons = 0
+        tenant.electricKWhs = 0
+        tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
+        tenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
+        tenant.servicesCharges = 0
+        tenant.compensation = 0
+        tenant.overdueDays = new moment().diff(tenant.rentalEndDate, 'days')
+        if (tenant.overdueDays<0) tenant.overdueDays = 0
+        tenant.overdueFinePerDay = 0
+        if (houseLayout) {
+          tenant.overdueFinePerDay = houseLayout.overdueFine
+        }
+        tenant.overdueCharges = tenant.overdueDays * tenant.overdueFinePerDay
+        tenant.doorCardRecoverCount = tenant.doorCardCount || 0
+        tenant.doorCardRecoverCharges = tenant.doorCardRecoverCount * mansion.doorCardRecoverCharges
+
+        // this.state.house = stateHouse
+        this.calcAll(stateHouse)
+      }
     } else {
       stateHouse = {}
-      disabled = props.disabled!==undefined? props.disabled: true
+      disabled = true
       this.setState({okDisable: true, printDisabled: true})
     }
     this.setState({house: stateHouse, houseLayout, disabled})
@@ -133,32 +129,15 @@ class HousesCheckOut extends Component {
       }
     }
   }
-  datePickerChange(key) {
-    return function(e, value) {
-      var house = this.state.house || {}
-      var tenant = house.tenantId || {}
-      tenant[key] = value
-      this.setState({house, forceUpdate: true})
-    }
-  }
-  checkboxChange(key) {
-    return function(e, value) {
-      var house = this.state.house || {}
-      var tenant = house.tenantId || {}
-      tenant[key] = value
-      this.setState({house, forceUpdate: true})
-      this.calcAll()
-    }
-  }
 
   formatDate(date) {
     return new moment(date).format('YYYY/MM/DD')
   }
 
-  calcAll(tenant) {
-    var house = this.state.house || {}
-    tenant = tenant || house.tenantId || {}
-    // var house = this.props.house || {}
+  calcAll(house) {
+    var mansion = this.props.mansion
+    var house = house || this.state.house
+    var tenant = house.tenantId
     var oldTenant = this.props.house.tenantId || {}
     var mansion = this.props.mansion
     
@@ -220,7 +199,6 @@ class HousesCheckOut extends Component {
     if (tenant.electricMeterEndNumber==='' || tenant.electricMeterEndNumber===undefined) return openToast({msg: '请输入电表读数'})
     if (tenant.waterMeterEndNumber==='' || tenant.waterMeterEndNumber===undefined) return openToast({msg: '请输入水表读数'})
 
-    
     tenant.electricMeterEndNumber = Number(tenant.electricMeterEndNumber)
     if (isNaN(tenant.electricMeterEndNumber)) tenant.electricMeterEndNumber = ''
     tenant.waterMeterEndNumber = Number(tenant.waterMeterEndNumber)
@@ -238,7 +216,6 @@ class HousesCheckOut extends Component {
     if (isNaN(tenant.summed)) {
       return openToast({msg: '非法数字，总计错误'})
     }
-
 
     if(this.props.ok) {
       this.props.ok(house)
@@ -314,8 +291,7 @@ class HousesCheckOut extends Component {
           <DatePicker value={tenant.oweRentalExpiredDate} disabled={true} formatDate={this.formatDate}
             floatingLabelText='租金补齐期限' autoOk={true}
             style={tenant.isOweRental? styles.dataPicker: _.assign({}, styles.dataPicker, {display: 'none'})} 
-            wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('oweRentalExpiredDate').bind(this)}/>
+            wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}/>
           <br />
 
 

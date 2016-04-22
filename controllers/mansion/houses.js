@@ -699,7 +699,7 @@ const houseCheckOut = async (req, res) => {
     tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
 
     tenant.overdueDays = new moment().diff(tenant.rentalEndDate, 'days')
-    tenant.overdueCharges = Number(newTenant.overdueCharges)
+    tenant.overdueCharges = Number(newTenant.overdueCharges) || 0
     tenant.compensation = Number(newTenant.compensation)
     tenant.doorCardRecoverCharges = 0
 
@@ -754,28 +754,44 @@ const houseCheckOut = async (req, res) => {
     if (isNaN(tenant.summed)) {
       return res.handleResponse(400, {}, 'calc summed return NaN');
     }
-    log.info(tenant)
     if (tenant.summed !== newTenant.summed) {
       return res.handleResponse(400, {}, 'calc summed diff');
     }
     tenant.createdBy = user._id
     tenant = await Tenant.create(tenant)
 
+    //保存计费信息
+    var charges = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
+      'waterCharges', 'electricCharges', 'deposit', 
+      'doorCardRecoverCharges', 'overdueCharges', 'compensation',
+      'oweRental', 'oweRentalRepay', 'summed', 'remark',])
+    charges.tenantId = tenant._id
+    charges.type = 'checkout'
+    charges.createdBy = user._id
+    charges.createdAt = new Date()
+    await Charges.create(charges)
+
+    //修改房间相关信息
+    var houseBackup = _.pick(house, ['tenantId', 'subscriberId', 'electricMeterEndNumber', 'waterMeterEndNumber', 'lastUpdatedAt'])
     house.tenantId = null
     house.subscriberId = null
     house.electricMeterEndNumber = newTenant.electricMeterEndNumber
     house.waterMeterEndNumber = newTenant.waterMeterEndNumber
     house.lastUpdatedAt = new Date()
     house = await house.save()
-    house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
 
+    house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
     return res.handleResponse(200, {mansionId, house})
+
   } catch(err) {
-    log.error(err.name, err.message)
+    log.error(err)
     if (tenant && tenant._id) {
       //删除新Tenant
       try {
         await Tenant.remove({_id: tenant._id})
+      } catch(error) {}
+      try {
+        await Charges.remove({_id: charges._id})
       } catch(error) {}
       //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
     }

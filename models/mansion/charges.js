@@ -46,7 +46,7 @@ const ChargesModel = new Schema({
   room: Number,                   //从0开始，0代表01房
   type: {                         //类型
     type: String,
-    enum: ['subscribe', 'unsubscribe', 'checkin', 'repay', 'rental', 'migrate']
+    enum: ['subscribe', 'unsubscribe', 'checkin', 'repay', 'rental', 'checkout']
   },
 
   subscription: Number,               //定金
@@ -60,6 +60,9 @@ const ChargesModel = new Schema({
   electricCharges: Number,            //电费
   servicesCharges: Number,            //物业费
   doorCardCharges: Number,            //门卡费
+  doorCardRecoverCharges: Number,     //门卡回收费
+  overdueCharges: Number,             //逾期罚款
+  compensation: Number,               //损坏赔偿
 
   summed: Number,                     //总计
 
