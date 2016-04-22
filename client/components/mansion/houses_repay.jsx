@@ -5,7 +5,6 @@ import utils from '../../utils'
 import IDCard from '../../../utils/identitycard'
 
 
-
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Colors from 'material-ui/lib/styles/colors';
@@ -61,25 +60,25 @@ class HousesRepay extends Component {
     var houseLayout = houseLayouts.find( houseLayout => { return houseLayout._id === house.houseLayout})
     var stateHouse = this.state.house || {}
     var tenant = stateHouse.tenantId || {}
-    if (house.tenantId) {
-      // disabled = false
-      if (_.isEmpty(stateHouse)) {
-        stateHouse = _.cloneDeep(house)
-      }
-      tenant = stateHouse.tenantId
-      tenant.rentalStartDate = new Date(tenant.rentalStartDate)
-      tenant.rentalEndDate = new Date(tenant.rentalEndDate)
-      tenant.contractStartDate = new Date(tenant.contractStartDate)
-      tenant.contractEndDate = new Date(tenant.contractEndDate)
+    if (!_.isEmpty(house) && house.tenantId) {
       if (house.tenantId.oweRental) {
         //还欠上次租金
         disabled = false
-        tenant.oweRentalRepay = tenant.oweRental
-        tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
         this.setState({okDisable: false, printDisabled: true})
       } else {
         disabled = true
         this.setState({okDisable: true, printDisabled: false})
+      }
+      if (_.isEmpty(tenant)) {
+        stateHouse = _.cloneDeep(house)
+        tenant = stateHouse.tenantId || {}
+        tenant.rentalStartDate = new Date(tenant.rentalStartDate)
+        tenant.rentalEndDate = new Date(tenant.rentalEndDate)
+        tenant.contractStartDate = new Date(tenant.contractStartDate)
+        tenant.contractEndDate = new Date(tenant.contractEndDate)
+        tenant.oweRentalRepay = tenant.oweRental
+        tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
+        this.calcAll(stateHouse)
       }
     } else {
       stateHouse = {}
@@ -87,6 +86,17 @@ class HousesRepay extends Component {
       this.setState({okDisable: true, printDisabled: true})
     }
     this.setState({house: stateHouse, houseLayout, disabled})
+  }
+
+  /*
+   * 计算总价
+   */
+  calcAll(house) {
+    var mansion = this.props.mansion
+    var house = house || this.state.house
+    var tenant = house.tenantId
+    tenant.summed = Number(tenant.oweRentalRepay)
+    this.setState({house, forceUpdate: true})
   }
 
   commonTextFiledChange(key, isNumber) {
@@ -97,37 +107,14 @@ class HousesRepay extends Component {
       } else {
         stateTenant[key] = value
         this.setState({house: stateHouse, forceUpdate: true})
-        // this.calcAll()
+        this.calcAll()
       }
     }
   }
-  // datePickerChange(key) {
-  //   return function(e, value) {
-  //     var house = this.state.house || {}
-  //     var tenant = house.tenantId || {}
-  //     tenant[key] = value
-  //     this.setState({house, forceUpdate: true})
-  //   }
-  // }
-  // checkboxChange(key) {
-  //   return function(e, value) {
-  //     var house = this.state.house || {}
-  //     var tenant = house.tenantId || {}
-  //     tenant[key] = value
-  //     this.setState({house, forceUpdate: true})
-  //     this.calcAll()
-  //   }
-  // }
 
   formatDate(date) {
     return new moment(date).format('YYYY/MM/DD')
   }
-
-  // calcAll(tenant) {
-  //   var house = this.state.house || {}
-  //   tenant = tenant || house.tenantId || {}
-  //   this.setState({house, forceUpdate: true})
-  // }
   print() {
 
   }
@@ -144,12 +131,14 @@ class HousesRepay extends Component {
     stateTenant.oweRental = Number(stateTenant.oweRental)
     stateTenant.oweRentalRepay = Number(stateTenant.oweRentalRepay)
     if (stateTenant.oweRentalRepay !== stateTenant.oweRentalRepay) return openToast({msg: '所欠租金需一次性补齐'})
-      
-    if (isNaN(stateTenant.oweRentalRepay)) {
+    
+
+    this.setState({stateHouse, forceUpdate: true})
+  
+    if (isNaN(stateTenant.summed)) {
       return openToast({msg: '非法数字，总计错误'})
     }
 
-    this.setState({stateHouse, forceUpdate: true})
     if(this.props.ok) {
       this.props.ok(stateHouse)
     }
@@ -220,7 +209,7 @@ class HousesRepay extends Component {
           
           </div>
           <span style={{display: 'inline-block', minWidth: '150px', marginBottom: '10px', marginTop: '10px'}}>
-            总计：<span style={{color: 'red'}}>{stateTenant.oweRentalRepay}</span> 元
+            总计：<span style={{color: 'red'}}>{stateTenant.summed}</span> 元
           </span>
 
           <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>

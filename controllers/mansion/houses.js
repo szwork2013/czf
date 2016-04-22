@@ -126,7 +126,7 @@ exports.houseSubscribe = houseSubscribe;
 
 
 /*
- * 退定房
+ * 退定
  */
 const houseUnsubscribe = async (req, res) => {
   try{
@@ -176,9 +176,10 @@ const houseUnsubscribe = async (req, res) => {
 
     //保存计费信息
     var charges = _.pick(subscriber, ['mansionId', 'houseId', 'floor', 'room', 
-      'subscription', 'refund', 'summed', 'remark', 'createdBy'])
+      'subscription', 'refund', 'summed', 'remark'])
     charges.subscriberId = subscriber._id
     charges.type = 'unsubscribe'
+    charges.createdBy = user._id
     charges.createdAt = new Date()
     await Charges.create(charges)
 
@@ -322,9 +323,10 @@ const houseCheckIn = async (req, res) => {
     //保存计费信息
     var charges = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
       'subscription', 'deposit', 'rental', 'oweRental', 'waterCharges', 'electricCharges', 
-      'servicesCharges', 'doorCardCharges', 'summed', 'remark', 'createdBy'])
+      'servicesCharges', 'doorCardCharges', 'summed', 'remark',])
     charges.tenantId = tenant._id
     charges.type = 'checkin'
+    charges.createdBy = user._id
     charges.createdAt = new Date()
     await Charges.create(charges)
 
@@ -367,6 +369,109 @@ const houseCheckIn = async (req, res) => {
   }
 }
 exports.houseCheckIn = houseCheckIn;
+
+
+
+
+
+
+
+
+
+/*
+ * 补交欠款
+ */
+const houseRepay = async (req, res) => {
+  // var pickArray = ['remark']
+  try{
+    var body = req.body || {};
+    var newHouse = body.house
+    var newTenant = newHouse.tenantId
+    // log.info(newTenant)
+    var mansionId = newHouse.mansionId
+    var user = req.user;
+    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(400, {}, 'mansion not found');
+    }
+    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).populate('tenantId subscriberId').exec();
+    if (!house) {
+      return res.handleResponse(400, {}, 'house not found');
+    }
+    if (house.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
+      return res.handleResponse(409, {}, 'old data');
+    }
+    var oldTenant = house.tenantId
+    if (_.isEmpty(oldTenant)) {
+      return res.handleResponse(400, {}, 'house has not tenant')
+    }
+    if (!oldTenant.oweRental) {
+      return res.handleResponse(400, {}, 'house has not owe rental');
+    }
+
+    newTenant.oweRental = Number(newTenant.oweRental)
+    newTenant.oweRentalRepay = Number(newTenant.oweRentalRepay)
+    if (newTenant.oweRental !== newTenant.oweRentalRepay) {
+      return res.handleResponse(400, {}, 'the owe rental must pay all once');
+    }
+    if (newTenant.oweRental !== oldTenant.oweRental) {
+      return res.handleResponse(400, {}, 'old data');
+    }
+    if (isNaN(newTenant.oweRentalRepay)) {
+      return res.handleResponse(400, {}, 'calc summed return NaN');
+    }
+    var oldTenantBackup = _.pick(oldTenant, ['oweRentalRepay', 'oweRental', 'rental', 'remark', 'lastUpdatedAt'])
+    oldTenant.oweRentalRepay = newTenant.oweRentalRepay
+    oldTenant.oweRental = oldTenant.oweRentalRepay - newTenant.oweRentalRepay
+    oldTenant.rental += oldTenant.oweRentalRepay
+    oldTenant.remark = newTenant.remark
+    oldTenant.lastUpdatedAt = new Date()
+
+    oldTenant = await oldTenant.save()
+
+    //保存计费信息
+    var charges = _.pick(oldTenant, ['mansionId', 'houseId', 'floor', 'room', 
+      'oweRentalRepay', 'remark', ])
+    charges.tenantId = oldTenant._id
+    charges.summed = oldTenant.oweRentalRepay 
+    charges.type = 'repay'
+    charges.createdBy = user._id
+    charges.createdAt = new Date()
+    log.info(charges)
+    await Charges.create(charges)
+
+    //修改出租房相关属性
+    house.lastUpdatedAt = new Date()
+    house = await house.save()
+
+    house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
+    return res.handleResponse(200, {mansionId, house})
+
+  } catch(err) {
+    log.error(err)
+    if (oldTenant && oldTenant._id) {
+      //恢复Tenant
+      try {
+        _.assign(oldTenant, oldTenantBackup)
+        await oldTenant.save()
+      } catch(error) {}
+      try {
+        await Charges.remove({_id: charges._id})
+      } catch(error) {}
+      //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
+    }
+    return res.handleResponse(500, {});
+  }
+}
+exports.houseRepay = houseRepay;
+
+
+
+
+
+
+
+
 
 
 /*
@@ -519,76 +624,7 @@ exports.housePayRent = housePayRent;
 
 
 
-/*
- * 补交欠款
- */
-const houseRepay = async (req, res) => {
-  // var pickArray = ['remark']
-  try{
-    var body = req.body || {};
-    var newHouse = body.house
-    var newTenant = newHouse.tenantId
-    // log.info(newTenant)
-    var mansionId = newHouse.mansionId
-    var user = req.user;
-    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
-    if (!mansion) {
-      return res.handleResponse(400, {}, 'mansion not found');
-    }
-    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).populate('tenantId subscriberId').exec();
-    if (!house) {
-      return res.handleResponse(400, {}, 'house not found');
-    }
-    if (house.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
-      return res.handleResponse(409, {}, 'old data');
-    }
-    var oldTenant = house.tenantId
-    if (_.isEmpty(oldTenant)) {
-      return res.handleResponse(400, {}, 'house has not tenant')
-    }
-    if (!oldTenant.oweRental) {
-      return res.handleResponse(400, {}, 'house has not owe rental');
-    }
 
-    newTenant.oweRental = Number(newTenant.oweRental)
-    newTenant.oweRentalRepay = Number(newTenant.oweRentalRepay)
-    if (newTenant.oweRental !== newTenant.oweRentalRepay) {
-      return res.handleResponse(400, {}, 'the owe rental must pay all once');
-    }
-    if (newTenant.oweRental !== oldTenant.oweRental) {
-      return res.handleResponse(400, {}, 'old data');
-    }
-    if (isNaN(newTenant.oweRentalRepay)) {
-      return res.handleResponse(400, {}, 'calc summed return NaN');
-    }
-    oldTenant.oweRentalRepay = newTenant.oweRentalRepay
-    oldTenant.oweRental = 0
-    oldTenant.remark = newTenant.remark
-
-    oldTenant = await oldTenant.save()
-
-    // house.tenantId = tenant._id
-    // house.subscriberId = null
-    // house.electricMeterEndNumber = newTenant.electricMeterEndNumber
-    // house.waterMeterEndNumber = newTenant.waterMeterEndNumber
-    house.lastUpdatedAt = new Date()
-    house = await house.save()
-    house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
-
-    return res.handleResponse(200, {mansionId, house})
-  } catch(err) {
-    log.error(err.name, err.message)
-    if (tenant && tenant._id) {
-      //删除新Tenant
-      try {
-        await Tenant.remove({_id: tenant._id})
-      } catch(error) {}
-      //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
-    }
-    return res.handleResponse(500, {});
-  }
-}
-exports.houseRepay = houseRepay;
 
 
 

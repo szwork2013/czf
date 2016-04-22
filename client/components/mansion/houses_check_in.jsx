@@ -239,7 +239,7 @@ class HousesCheckIn extends Component {
     tenant.doorCardCount = Number(tenant.doorCardCount)
     if (isNaN(tenant.doorCardCount)) tenant.doorCardCount = ''
 
-    this.setState({tenant, forceUpdate: true})
+    this.setState({house, forceUpdate: true})
   
     if (isNaN(tenant.summed)) {
       return openToast({msg: '非法数字，总计错误'})
