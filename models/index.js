@@ -13,6 +13,7 @@ import { Houses } from './mansion/houses';
 import { Shops } from './mansion/shops';
 import { Tenant } from './mansion/tenant';
 import { Subscriber } from './mansion/subscriber'
+import { Charges } from './mansion/charges'
 
 // mongoose.Promise = require('bluebird');
 
@@ -77,6 +78,8 @@ exports.Shops = Shops;
 
 exports.Tenant = Tenant
 exports.Subscriber = Subscriber
+
+exports.Charges = Charges
 
 exports.init = async (clean, rebuiltRelationships) => {
   if (clean) {

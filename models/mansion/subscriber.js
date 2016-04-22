@@ -28,11 +28,11 @@ const SubscriberModel = new Schema({
   idNo: String,
   subscription: Number,           //订金
   expiredDate: Date,              //过期日期
-  status: {                       //状态，normal正常状态，transfer为入住转移到押金，expired过期订金不退，
+  status: {                       //状态，valid有效状态，transfer为入住转移到押金，expired过期订金不退，
                                   //default我方违约，需要赔偿，migrate导入数据迁移
     type: String,
-    enum: ['normal', 'unsubscribe', 'transfer', 'expired', 'default', 'migrate'],
-    default: 'normal'
+    enum: ['valid', 'unsubscribe', 'transfer', 'expired'],
+    default: 'valid'
   },
   refund: Number,                  //退定金
 
