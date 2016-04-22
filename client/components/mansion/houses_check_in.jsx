@@ -55,88 +55,117 @@ class HousesCheckIn extends Component {
   stateHouse(props) {
     var mansion = props.mansion
     var houseLayouts = props.houseLayouts
-    var house = _.cloneDeep(props.house)
+    var house = props.house
     var disabled = false
     var houseLayout = houseLayouts.find( houseLayout => { return houseLayout._id === house.houseLayout})
-    var tenant = {}
-    if (!house.tenantId) {
-      disabled = props.disabled!==undefined? props.disabled: false
-      tenant = _.pick(house, ['mansionId', 'floor', 'room', ]) || {}
-      house.tenantId = tenant
-      tenant.houseId = house._id
-      tenant.type = 'in'
-      tenant.rentalStartDate = new moment().startOf('day').toDate()
-      tenant.rentalEndDate = new moment(tenant.rentalStartDate).add(1, 'M').subtract(1, 'day').endOf('day').toDate()
-      tenant.contractStartDate = tenant.rentalStartDate
-      tenant.contractEndDate = new moment(tenant.contractStartDate).add(1, 'Y').subtract(1, 'day').endOf('day').toDate()
-      tenant.electricMeterEndNumber = house.electricMeterEndNumber
-      tenant.waterMeterEndNumber = house.waterMeterEndNumber
-      tenant.electricCharges = 0
-      tenant.waterCharges = 0
-      tenant.subscription = 0
-      tenant.doorCardCount = 0
-      if (house.subscriberId) {
-        var subscriber = house.subscriberId
-        tenant.subscriberId = subscriber._id
-        tenant.subscription = subscriber.subscription || 0
-        tenant.name = subscriber.name
-        tenant.mobile = subscriber.mobile
-        tenant.idNo = subscriber.idNo
-      }
-      if (houseLayout) {
-        tenant.deposit = houseLayout.defaultDeposit
-        tenant.rental = houseLayout.defaultRental
-        tenant.servicesCharges = houseLayout.servicesCharges
+    var stateHouse = this.state.house || {}
+    var tenant = stateHouse.tenantId || {}
+    if (!_.isEmpty(house)) {
+      if (house.tenantId) {
+        disabled = true
+        this.setState({okDisable: true, printDisabled: false})
       } else {
-        tenant.deposit = 0
-        tenant.rental = 0
-        tenant.servicesCharges = 0
+        disabled = false
+        this.setState({okDisable: false, printDisabled: true})
       }
-      tenant.isOweRental = false
-      tenant.oweRental = 0
-      tenant.oweRentalExpiredDate = new moment(tenant.rentalStartDate).add(7, 'day').endOf('day').toDate()
+      if (_.isEmpty(tenant)) {
+        stateHouse = _.cloneDeep(props.house)
+        tenant = _.pick(stateHouse, ['mansionId', 'floor', 'room'])
+        stateHouse.tenantId = tenant
+        tenant.houseId = stateHouse._id
+        tenant.type = 'in'
+        tenant.rentalStartDate = new moment().startOf('day').toDate()
+        tenant.rentalEndDate = new moment(tenant.rentalStartDate).add(1, 'M').subtract(1, 'day').endOf('day').toDate()
+        tenant.contractStartDate = tenant.rentalStartDate
+        tenant.contractEndDate = new moment(tenant.contractStartDate).add(1, 'Y').subtract(1, 'day').endOf('day').toDate()
+        tenant.electricMeterEndNumber = house.electricMeterEndNumber
+        tenant.waterMeterEndNumber = house.waterMeterEndNumber
+        tenant.electricCharges = 0
+        tenant.waterCharges = 0
+        tenant.doorCardCount = 0
+        //定房信息
+        if (house.subscriberId) {
+          var subscriber = house.subscriberId
+          tenant.subscriberId = subscriber._id
+          tenant.subscription = subscriber.subscription || 0
+          tenant.name = subscriber.name
+          tenant.mobile = subscriber.mobile
+          tenant.idNo = subscriber.idNo
+        } else {
+          tenant.subscription = 0
+        }
+        //默认租金和押金
+        if (houseLayout) {
+          tenant.deposit = houseLayout.defaultDeposit
+          tenant.rental = houseLayout.defaultRental
+          tenant.servicesCharges = houseLayout.servicesCharges
+        } else {
+          tenant.deposit = 0
+          tenant.rental = 0
+          tenant.servicesCharges = 0
+        }
+        //默认不欠租金
+        tenant.isOweRental = false
+        tenant.oweRental = 0
+        tenant.oweRentalExpiredDate = new moment(tenant.rentalStartDate).add(7, 'day').endOf('day').toDate()
 
-      tenant.summed = 0
-      this.setState({okDisable: false, printDisabled: true})
-      this.calcAll(house)
-    } else {
-      disabled = props.disabled!==undefined? props.disabled: true
-      tenant = house.tenantId
-      tenant.rentalStartDate = new Date(tenant.rentalStartDate)
-      tenant.rentalEndDate = new Date(tenant.rentalEndDate)
-      tenant.contractStartDate = new Date(tenant.contractStartDate)
-      tenant.contractEndDate = new Date(tenant.contractEndDate)
-      tenant.deposit = tenant.deposit || 0
-      tenant.rental = tenant.rental || 0
-      tenant.subscription = tenant.subscription || 0
-      tenant.servicesCharges = tenant.servicesCharges || 0
-      tenant.electricCharges = tenant.electricCharges || 0
-      tenant.waterCharges = tenant.waterCharges || 0
-      tenant.isOweRental = tenant.oweRental>0 ? true: false
-      tenant.oweRental = tenant.oweRental || 0
-      if (tenant.isOweRental) {
-        tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
+        tenant.summed = 0
+        this.setState({okDisable: false, printDisabled: true})
+        this.calcAll(stateHouse)
       }
-      tenant.electricMeterEndNumber = tenant.electricMeterEndNumber || 0
-      tenant.waterMeterEndNumber = tenant.waterMeterEndNumber || 0
-      tenant.summed = tenant.summed || 0
-      this.setState({okDisable: true, printDisabled: false})
+    } else {
+      disabled = true
+      stateHouse = {}
+      // stateHouse.tenantId = {}
+      this.setState({okDisable: true, printDisabled: true})
     }
-    // log.info(house)
-    this.setState({house, houseLayout, disabled})
+    this.setState({house: stateHouse, houseLayout, disabled})
+
+
+
+    //   disabled = true
+    //   tenant = house.tenantId
+    //   tenant.rentalStartDate = new Date(tenant.rentalStartDate)
+    //   tenant.rentalEndDate = new Date(tenant.rentalEndDate)
+    //   tenant.contractStartDate = new Date(tenant.contractStartDate)
+    //   tenant.contractEndDate = new Date(tenant.contractEndDate)
+    //   tenant.deposit = tenant.deposit || 0
+    //   tenant.rental = tenant.rental || 0
+    //   tenant.subscription = tenant.subscription || 0
+    //   tenant.servicesCharges = tenant.servicesCharges || 0
+    //   tenant.electricCharges = tenant.electricCharges || 0
+    //   tenant.waterCharges = tenant.waterCharges || 0
+    //   tenant.isOweRental = tenant.oweRental>0 ? true: false
+    //   tenant.oweRental = tenant.oweRental || 0
+    //   if (tenant.isOweRental) {
+    //     tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
+    //   }
+    //   tenant.electricMeterEndNumber = tenant.electricMeterEndNumber || 0
+    //   tenant.waterMeterEndNumber = tenant.waterMeterEndNumber || 0
+    //   tenant.summed = tenant.summed || 0
+    //   this.setState({okDisable: true, printDisabled: false})
   }
 
+  /*
+   * 计算总价
+   */
+  calcAll(house) {
+    var mansion = this.props.mansion
+    var house = house || this.state.house
+    var tenant = house.tenantId
+    // log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
+    tenant.summed = Number(tenant.deposit) + Number(tenant.rental) + Number(tenant.servicesCharges) - Number(tenant.subscription) +
+      (Number(tenant.doorCardCount) * mansion.doorCardSellCharges)
+    this.setState({house, forceUpdate: true})
+  }
+
+  /*
+   * 输入框变化处理
+   */ 
   commonTextFiledChange(key, isNumber) {
     return function (value) {
       var house = this.state.house
       var tenant = house.tenantId
-      // if (isNumber) {
-      //   value = Number(value)
-      //   if (isNaN(value)) 
-      //     value = 0
-      //   if (value<0)
-      //     value = -value
-      // } 
       if (isNumber && !utils.isPositiveNumber(value)) {
       } else {
         tenant[key] = value
@@ -166,15 +195,6 @@ class HousesCheckIn extends Component {
     return new moment(date).format('YYYY/MM/DD')
   }
 
-  calcAll(house) {
-    var mansion = this.props.mansion
-    var house = house || this.state.house
-    var tenant = house.tenantId
-    // log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
-    tenant.summed = Number(tenant.deposit) + Number(tenant.rental) + Number(tenant.servicesCharges) - Number(tenant.subscription) +
-      (Number(tenant.doorCardCount) * mansion.doorCardSellCharges)
-    this.setState({house, forceUpdate: true})
-  }
   print() {
 
   }
@@ -236,15 +256,13 @@ class HousesCheckIn extends Component {
   }
 
   render() {
-
     var styles = this.getStyles()
     var state = this.state
     var props = this.props
     var houseLayout = state.houseLayout || {}
     var mansion = this.props.mansion
-    var house = state.house
-    var tenant = house.tenantId
-    // tenant.servicesCharges = 0
+    var house = state.house || {}
+    var tenant = house.tenantId || {}
     var disabled = state.disabled
     var wordings = {ok: '确定', cancel: '取消'}
     var forceUpdate = state.forceUpdate
@@ -257,9 +275,6 @@ class HousesCheckIn extends Component {
         subscriberStr = '定房过期'
       }
     }
-    // tenant.name = tenant.name || 'Welkinm'
-    // tenant.mobile = tenant.mobile || '13710248411'
-    // log.info(tenant)
     return (
       <Dialog title={'入住登记：'+(house.floor+1)+'楼'+(house.room+1)+'房'+'  [  '+houseLayout.description+'  ]'} modal={true} 
         open={this.props.open} autoDetectWindowHeight={false} 

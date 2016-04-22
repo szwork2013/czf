@@ -70,27 +70,20 @@ class HousesSubscribe extends Component {
         disabled = true
         this.setState({okDisable: true, printDisabled: false})
       } else {
-        if (_.isEmpty(stateHouse)) {
-          stateHouse = _.cloneDeep(house)
-          subscriber = stateHouse.subscriberId = {}
-          subscriber.mansionId = mansion._id
-          subscriber.houseId = house._id
-          subscriber.floor = house.floor
-          subscriber.room = house.room
-          subscriber.expiredDate = new moment().add(mansion.houseSubscriptionValidityCount, 'day').endOf('day').toDate()
-          if (houseLayout) {
-            subscriber.subscription = houseLayout.defaultSubscription
-          }
-          subscriber.createdAt = new moment().startOf('day').toDate()
-          this.setState({okDisable: false, printDisabled: true})
-          this.calcAll(subscriber)
-        } else {
-          // if (new Date(house.lastUpdatedAt).getTime() !== new Date(stateHouse.lastUpdatedAt).getTime()) {
-          //   //说明是保存过本次的交租信息，不能再修改信息
-          //   disabled = true
-          //   this.setState({okDisable: true, printDisabled: false})
-          // }
+        disabled = false
+        this.setState({okDisable: false, printDisabled: true})
+      }
+      if (_.isEmpty(subscriber)) {
+        stateHouse = _.cloneDeep(house)
+        subscriber = _.pick(stateHouse, ['mansionId', 'floor', 'room'])
+        stateHouse.subscriberId = subscriber
+        subscriber.houseId = house._id
+        subscriber.subscribeDate = new moment().startOf('day').toDate()
+        subscriber.expiredDate = new moment().add(mansion.houseSubscriptionValidityCount, 'day').endOf('day').toDate()
+        if (houseLayout) {
+          subscriber.subscription = houseLayout.defaultSubscription
         }
+        this.calcAll(stateHouse)
       }
     } else {
       stateHouse = {}
@@ -100,6 +93,20 @@ class HousesSubscribe extends Component {
     this.setState({house: stateHouse, houseLayout, disabled})
   }
 
+  /*
+   * 计算总费
+   */
+  calcAll(house) {
+    var mansion = this.props.mansion
+    var house = house || this.state.house
+    var subscriber = house.subscriberId || {}
+    subscriber.summed = Number(subscriber.subscription)
+    this.setState({house, forceUpdate: true})
+  }
+
+  /*
+   * 输入框变化处理
+   */ 
   commonTextFiledChange(key, isNumber) {
     return function (value) {
       var house = this.state.house || {}
@@ -120,26 +127,11 @@ class HousesSubscribe extends Component {
       this.setState({house, forceUpdate: true})
     }
   }
-  // checkboxChange(key) {
-  //   return function(e, value) {
-  //     var house = this.state.house || {}
-  //     var subscriber = house.subscriberId || {}
-  //     subscriber[key] = value
-  //     this.setState({house, forceUpdate: true})
-  //     this.calcAll()
-  //   }
-  // }
 
   formatDate(date) {
     return new moment(date).format('YYYY/MM/DD')
   }
 
-  calcAll(subscriber) {
-    var house = this.state.house || {}
-    subscriber = subscriber || house.subscriberId || {}
-    subscriber.summed = Number(subscriber.subscription)
-    this.setState({house, forceUpdate: true})
-  }
   print() {
 
   }
@@ -154,7 +146,7 @@ class HousesSubscribe extends Component {
     if (!utils.isMobileNumber(subscriber.mobile)) return openToast({msg: '手机号格式错误'})
     if (subscriber.idNo && !IDCard.IDIsValid(subscriber.idNo)) return openToast({msg: '身份证格式错误'})
 
-    if (!utils.parseDate(subscriber.createdAt)) return openToast({msg: '请选择订房时间'})
+    if (!utils.parseDate(subscriber.subscribeDate)) return openToast({msg: '请选择订房时间'})
     if (!utils.parseDate(subscriber.expiredDate)) return openToast({msg: '请选择定房失效日期'})
 
     if (subscriber.subscription==='' || subscriber.subscription===undefined) return openToast({msg: '请输入定金'})
@@ -179,18 +171,15 @@ class HousesSubscribe extends Component {
   }
 
   render() {
-
     var styles = this.getStyles()
     var state = this.state
     var props = this.props
     var houseLayout = state.houseLayout || {}
-    
     var stateHouse = state.house || {}
     var subscriber = stateHouse.subscriberId || {}
     var disabled = state.disabled
     var wordings = {ok: '确定', cancel: '取消'}
     var forceUpdate = state.forceUpdate
-
 
     return (
       <Dialog title={'定房登记：'+(stateHouse.floor+1)+'楼'+(stateHouse.room+1)+'房'+'  [  '+houseLayout.description+'  ]'} modal={true} 
@@ -208,10 +197,10 @@ class HousesSubscribe extends Component {
             style={styles.textFieldLong} onChange={this.commonTextFiledChange('idNo').bind(this)}/>
           <br />
           
-          <DatePicker value={subscriber.createdAt} disabled={true} formatDate={this.formatDate}
+          <DatePicker value={subscriber.subscribeDate} disabled={true} formatDate={this.formatDate}
             floatingLabelText='定房日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}
-            onChange={this.datePickerChange('createdAt').bind(this)}/>
+            onChange={this.datePickerChange('subscribeDate').bind(this)}/>
           <DatePicker value={subscriber.expiredDate} disabled={disabled} formatDate={this.formatDate}
             floatingLabelText='定房失效日期' autoOk={true}
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}

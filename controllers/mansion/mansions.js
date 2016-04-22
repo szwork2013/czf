@@ -475,10 +475,10 @@ const importHistoryVersionData = async (req, res) => {
       // oldHouse = oldHouse[i]
       //有租客，需要将租户的信息转入tenant表
       if (oldHouse.tenantId) {
-        await Tenant.update({_id: oldHouse.tenantId}, {$set: {type: 'migrate'}}).exec()
+        await Tenant.update({_id: oldHouse.tenantId}, {$set: {type: 'out'}}).exec()
       }
       if (oldHouse.subscriberId) {
-        await Subscriber.update({_id: oldHouse.subscriberId}, {$set: {type: 'migrate'}}).exec()
+        await Subscriber.update({_id: oldHouse.subscriberId}, {$set: {type: 'unsubscribe'}}).exec()
       }
     }
     await Houses.update({mansionId: mansionId, deleted: false}, {$set: {deleted: true}}, {multi: true}).exec();
@@ -570,7 +570,7 @@ const importHistoryVersionData = async (req, res) => {
             newTenant.houseId = newHouse._id;
             newTenant.floor = floorIdx;
             newTenant.room = houseIdx;
-            newTenant.type = 'migrate';
+            newTenant.type = 'in';
             newTenant.name = tenant.name;
             newTenant.mobile = tenant.mobile;
             newTenant.idNo = tenant.idNo;
@@ -611,7 +611,7 @@ const importHistoryVersionData = async (req, res) => {
             newSubscriber.houseId = newHouse._id;
             newSubscriber.floor = floorIdx;
             newSubscriber.room = houseIdx;
-            newSubscriber.status = 'migrate';
+            newSubscriber.status = 'valid';
             newSubscriber.name = subscriber.name;
             newSubscriber.mobile = subscriber.mobile;
             newSubscriber.idNo = subscriber.idNo;
