@@ -26,18 +26,20 @@ const SubscriberModel = new Schema({
   name: String,
   mobile: String,
   idNo: String,
+
   subscription: Number,           //订金
+  subscribeDate: Date,            //订房日期
   expiredDate: Date,              //过期日期
-  status: {                       //状态，valid有效状态，transfer为入住转移到押金，expired过期订金不退，
-                                  //default我方违约，需要赔偿，migrate导入数据迁移
-    type: String,
+  status: {                       //状态，valid有效状态，unsubscribe取消订房，transfer为入住转移到押金，expired过期订金不退，
+    type: String,                 
     enum: ['valid', 'unsubscribe', 'transfer', 'expired'],
     default: 'valid'
   },
   refund: Number,                  //退定金
+  summed: Number,                  //费用总计
 
   remark: String,                  //备注
-  createdAt: {                    //下定时间
+  createdAt: {
     type: Date,
     default: Date.now
   },
