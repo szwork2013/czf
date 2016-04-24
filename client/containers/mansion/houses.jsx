@@ -35,6 +35,10 @@ import HousesRepay from '../../components/mansion/houses_repay'
 
 // import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
 
+import printTemplate from '../../print/template'
+import jQuery from 'jquery'
+
+
 
 class Houses extends Component {
 
@@ -305,7 +309,8 @@ class Houses extends Component {
 
   print(floorIdx, houseIdx) {
     return function(e) {
-
+      window.printArea.innerHTML = printTemplate.buildHtmlStr(this.state.mansion, this.state.floor[floorIdx][houseIdx])
+      window.print()
     }
   }
 
@@ -512,10 +517,10 @@ class Houses extends Component {
                   <button key={house._id+'out'} style={styles.button} 
                     onTouchTap={this.checkoutClick(house.floor, house.room).bind(this)}>退房</button>
                 )
-                actions.push(
-                  <button key={house._id+'print'} style={styles.button} 
-                    onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
-                )
+                // actions.push(
+                //   <button key={house._id+'print'} style={styles.button} 
+                //     onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
+                // )
               } else if (house.subscriberId) {
                 state = '定'
                 name = house.subscriberId.name
@@ -540,10 +545,10 @@ class Houses extends Component {
                   <button key={house._id+'out'} style={styles.button} 
                     onTouchTap={this.unsubscribeClick(house.floor, house.room).bind(this)}>退订</button>
                 )
-                actions.push(
-                  <button key={house._id+'print'} style={styles.button} 
-                    onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
-                )
+                // actions.push(
+                //   <button key={house._id+'print'} style={styles.button} 
+                //     onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
+                // )
               } else {
                 // actions.push(
                 //   <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
@@ -561,6 +566,12 @@ class Houses extends Component {
                   <button key={house._id+'subs'} style={styles.button} 
                     onTouchTap={this.subscribeClick(house.floor, house.room).bind(this)}>预定</button>
                 )
+                // actions.push(
+                //   <button key={house._id+'print'} style={styles.button} 
+                //     onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
+                // )
+              }
+              if (house.charge) {
                 actions.push(
                   <button key={house._id+'print'} style={styles.button} 
                     onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>

@@ -19,7 +19,8 @@ const history = syncHistoryWithStore(browserHistory, store);
 
 //html root DOM
 const root = document.getElementById('root');
-
+const printArea = document.getElementById('print_area');
+window.printArea = printArea;
 
 //react render
 import MUIMaster from './containers/master/mui_master';

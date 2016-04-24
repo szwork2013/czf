@@ -107,10 +107,12 @@ export default (state = initialState, action) => {
       newMansions = _.assign({}, state)
       data = action.resData.data
       mansion = newMansions[data.mansionId]
-      houseRet = action.resData.data.house
+      houseRet = data.house
+      var charge = data.charge 
       var idx = findHouseIdx(mansion.houses, houseRet)
       if (idx>-1) {
         mansion.houses[idx] = houseRet
+        mansion.houses[idx].charge = charge
       }
       return newMansions
 

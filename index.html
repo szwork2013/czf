@@ -8,7 +8,8 @@
     <link rel="stylesheet" type='text/css' href="/public/stylesheets/loader.css">
     <link rel="stylesheet" type='text/css' href="/public/stylesheets/desktop.css">
     <link rel="stylesheet" type='text/css' href="/public/stylesheets/table.css">
-    <link rel="stylesheet" type='text/css' href="/public/stylesheets/bootstrap_v3.css">
+    <link rel="stylesheet" type='text/css' href="/public/stylesheets/print.css">
+
 
 
     <link rel="stylesheet" type='text/css' href="/public/fonts/MaterialIcons/material-icons.css">
@@ -17,6 +18,32 @@
 
 <!--     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet'/> -->
+    
+    <!-- 打印-->
+    <style type="text/css"> 
+      @media not print {
+        .noprint{
+          display: block;
+          visibility: visible;
+        }
+        .print{
+          display: none;
+          visibility: hidden;
+        }
+      } 
+      @media print {
+        .noprint{
+          display: none;
+          visibility: hidden;
+        }
+        .print{
+          display: block;
+          visibility: visible;
+        } 
+      } 
+    </style>
+
+    <!-- loader -->
     <style type="text/css">
       body > #root {
         opacity: 0;
@@ -47,7 +74,8 @@
         <div class="loader-section section-right"></div>
       </div>
     </div>
-    <div id="root"></div>
+    <div id="root" class="noprint"></div>
+    <div id='print_area' class="print"></div>
     <script type="text/javascript">
       function onload()
     　{

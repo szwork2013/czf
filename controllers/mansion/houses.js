@@ -83,12 +83,13 @@ const houseSubscribe = async (req, res) => {
     subscriber = await Subscriber.create(subscriber)
 
     //保存计费信息
-    var charges = _.pick(subscriber, ['mansionId', 'houseId', 'floor', 'room', 
+    var charge = _.pick(subscriber, ['mansionId', 'houseId', 'floor', 'room', 
       'subscription', 'summed', 'remark', 'createdBy'])
-    charges.subscriberId = subscriber._id
-    charges.type = 'subscribe'
-    charges.createdAt = new Date()
-    await Charges.create(charges)
+    charge.subscriberId = subscriber._id
+    charge.type = 'subscribe'
+    charge.createdAt = new Date()
+    charge = await Charges.create(charge)
+    charge = await Charges.findOne({_id: charge._id}).populate('subscriberId').exec()
 
     //修改出租房相关属性
     house.subscriberId = subscriber._id
@@ -96,7 +97,7 @@ const houseSubscribe = async (req, res) => {
     house = await house.save()
 
     house = await Houses.findOne({_id: house._id}).populate('subscriberId').exec()
-    return res.handleResponse(200, {mansionId, house})
+    return res.handleResponse(200, {mansionId, house, charge})
 
   } catch(err) {
     log.error(err.name, err.message)
@@ -107,7 +108,7 @@ const houseSubscribe = async (req, res) => {
       } catch(error) {}
       //删除计费
       try {
-        await Charges.remove({_id: charges._id})
+        await Charges.remove({_id: charge._id})
       } catch(error) {}
       //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
     }
@@ -175,20 +176,21 @@ const houseUnsubscribe = async (req, res) => {
     await subscriber.save()
 
     //保存计费信息
-    var charges = _.pick(subscriber, ['mansionId', 'houseId', 'floor', 'room', 
+    var charge = _.pick(subscriber, ['mansionId', 'houseId', 'floor', 'room', 
       'subscription', 'refund', 'summed', 'remark'])
-    charges.subscriberId = subscriber._id
-    charges.type = 'unsubscribe'
-    charges.createdBy = user._id
-    charges.createdAt = new Date()
-    await Charges.create(charges)
+    charge.subscriberId = subscriber._id
+    charge.type = 'unsubscribe'
+    charge.createdBy = user._id
+    charge.createdAt = new Date()
+    charge = await Charges.create(charge)
+    charge = await Charges.findOne({_id: charge._id}).populate('subscriberId').exec()
 
     house.subscriberId = null
     house.lastUpdatedAt = new Date()
     house = await house.save()
     house = await Houses.findOne({_id: house._id}).exec()
 
-    return res.handleResponse(200, {mansionId, house})
+    return res.handleResponse(200, {mansionId, house, charge})
   } catch(err) {
     log.error(err)
     if (subscriber && subscriber._id) {
@@ -199,7 +201,7 @@ const houseUnsubscribe = async (req, res) => {
       } catch(error) {}
       //删除计费
       try {
-        await Charges.remove({_id: charges._id})
+        await Charges.remove({_id: charge._id})
       } catch(error) {}
       //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
     }
@@ -321,14 +323,15 @@ const houseCheckIn = async (req, res) => {
     tenant = await Tenant.create(tenant)
 
     //保存计费信息
-    var charges = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
+    var charge = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
       'subscription', 'deposit', 'rental', 'oweRental', 'waterCharges', 'electricCharges', 
       'servicesCharges', 'doorCardCharges', 'summed', 'remark',])
-    charges.tenantId = tenant._id
-    charges.type = 'checkin'
-    charges.createdBy = user._id
-    charges.createdAt = new Date()
-    await Charges.create(charges)
+    charge.tenantId = tenant._id
+    charge.type = 'checkin'
+    charge.createdBy = user._id
+    charge.createdAt = new Date()
+    charge = await Charges.create(charge)
+    charge = await Charges.findOne({_id: charge._id}).populate('tenantId').exec()
 
     //定房信息
     var oldSubscriber = _.pick(subscriber, ['status', 'lastUpdatedAt'])
@@ -347,7 +350,7 @@ const houseCheckIn = async (req, res) => {
     house = await house.save()
 
     house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
-    return res.handleResponse(200, {mansionId, house})
+    return res.handleResponse(200, {mansionId, house, charge})
 
   } catch(err) {
     log.error(err)
@@ -357,7 +360,7 @@ const houseCheckIn = async (req, res) => {
         await Tenant.remove({_id: tenant._id})
       } catch(error) {}
       try {
-        await Charges.remove({_id: charges._id})
+        await Charges.remove({_id: charge._id})
       } catch(error) {}
       try {
         _.assign(subscriber, oldSubscriber)
@@ -430,22 +433,22 @@ const houseRepay = async (req, res) => {
     oldTenant = await oldTenant.save()
 
     //保存计费信息
-    var charges = _.pick(oldTenant, ['mansionId', 'houseId', 'floor', 'room', 
+    var charge = _.pick(oldTenant, ['mansionId', 'houseId', 'floor', 'room', 
       'oweRentalRepay', 'remark', ])
-    charges.tenantId = oldTenant._id
-    charges.summed = oldTenant.oweRentalRepay 
-    charges.type = 'repay'
-    charges.createdBy = user._id
-    charges.createdAt = new Date()
-    log.info(charges)
-    await Charges.create(charges)
+    charge.tenantId = oldTenant._id
+    charge.summed = oldTenant.oweRentalRepay 
+    charge.type = 'repay'
+    charge.createdBy = user._id
+    charge.createdAt = new Date()
+    charge = await Charges.create(charge)
+    charge = await Charges.findOne({_id: charge._id}).populate('tenantId').exec()
 
     //修改出租房相关属性
     house.lastUpdatedAt = new Date()
     house = await house.save()
 
     house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
-    return res.handleResponse(200, {mansionId, house})
+    return res.handleResponse(200, {mansionId, house, charge})
 
   } catch(err) {
     log.error(err)
@@ -456,7 +459,7 @@ const houseRepay = async (req, res) => {
         await oldTenant.save()
       } catch(error) {}
       try {
-        await Charges.remove({_id: charges._id})
+        await Charges.remove({_id: charge._id})
       } catch(error) {}
       //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
     }
@@ -600,15 +603,16 @@ const housePayRent = async (req, res) => {
     tenant = await Tenant.create(tenant)
 
     //保存计费信息
-    var charges = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
+    var charge = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
       'rental','servicesCharges', 'waterCharges', 'electricCharges', 
       'oweRental', 'deposit', 'summed', 'remark',])
-    charges.tenantId = tenant._id
-    charges.type = 'rental'
-    charges.changeDeposit = Number(tenant.deposit) - Number(oldTenant.deposit)
-    charges.createdBy = user._id
-    charges.createdAt = new Date()
-    await Charges.create(charges)
+    charge.tenantId = tenant._id
+    charge.type = 'rental'
+    charge.changeDeposit = Number(tenant.deposit) - Number(oldTenant.deposit)
+    charge.createdBy = user._id
+    charge.createdAt = new Date()
+    charge = await Charges.create(charge)
+    charge = await Charges.findOne({_id: charge._id}).populate('tenantId').exec()
 
     //修改房间相关信息
     var houseBackup = _.pick(house, ['tenantId', 'subscriberId', 'electricMeterEndNumber', 'waterMeterEndNumber', 'lastUpdatedAt'])
@@ -630,7 +634,7 @@ const housePayRent = async (req, res) => {
         await Tenant.remove({_id: tenant._id})
       } catch(error) {}
       try {
-        await Charges.remove({_id: charges._id})
+        await Charges.remove({_id: charge._id})
       } catch(error) {}
       //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
     }
@@ -761,15 +765,16 @@ const houseCheckOut = async (req, res) => {
     tenant = await Tenant.create(tenant)
 
     //保存计费信息
-    var charges = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
+    var charge = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
       'waterCharges', 'electricCharges', 'deposit', 
       'doorCardRecoverCharges', 'overdueCharges', 'compensation',
       'oweRental', 'oweRentalRepay', 'summed', 'remark',])
-    charges.tenantId = tenant._id
-    charges.type = 'checkout'
-    charges.createdBy = user._id
-    charges.createdAt = new Date()
-    await Charges.create(charges)
+    charge.tenantId = tenant._id
+    charge.type = 'checkout'
+    charge.createdBy = user._id
+    charge.createdAt = new Date()
+    charge = await Charges.create(charge)
+    charge = await Charges.findOne({_id: charge._id}).populate('tenantId').exec()
 
     //修改房间相关信息
     var houseBackup = _.pick(house, ['tenantId', 'subscriberId', 'electricMeterEndNumber', 'waterMeterEndNumber', 'lastUpdatedAt'])
@@ -781,7 +786,7 @@ const houseCheckOut = async (req, res) => {
     house = await house.save()
 
     house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
-    return res.handleResponse(200, {mansionId, house})
+    return res.handleResponse(200, {mansionId, house, charge})
 
   } catch(err) {
     log.error(err)
@@ -791,7 +796,7 @@ const houseCheckOut = async (req, res) => {
         await Tenant.remove({_id: tenant._id})
       } catch(error) {}
       try {
-        await Charges.remove({_id: charges._id})
+        await Charges.remove({_id: charge._id})
       } catch(error) {}
       //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
     }
