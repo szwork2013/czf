@@ -159,6 +159,7 @@ const houseUnsubscribe = async (req, res) => {
   
     subscriber.status = 'unsubscribe'
     subscriber.summed = 0
+    subscriber.refund = 0
     if (newSubscriber.isRefund) {
       subscriber.refund = Number(newSubscriber.refund)
       subscriber.summed = -subscriber.refund

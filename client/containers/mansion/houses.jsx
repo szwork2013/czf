@@ -261,14 +261,15 @@ class Houses extends Component {
 
   subscribeClick(floorIdx, houseIdx) {
     return function() {
-      this.setState({subscribeHouseFloor: floorIdx, subscribeHouseRoom: houseIdx, subscribeOpen: true})
+      var print = this.print(floorIdx, houseIdx).bind(this)
+      this.setState({subscribeHouseFloor: floorIdx, subscribeHouseRoom: houseIdx, subscribeOpen: true, print})
     }
   }
   subscribeOk(house) {
     this.props.actions.houseSubscribeClick({house})
   }
   subscribeCancel() {
-    this.setState({subscribeHouseFloor: -1, subscribeHouseRoom: -1, subscribeOpen: false})
+    this.setState({subscribeHouseFloor: -1, subscribeHouseRoom: -1, subscribeOpen: false, print: null})
   }
 
   repayClick(floorIdx, houseIdx) {
@@ -285,14 +286,15 @@ class Houses extends Component {
 
   unsubscribeClick(floorIdx, houseIdx) {
     return function() {
-      this.setState({unsubscribeHouseFloor: floorIdx, unsubscribeHouseRoom: houseIdx, unsubscribeOpen: true})
+      var print = this.print(floorIdx, houseIdx).bind(this)
+      this.setState({unsubscribeHouseFloor: floorIdx, unsubscribeHouseRoom: houseIdx, unsubscribeOpen: true, print})
     }
   }
   unsubscribeOk(house) {
     this.props.actions.houseUnsubscribeClick({house})
   }
   unsubscribeCancel() {
-    this.setState({unsubscribeHouseFloor: -1, unsubscribeHouseRoom: -1, unsubscribeOpen: false})
+    this.setState({unsubscribeHouseFloor: -1, unsubscribeHouseRoom: -1, unsubscribeOpen: false, print: null})
   }
 
   checkoutClick(floorIdx, houseIdx) {
@@ -626,17 +628,17 @@ class Houses extends Component {
           </table>
         </div>
         <HousesCheckIn mansion={state.mansion} houseLayouts={state.houseLayouts} house={checkInHouse} open={state.checkInOpen} 
-            ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)} openToast={props.actions.openToast}/>
+            ok={this.checkInOk.bind(this)} cancel={this.checkInCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
         <HousesPayRent mansion={state.mansion} houseLayouts={state.houseLayouts} house={payRentHouse} open={state.payRentOpen} 
-            ok={this.payRentOk.bind(this)} cancel={this.payRentCancel.bind(this)} openToast={props.actions.openToast}/>
+            ok={this.payRentOk.bind(this)} cancel={this.payRentCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
         <HousesSubscribe mansion={state.mansion} houseLayouts={state.houseLayouts} house={subscribeHouse} open={state.subscribeOpen} 
-            ok={this.subscribeOk.bind(this)} cancel={this.subscribeCancel.bind(this)} openToast={props.actions.openToast}/>
+            ok={this.subscribeOk.bind(this)} cancel={this.subscribeCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
         <HousesRepay mansion={state.mansion} houseLayouts={state.houseLayouts} house={repayHouse} open={state.repayOpen} 
-            ok={this.repayOk.bind(this)} cancel={this.repayCancel.bind(this)} openToast={props.actions.openToast}/>
+            ok={this.repayOk.bind(this)} cancel={this.repayCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
         <HousesUnsubscribe mansion={state.mansion} houseLayouts={state.houseLayouts} house={unsubscribeHouse} open={state.unsubscribeOpen} 
-            ok={this.unsubscribeOk.bind(this)} cancel={this.unsubscribeCancel.bind(this)} openToast={props.actions.openToast}/>
+            ok={this.unsubscribeOk.bind(this)} cancel={this.unsubscribeCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
         <HousesCheckOut mansion={state.mansion} houseLayouts={state.houseLayouts} house={checkoutHouse} open={state.checkoutOpen} 
-            ok={this.checkoutOk.bind(this)} cancel={this.checkoutCancel.bind(this)} openToast={props.actions.openToast}/>
+            ok={this.checkoutOk.bind(this)} cancel={this.checkoutCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
       </div>
     )
   }

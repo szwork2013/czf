@@ -285,7 +285,7 @@ class HousesPayRent extends Component {
         open={this.props.open} autoDetectWindowHeight={false} 
         contentStyle={{transform: 'translate3d(0px, 0px, 0px)'}} 
         titleStyle={{borderBottom: '2px solid #e0e0e0', padding: '10px 24px 5px 24px'}} 
-        bodyStyle={{overflowY: 'auto', maxHeight: 'calc(100vh - 110px)', padding: '5px 24px 24px 24px'}}>
+        bodyStyle={{overflowY: 'auto', maxHeight: 'calc(100vh - 110px)', padding: '5px 24px 24px 24px'}}  className='noprint'>
         <div style={{display: 'inline-block', float: 'left', width: '500px'}}>
           
           <CommonTextField defaultValue={tenant.name} disabled={true} floatingLabelText='姓名'

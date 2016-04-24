@@ -43,14 +43,16 @@ function buildHtmlStr(mansion, house) {
   var charge = house.charge || {}
   if (!charge) return '';
   var data = generateCommonData(mansion, house, charge)
-  log.info(charge, data)
+  log.info(house, charge, data)
   switch (charge.type) {
     case 'subscribe':
       data.subTitle = '订金单'
-      data.day = getValue(utils.parseDate(house.subscriberId.subscribeDate))
-      log.info(charge, data)
+      data.day = getValue(utils.parseDate(charge.subscriberId.subscribeDate))
       return buildSubscribeHtmlStr(data)
-      break;
+    case 'unsubscribe':
+      data.subTitle = '退订金单'
+      data.day = getValue(new Date())
+      return buildUnsubscribeHtmlStr(data)
 
       //, 'checkin', 'repay', 'rental', 'checkout'
   }
@@ -67,10 +69,12 @@ function generateCommonData(mansion, house, charge) {
   if (charge.subscriberId) {
     user = charge.subscriberId
     retObj.subscription = getValue(charge.subscription)
-    retObj.subscriptionChinese = getNumberChinese(charge.subscription)
-    retObj.day = getValue(utils.parseDate(charge.createdAt))
+    retObj.subscriptionChinese = getNumberChinese(charge.subscription, 6, 1, false)
+    // retObj.day = getValue(utils.parseDate(charge.createdAt))
+    retObj.subscribeDate = getValue(utils.parseDate(charge.subscriberId.subscribeDate))
     retObj.expiredDate = getValue(utils.parseDate(charge.subscriberId.expiredDate))
-    retObj.refund = getValue(charge.refund)
+    retObj.refund = getValue(Math.abs(charge.refund===undefined? 0: charge.refund))
+    retObj.refundChinese = getNumberChinese(charge.refund, 6, 1, false)
   } else if (charge.tenantId) {
     user = charge.tenantId
   }
@@ -89,6 +93,14 @@ function generateCommonData(mansion, house, charge) {
 import subscribe from './subscribe'
 function buildSubscribeHtmlStr(data) {
   return buildHtmlStrInner(data, subscribe.build(data))
+}
+
+/*
+ * 退订房
+ */
+import unsubscribe from './unsubscribe'
+function buildUnsubscribeHtmlStr(data) {
+  return buildHtmlStrInner(data, unsubscribe.build(data))
 }
 
 function buildHtmlStrInner(data, contentHtmlStr) {
