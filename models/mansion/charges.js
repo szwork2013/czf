@@ -59,6 +59,7 @@ const ChargesModel = new Schema({
   waterCharges: Number,               //水费
   electricCharges: Number,            //电费
   servicesCharges: Number,            //物业费
+  doorCardCount: Number,              //门卡
   doorCardCharges: Number,            //门卡费
   doorCardRecoverCharges: Number,     //门卡回收费
   overdueCharges: Number,             //逾期罚款

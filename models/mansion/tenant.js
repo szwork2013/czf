@@ -62,11 +62,13 @@ const TenantModel = new Schema({
   contractEndDate: Date,      //合同结束日期
 
   electricMeterEndNumber: Number,     //电表
+  electricMeterEndNumberLast: Number, //上次抄表
   electricChargesPerKWh: Number,      //房子单位电费
   electricKWhs: Number,               //用电度数
   electricCharges: Number,            //电费
 
   waterMeterEndNumber: Number,        //水表
+  waterMeterEndNumberLast: Number,    //电表
   waterChargesPerTon: Number,         //房子单位水费
   waterTons: Number,                  //用水吨数
   waterCharges: Number,               //水费   

@@ -156,6 +156,9 @@ class HousesCheckIn extends Component {
     // log.info(tenant.deposit ,tenant.rental ,tenant.servicesCharges , tenant.subscription)
     tenant.summed = Number(tenant.deposit) + Number(tenant.rental) + Number(tenant.servicesCharges) - Number(tenant.subscription) +
       (Number(tenant.doorCardCount) * mansion.doorCardSellCharges)
+    if (tenant.isOweRental) {
+      tenant.summed -= Number(tenant.oweRental)
+    }
     this.setState({house, forceUpdate: true})
   }
 
@@ -196,7 +199,9 @@ class HousesCheckIn extends Component {
   }
 
   print() {
-
+    if (this.props.print) {
+      this.props.print()
+    }
   }
 
   ok() {
@@ -226,6 +231,8 @@ class HousesCheckIn extends Component {
     if (tenant.waterMeterEndNumber==='' || tenant.waterMeterEndNumber===undefined) return openToast({msg: '请输入水表底数'})
     if (tenant.doorCardCount==='' || tenant.doorCardCount===undefined) return openToast({msg: '请输入购门卡数'})
 
+    tenant.oweRental = Number(tenant.oweRental)
+    if (isNaN(tenant.oweRental)) tenant.oweRental = ''
     tenant.deposit = Number(tenant.deposit)
     if (isNaN(tenant.deposit)) tenant.deposit = ''
     tenant.rental = Number(tenant.rental)
@@ -307,7 +314,7 @@ class HousesCheckIn extends Component {
 
           <CommonTextField value={tenant.deposit} disabled={disabled} floatingLabelText='押金' 
             style={styles.textField} onChange={this.commonTextFiledChange('deposit', true).bind(this)}/>
-          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='租金' 
+          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='应收租金' 
             style={styles.textField} onChange={this.commonTextFiledChange('rental', true).bind(this)}/>
           <CommonTextField value={tenant.servicesCharges} disabled={disabled} floatingLabelText='管理费' 
             style={styles.textField} onChange={this.commonTextFiledChange('servicesCharges', true).bind(this)}/>
@@ -348,7 +355,10 @@ class HousesCheckIn extends Component {
               <span>{subscriberStr}<br /></span>
           )}
           押金：{tenant.deposit}<br />
-          租金：{tenant.rental}<br />
+          应收租金：{tenant.rental}<br />
+          { tenant.isOweRental && (
+              <span>欠租金：{-tenant.oweRental}<br /></span>
+          )}
           电费：{tenant.electricCharges}<br />
           水费：{tenant.waterCharges}<br />
           管理费：{tenant.servicesCharges}<br />

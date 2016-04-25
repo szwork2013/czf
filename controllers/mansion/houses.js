@@ -276,6 +276,7 @@ const houseCheckIn = async (req, res) => {
 
     tenant.deposit = Number(newTenant.deposit)
     tenant.rental = Number(newTenant.rental)
+    tenant.oweRental = 0
     if (newTenant.isOweRental) {
       tenant.oweRental = Number(newTenant.oweRental)
       tenant.oweRentalExpiredDate = utils.parseDate(newTenant.oweRentalExpiredDate)
@@ -291,10 +292,12 @@ const houseCheckIn = async (req, res) => {
     tenant.contractEndDate = utils.parseDate(newTenant.contractEndDate) 
     if (!tenant.contractEndDate) return res.handleResponse(400, {}, 'contractEndDate is Invalid Date');
 
+    tenant.electricMeterEndNumberLast = Number(newTenant.electricMeterEndNumber)
     tenant.electricMeterEndNumber = Number(newTenant.electricMeterEndNumber)
-    tenant.electricChargesPerKWh = mansion.electricChargesPerKWh
+    tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
     tenant.electricKWhs = 0
     tenant.electricCharges = 0
+    tenant.waterMeterEndNumberLast = Number(newTenant.waterMeterEndNumber)
     tenant.waterMeterEndNumber = Number(newTenant.waterMeterEndNumber)
     tenant.waterChargesPerTon = mansion.houseWaterChargesMinimalTons
     tenant.waterTons = 0
@@ -306,7 +309,7 @@ const houseCheckIn = async (req, res) => {
     tenant.servicesCharges = Number(newTenant.servicesCharges)
 
     // log.info(tenant.deposit , tenant.rental , tenant.servicesCharges , - tenant.subscription , tenant.doorCardCharges)
-    tenant.summed = tenant.deposit + tenant.rental + tenant.servicesCharges - tenant.subscription + tenant.doorCardCharges
+    tenant.summed = tenant.deposit + tenant.rental + tenant.servicesCharges - tenant.subscription + tenant.doorCardCharges - tenant.oweRental
 
     if (isNaN(tenant.summed)) {
       return res.handleResponse(400, {}, 'calc summed return NaN');
@@ -326,7 +329,7 @@ const houseCheckIn = async (req, res) => {
     //保存计费信息
     var charge = _.pick(tenant, ['mansionId', 'houseId', 'floor', 'room', 
       'subscription', 'deposit', 'rental', 'oweRental', 'waterCharges', 'electricCharges', 
-      'servicesCharges', 'doorCardCharges', 'summed', 'remark',])
+      'servicesCharges', 'doorCardCount', 'doorCardCharges', 'summed', 'remark',])
     charge.tenantId = tenant._id
     charge.type = 'checkin'
     charge.createdBy = user._id
@@ -427,7 +430,7 @@ const houseRepay = async (req, res) => {
     var oldTenantBackup = _.pick(oldTenant, ['oweRentalRepay', 'oweRental', 'rental', 'remark', 'lastUpdatedAt'])
     oldTenant.oweRentalRepay = newTenant.oweRentalRepay
     oldTenant.oweRental = oldTenant.oweRentalRepay - newTenant.oweRentalRepay
-    oldTenant.rental += oldTenant.oweRentalRepay
+    // oldTenant.rental += oldTenant.oweRentalRepay
     oldTenant.remark = newTenant.remark
     oldTenant.lastUpdatedAt = new Date()
 
@@ -536,13 +539,15 @@ const housePayRent = async (req, res) => {
     tenant.deposit = oldTenant.deposit
     tenant.rental = Number(newTenant.rental)
     tenant.servicesCharges = Number(newTenant.servicesCharges)
+    tenant.electricMeterEndNumberLast = house.electricMeterEndNumber
     tenant.electricMeterEndNumber = Number(newTenant.electricMeterEndNumber)
+    tenant.waterMeterEndNumberLast = house.waterMeterEndNumber
     tenant.waterMeterEndNumber = Number(newTenant.waterMeterEndNumber)
     tenant.doorCardCount = oldTenant.doorCardCount
     tenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
     tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
 
-
+    tenant.oweRental = 0
     if (newTenant.isOweRental) {
       tenant.oweRental = Number(newTenant.oweRental)
       tenant.oweRentalExpiredDate = utils.parseDate(newTenant.oweRentalExpiredDate)
@@ -581,7 +586,7 @@ const housePayRent = async (req, res) => {
     }
     tenant.waterCharges = Number(tenant.waterCharges.toFixed(1))
 
-    tenant.summed = Number(tenant.rental) + Number(tenant.servicesCharges) + Number(tenant.electricCharges) + Number(tenant.waterCharges)
+    tenant.summed = Number(tenant.rental) + Number(tenant.servicesCharges) + Number(tenant.electricCharges) + Number(tenant.waterCharges) - tenant.oweRental
     if (newTenant.isChangeDeposit) {
       tenant.deposit = Number(newTenant.deposit)
       tenant.summed += Number(tenant.deposit) - Number(oldTenant.deposit)
@@ -697,7 +702,9 @@ const houseCheckOut = async (req, res) => {
     tenant.rental = 0
     tenant.servicesCharges = 0
 
+    tenant.electricMeterEndNumberLast = house.electricMeterEndNumber
     tenant.electricMeterEndNumber = Number(newTenant.electricMeterEndNumber)
+    tenant.waterMeterEndNumberLast = house.waterMeterEndNumber
     tenant.waterMeterEndNumber = Number(newTenant.waterMeterEndNumber)
     tenant.doorCardRecoverCount = Number(newTenant.doorCardRecoverCount)
     tenant.waterChargesPerTon = mansion.houseWaterChargesPerTon

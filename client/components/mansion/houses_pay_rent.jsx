@@ -196,6 +196,9 @@ class HousesPayRent extends Component {
     } else {
       this.setState({changeDeposit: 0})
     }
+    if (tenant.isOweRental) {
+      tenant.summed -= Number(tenant.oweRental)
+    }
     tenant.summed = Number(tenant.summed.toFixed(1))
 
     this.setState({house, forceUpdate: true})
@@ -231,6 +234,8 @@ class HousesPayRent extends Component {
 
     if (tenant.isChangeDeposit && (tenant.deposit==='' || tenant.deposit===undefined)) return openToast({msg: '请输入押金'})
 
+    tenant.oweRental = Number(tenant.oweRental)
+    if (isNaN(tenant.oweRental)) tenant.oweRental = ''
     tenant.rental = Number(tenant.rental)
     if (isNaN(tenant.rental)) tenant.rental = ''
     tenant.servicesCharges = Number(tenant.servicesCharges)
@@ -309,7 +314,7 @@ class HousesPayRent extends Component {
             style={styles.dataPicker} wordings={wordings} locale='zh-Hans' DateTimeFormat={Intl.DateTimeFormat}/>
           <br />
 
-          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='租金' 
+          <CommonTextField value={tenant.rental} disabled={disabled} floatingLabelText='应收租金' 
             style={styles.textField} onChange={this.commonTextFiledChange('rental', true).bind(this)}/>
           <CommonTextField value={tenant.servicesCharges} disabled={disabled} floatingLabelText='管理费'
             style={styles.textField} onChange={this.commonTextFiledChange('servicesCharges', true).bind(this)}/>
@@ -355,7 +360,10 @@ class HousesPayRent extends Component {
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
                      fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '485px'}}>
           <div style={{height: '400px'}}>
-          租金：{tenant.rental}<br />
+          应收租金：{tenant.rental}<br />
+          { tenant.isOweRental && (
+            <span>欠租金：{-tenant.oweRental}<br /></span>
+          )}
           电费：{tenant.electricCharges}<br />
           水费：{tenant.waterCharges}<br />
           管理费：{tenant.servicesCharges}<br />

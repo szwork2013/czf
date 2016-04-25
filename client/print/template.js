@@ -22,7 +22,7 @@ var printStr = `<div class='print-next-page print-container'>
       <span class='print-margin-left'>{day}</span>
     </div>
   </div>
-  <div style='height:258px, overflow:hidden;'>
+  <div style='height:258px; overflow:hidden;'>
     {content}
   </div>
   <div class='print-table-foot'>
@@ -41,21 +41,42 @@ function buildHtmlStr(mansion, house) {
   var mansion = mansion || {}
   var house = house || {}
   var charge = house.charge || {}
+  var tenant = charge.tenantId || {}
+  log.info(house, charge)
   if (!charge) return '';
+  var retHtmlStr = '无支持的打印功能！'
   var data = generateCommonData(mansion, house, charge)
-  log.info(house, charge, data)
+  // log.info(house, charge, data)
   switch (charge.type) {
     case 'subscribe':
       data.subTitle = '订金单'
       data.day = getValue(utils.parseDate(charge.subscriberId.subscribeDate))
-      return buildSubscribeHtmlStr(data)
+      retHtmlStr = buildSubscribeHtmlStr(data)
+      break;
     case 'unsubscribe':
       data.subTitle = '退订金单'
       data.day = getValue(new Date())
-      return buildUnsubscribeHtmlStr(data)
-
+      retHtmlStr = buildUnsubscribeHtmlStr(data)
+      break;
+    case 'checkin':
+      data.subTitle = '租房缴费单'
+      data.day = getValue(utils.parseDate(charge.createdAt))
+      retHtmlStr = buildPayRentHtmlStr(data)
+      data.subTitle = '押金单'
+      retHtmlStr += buildDepositHtmlStr(data)
+      // log.info(charge.oweRental)
+      if (charge.oweRental) {
+        data.subTitle = '欠款单'
+        retHtmlStr += buildOweRentalHtmlStr(data)
+      }
+      if (charge.doorCardCharges) {
+        data.subTitle = '门卡单'
+        retHtmlStr += buildDoorCardHtmlStr(data)
+      }
+      break;
       //, 'checkin', 'repay', 'rental', 'checkout'
   }
+  return retHtmlStr
 }
 exports.buildHtmlStr = buildHtmlStr
 
@@ -77,6 +98,69 @@ function generateCommonData(mansion, house, charge) {
     retObj.refundChinese = getNumberChinese(charge.refund, 6, 1, false)
   } else if (charge.tenantId) {
     user = charge.tenantId
+    //电费
+    retObj.electricMeterEndNumberLast = getValue(user.electricMeterEndNumberLast)
+    retObj.electricMeterEndNumber = getValue(user.electricMeterEndNumber)
+    retObj.electricChargesPerKWh = getValue(user.electricChargesPerKWh)
+    retObj.electricKWhs = getValue(user.electricKWhs)
+    retObj.electricCharges = getValue(charge.electricCharges)
+    //水费
+    retObj.waterMeterEndNumberLast = getValue(user.waterMeterEndNumberLast)
+    retObj.waterMeterEndNumber = getValue(user.waterMeterEndNumber)
+    retObj.waterChargesPerTon = getValue(user.waterChargesPerTon)
+    retObj.waterTons = getValue(user.waterTons)
+    retObj.waterCharges = getValue(charge.waterCharges)
+    //房租
+    retObj.rental = getValue(charge.rental)
+    retObj.oweRental = getValue(charge.oweRental)
+    retObj.oweRentalExpiredDate = getValue(utils.parseDate(user.oweRentalExpiredDate))
+    //管理费
+    retObj.servicesCharges = getValue(charge.servicesCharges)
+    retObj.servicesChargesDes = getValue(mansion.houseServicesChargesDes) || '卫生、管理费'
+    //租房总计
+    retObj.rentalStartDate = getValue(utils.parseDate(user.rentalStartDate))
+    retObj.rentalEndDate = getValue(utils.parseDate(user.rentalEndDate))
+    // log.info(typeof retObj.electricCharges, typeof retObj.waterCharges, typeof retObj.rental, typeof retObj.oweRental, typeof retObj.servicesCharges)
+    retObj.rentalSummed = charge.electricCharges + charge.waterCharges + charge.rental - charge.oweRental + charge.servicesCharges
+    if (retObj.rentalSummed>=0) {
+      retObj.rentalSummedDes = '实收'
+    } else {
+      retObj.rentalSummedDes = '实退'
+      retObj.rentalSummed = -retObj.rentalSummed
+    }
+    retObj.rentalSummedChinese = getNumberChinese(retObj.rentalSummed, 6, 1, false)
+
+    //押金
+    retObj.deposit = getValue(charge.deposit)
+    retObj.depositChinese = getNumberChinese(charge.deposit, 6, 1, false)
+
+    //
+    if (charge.oweRental) {
+      retObj.oweRental = getValue(charge.oweRental)
+      retObj.oweRentalChinese = getNumberChinese(charge.oweRental, 6, 1, false)
+      retObj.realRental = charge.rental - charge.oweRental
+      retObj.oweRentalExpiredDate = getValue(utils.parseDate(user.oweRentalExpiredDate))
+    }
+
+    if (charge.doorCardCharges) {
+      retObj.doorCardCount = getValue(charge.doorCardCount)
+      retObj.doorCardCharges = getValue(charge.doorCardCharges)
+      retObj.doorCardChargesChinese = getNumberChinese(charge.doorCardCharges, 6, 1, false)
+      retObj.doorCardChargesDes = '实收'
+    }
+    if (charge.doorCardRecoverCharges) {
+      retObj.doorCardCount = getValue(charge.doorCardCount)
+      retObj.doorCardCharges = getValue(charge.doorCardRecoverCharges)
+      retObj.doorCardChargesChinese = getNumberChinese(charge.doorCardRecoverCharges, 6, 1, false)
+      retObj.doorCardChargesDes = '实退'
+    }
+
+
+    // retObj.rental = user.rental
+    // retObj.rental = user.rental
+    // retObj.rental = user.rental
+    // retObj.rental = user.rental
+    
   }
   retObj.name = getValue(user.name)
   retObj.mobile = getValue(user.mobile)
@@ -102,6 +186,40 @@ import unsubscribe from './unsubscribe'
 function buildUnsubscribeHtmlStr(data) {
   return buildHtmlStrInner(data, unsubscribe.build(data))
 }
+
+/*
+ * 房租
+ */
+import payRent from './pay_rent'
+function buildPayRentHtmlStr(data) {
+  return buildHtmlStrInner(data, payRent.build(data))
+}
+
+/*
+ * 押金
+ */
+import deposit from './deposit'
+function buildDepositHtmlStr(data) {
+  return buildHtmlStrInner(data, deposit.build(data))
+}
+
+/*
+ * 欠款
+ */
+import oweRental from './owe_rental'
+function buildOweRentalHtmlStr(data) {
+  return buildHtmlStrInner(data, oweRental.build(data))
+}
+
+/*
+ * 门卡
+ */
+import doorCard from './door_card'
+function buildDoorCardHtmlStr(data) {
+  return buildHtmlStrInner(data, doorCard.build(data))
+}
+
+
 
 function buildHtmlStrInner(data, contentHtmlStr) {
   var data = data || {}

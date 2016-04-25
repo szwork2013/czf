@@ -237,14 +237,15 @@ class Houses extends Component {
    */
   checkInClick(floorIdx, houseIdx) {
     return function() {
-      this.setState({checkInHouseFloor: floorIdx, checkInHouseRoom: houseIdx, checkInOpen: true})
+      var print = this.print(floorIdx, houseIdx).bind(this)
+      this.setState({checkInHouseFloor: floorIdx, checkInHouseRoom: houseIdx, checkInOpen: true, print})
     }
   }
   checkInOk(house) {
     this.props.actions.houseCheckInClick({house})
   }
   checkInCancel() {
-    this.setState({checkInHouseFloor: -1, checkInHouseRoom: -1, checkInOpen: false})
+    this.setState({checkInHouseFloor: -1, checkInHouseRoom: -1, checkInOpen: false, print: null})
   }
 
   payRentClick(floorIdx, houseIdx) {
