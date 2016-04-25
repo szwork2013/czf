@@ -250,14 +250,15 @@ class Houses extends Component {
 
   payRentClick(floorIdx, houseIdx) {
     return function() {
-      this.setState({payRentHouseFloor: floorIdx, payRentHouseRoom: houseIdx, payRentOpen: true})
+      var print = this.print(floorIdx, houseIdx).bind(this)
+      this.setState({payRentHouseFloor: floorIdx, payRentHouseRoom: houseIdx, payRentOpen: true, print})
     }
   }
   payRentOk(house) {
     this.props.actions.housePayRentClick({house})
   }
   payRentCancel() {
-    this.setState({payRentHouseFloor: -1, payRentHouseRoom: -1, payRentOpen: false})
+    this.setState({payRentHouseFloor: -1, payRentHouseRoom: -1, payRentOpen: false, print: null})
   }
 
   subscribeClick(floorIdx, houseIdx) {
@@ -275,14 +276,15 @@ class Houses extends Component {
 
   repayClick(floorIdx, houseIdx) {
     return function() {
-      this.setState({repayHouseFloor: floorIdx, repayHouseRoom: houseIdx, repayOpen: true})
+      var print = this.print(floorIdx, houseIdx).bind(this)
+      this.setState({repayHouseFloor: floorIdx, repayHouseRoom: houseIdx, repayOpen: true, print})
     }
   }
   repayOk(house) {
     this.props.actions.houseRepayClick({house})
   }
   repayCancel() {
-    this.setState({repayHouseFloor: -1, repayHouseRoom: -1, repayOpen: false})
+    this.setState({repayHouseFloor: -1, repayHouseRoom: -1, repayOpen: false, print: null})
   }
 
   unsubscribeClick(floorIdx, houseIdx) {
@@ -300,14 +302,15 @@ class Houses extends Component {
 
   checkoutClick(floorIdx, houseIdx) {
     return function() {
-      this.setState({checkoutHouseFloor: floorIdx, checkoutHouseRoom: houseIdx, checkoutOpen: true})
+      var print = this.print(floorIdx, houseIdx).bind(this)
+      this.setState({checkoutHouseFloor: floorIdx, checkoutHouseRoom: houseIdx, checkoutOpen: true, print})
     }
   }
   checkoutOk(house) {
     this.props.actions.houseCheckOutClick({house})
   }
   checkoutCancel() {
-    this.setState({checkoutHouseFloor: -1, checkoutHouseRoom: -1, checkoutOpen: false})
+    this.setState({checkoutHouseFloor: -1, checkoutHouseRoom: -1, checkoutOpen: false, print: null})
   }
 
   print(floorIdx, houseIdx) {

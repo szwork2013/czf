@@ -116,7 +116,9 @@ class HousesRepay extends Component {
     return new moment(date).format('YYYY/MM/DD')
   }
   print() {
-
+    if (this.props.print) {
+      this.props.print()
+    }
   }
 
   ok() {

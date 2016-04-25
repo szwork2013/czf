@@ -630,7 +630,7 @@ const housePayRent = async (req, res) => {
     house = await house.save()
 
     house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
-    return res.handleResponse(200, {mansionId, house})
+    return res.handleResponse(200, {mansionId, house, charge})
 
   } catch(err) {
     log.error(err)
@@ -706,13 +706,13 @@ const houseCheckOut = async (req, res) => {
     tenant.electricMeterEndNumber = Number(newTenant.electricMeterEndNumber)
     tenant.waterMeterEndNumberLast = house.waterMeterEndNumber
     tenant.waterMeterEndNumber = Number(newTenant.waterMeterEndNumber)
-    tenant.doorCardRecoverCount = Number(newTenant.doorCardRecoverCount)
+    tenant.doorCardRecoverCount = Number(newTenant.doorCardRecoverCount) || 0
     tenant.waterChargesPerTon = mansion.houseWaterChargesPerTon
     tenant.electricChargesPerKWh = mansion.houseElectricChargesPerKWh
 
     tenant.overdueDays = new moment().diff(tenant.rentalEndDate, 'days')
     tenant.overdueCharges = Number(newTenant.overdueCharges) || 0
-    tenant.compensation = Number(newTenant.compensation)
+    tenant.compensation = Number(newTenant.compensation) || 0
     tenant.doorCardRecoverCharges = 0
 
     //计算电费
@@ -779,6 +779,7 @@ const houseCheckOut = async (req, res) => {
       'oweRental', 'oweRentalRepay', 'summed', 'remark',])
     charge.tenantId = tenant._id
     charge.type = 'checkout'
+    charge.doorCardCount = tenant.doorCardRecoverCount
     charge.createdBy = user._id
     charge.createdAt = new Date()
     charge = await Charges.create(charge)

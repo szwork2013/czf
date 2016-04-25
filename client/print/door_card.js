@@ -8,7 +8,7 @@ var printStr = `<table class='print-table'>
   <tr>
     <td class='print-td' colspan=2> <div class='print-cell print-text-center' style='height: 180px;'>
       <div class='print-text-l' style='margin: 75px 0px 5px;'>
-        {room}房购买门卡{doorCardCount}个，{doorCardChargesDes} {doorCardCharges}元。
+        {room}房{doorCardSellOrRecoverDes}门卡{doorCardCount}个，{doorCardChargesDes} {doorCardCharges}元。
       </div>
     </div> </td>
     <td class='print-td' rowspan=2> <div class='print-cell print-text-xs' style='height: 210px;'>
@@ -28,6 +28,7 @@ var printStr = `<table class='print-table'>
 
 var build = (data) => {
   return printStr.replace(/{room}/g, data.room)
+                 .replace(/{doorCardSellOrRecoverDes}/g, data.doorCardSellOrRecoverDes)
                  .replace(/{doorCardCount}/g, data.doorCardCount)
                  .replace(/{doorCardChargesDes}/g, data.doorCardChargesDes)
                  .replace(/{doorCardCharges}/g, data.doorCardCharges)

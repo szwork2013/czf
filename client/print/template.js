@@ -74,6 +74,41 @@ function buildHtmlStr(mansion, house) {
         retHtmlStr += buildDoorCardHtmlStr(data)
       }
       break;
+    case 'repay':
+      data.subTitle = '缴欠款单'
+      data.day = getValue(utils.parseDate(charge.createdAt))
+      retHtmlStr = buildRepayHtmlStr(data)
+      break;
+    case 'rental':
+      data.subTitle = '租房缴费单'
+      data.day = getValue(utils.parseDate(charge.createdAt))
+      retHtmlStr = buildPayRentHtmlStr(data)
+      if (charge.changeDeposit) {
+        data.subTitle = '押金单'
+        retHtmlStr += buildDepositHtmlStr(data)
+      }
+      if (charge.oweRental) {
+        data.subTitle = '欠款单'
+        retHtmlStr += buildOweRentalHtmlStr(data)
+      }
+      if (charge.doorCardCharges) {
+        data.subTitle = '门卡单'
+        retHtmlStr += buildDoorCardHtmlStr(data)
+      }
+      break;
+    case 'checkout':
+      data.subTitle = '退租结算单'
+      data.day = getValue(utils.parseDate(charge.createdAt))
+      retHtmlStr = buildCheckoutHtmlStr(data)
+      if (charge.oweRentalRepay) {
+        data.subTitle = '缴欠款单'
+        retHtmlStr += buildRepayHtmlStr(data)
+      }
+      if (charge.doorCardRecoverCharges) {
+        data.subTitle = '门卡单'
+        retHtmlStr += buildDoorCardHtmlStr(data)
+      }
+      break;
       //, 'checkin', 'repay', 'rental', 'checkout'
   }
   return retHtmlStr
@@ -130,7 +165,20 @@ function generateCommonData(mansion, house, charge) {
     }
     retObj.rentalSummedChinese = getNumberChinese(retObj.rentalSummed, 6, 1, false)
 
+    //退房合计
+    retObj.overdueCharges = getValue(charge.overdueCharges)
+    retObj.compensation = getValue(charge.compensation)
+    retObj.checkoutSummed = charge.electricCharges + charge.waterCharges + charge.overdueCharges + charge.compensation - charge.deposit
+    if (retObj.checkoutSummed>=0) {
+      retObj.checkoutSummedDes = '实收'
+    } else {
+      retObj.checkoutSummedDes = '实退'
+      retObj.checkoutSummed = -retObj.checkoutSummed
+    }
+    retObj.checkoutSummedChinese = getNumberChinese(retObj.checkoutSummed, 6, 1, false)
+
     //押金
+    retObj.changeDeposit = getValue(charge.changeDeposit)
     retObj.deposit = getValue(charge.deposit)
     retObj.depositChinese = getNumberChinese(charge.deposit, 6, 1, false)
 
@@ -141,26 +189,24 @@ function generateCommonData(mansion, house, charge) {
       retObj.realRental = charge.rental - charge.oweRental
       retObj.oweRentalExpiredDate = getValue(utils.parseDate(user.oweRentalExpiredDate))
     }
-
-    if (charge.doorCardCharges) {
-      retObj.doorCardCount = getValue(charge.doorCardCount)
-      retObj.doorCardCharges = getValue(charge.doorCardCharges)
-      retObj.doorCardChargesChinese = getNumberChinese(charge.doorCardCharges, 6, 1, false)
-      retObj.doorCardChargesDes = '实收'
+    if (charge.oweRentalRepay) {
+      retObj.oweRentalRepay = getValue(charge.oweRentalRepay)
+      retObj.oweRentalRepayChinese = getNumberChinese(charge.oweRentalRepay, 6, 1, false)
     }
-    if (charge.doorCardRecoverCharges) {
-      retObj.doorCardCount = getValue(charge.doorCardCount)
-      retObj.doorCardCharges = getValue(charge.doorCardRecoverCharges)
-      retObj.doorCardChargesChinese = getNumberChinese(charge.doorCardRecoverCharges, 6, 1, false)
-      retObj.doorCardChargesDes = '实退'
-    }
-
-
-    // retObj.rental = user.rental
-    // retObj.rental = user.rental
-    // retObj.rental = user.rental
-    // retObj.rental = user.rental
-    
+  }
+  if (charge.doorCardCharges) {
+    retObj.doorCardCount = getValue(charge.doorCardCount)
+    retObj.doorCardCharges = getValue(charge.doorCardCharges)
+    retObj.doorCardChargesChinese = getNumberChinese(charge.doorCardCharges, 6, 1, false)
+    retObj.doorCardSellOrRecoverDes = '购买'
+    retObj.doorCardChargesDes = '实收'
+  }
+  if (charge.doorCardRecoverCharges) {
+    retObj.doorCardCount = getValue(charge.doorCardCount)
+    retObj.doorCardCharges = getValue(charge.doorCardRecoverCharges)
+    retObj.doorCardChargesChinese = getNumberChinese(charge.doorCardRecoverCharges, 6, 1, false)
+    retObj.doorCardSellOrRecoverDes = '退回'
+    retObj.doorCardChargesDes = '实退'
   }
   retObj.name = getValue(user.name)
   retObj.mobile = getValue(user.mobile)
@@ -219,6 +265,21 @@ function buildDoorCardHtmlStr(data) {
   return buildHtmlStrInner(data, doorCard.build(data))
 }
 
+/*
+ * 补欠款
+ */
+import repay from './repay'
+function buildRepayHtmlStr(data) {
+  return buildHtmlStrInner(data, repay.build(data))
+}
+
+/*
+ * 补欠款
+ */
+import checkout from './checkout'
+function buildCheckoutHtmlStr(data) {
+  return buildHtmlStrInner(data, checkout.build(data))
+}
 
 
 function buildHtmlStrInner(data, contentHtmlStr) {

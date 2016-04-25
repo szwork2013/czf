@@ -204,7 +204,9 @@ class HousesPayRent extends Component {
     this.setState({house, forceUpdate: true})
   }
   print() {
-
+    if (this.props.print) {
+      this.props.print()
+    }
   }
 
   ok() {
