@@ -35,7 +35,7 @@ const HousesSchema = new Schema({
     type: ObjectId,
     ref: 'tenant'
   },
-  subscriberId: {                   //订客信息
+  subscriberId: {                   //定客信息
     type: ObjectId,
     ref: 'subscriber'
   },
@@ -82,13 +82,13 @@ exports.Houses = HousesModel;
 // });
 
 // /*
-//  * 订房信息
+//  * 定房信息
 //  */
 // const SubscriberModel = new Schema({
 //   name: String,
 //   mobile: String,
 //   idNo: String,
-//   subscription: Number,     //订金
+//   subscription: Number,     //定金
 //   expiredDate: Date           //过期日期
 //   createdAt: {              //下定时间
 //     type: Date,

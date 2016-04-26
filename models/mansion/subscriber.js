@@ -1,6 +1,6 @@
 'use strict';
 /*
- * 记录订房信息
+ * 记录定房信息
  */
 
 import log from '../../utils/log'
@@ -9,7 +9,7 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 /*
- * 订房信息
+ * 定房信息
  */
 const SubscriberModel = new Schema({
   mansionId: {                    
@@ -27,10 +27,10 @@ const SubscriberModel = new Schema({
   mobile: String,
   idNo: String,
 
-  subscription: Number,           //订金
-  subscribeDate: Date,            //订房日期
+  subscription: Number,           //定金
+  subscribeDate: Date,            //定房日期
   expiredDate: Date,              //过期日期
-  status: {                       //状态，valid有效状态，unsubscribe取消订房，transfer为入住转移到押金，expired过期订金不退，
+  status: {                       //状态，valid有效状态，unsubscribe取消定房，transfer为入住转移到押金，expired过期定金不退，
     type: String,                 
     enum: ['valid', 'unsubscribe', 'transfer', 'expired'],
     default: 'valid'

@@ -149,7 +149,7 @@ class MansionsBase extends Component {
         <CommonTextField floatingLabelText="出租房最少用水量/月/吨" ref='houseWaterChargesMinimalTons' style={styles.marginRight} value={mansion.houseWaterChargesMinimalTons} onChange={this.commonTextFiledChange('houseWaterChargesMinimalTons', true).bind(this)} />
         <CommonTextField floatingLabelText="出租房最大水表读数/吨" ref='houseWaterMeterMax' style={styles.marginRight} value={mansion.houseWaterMeterMax} onChange={this.commonTextFiledChange('houseWaterMeterMax', true).bind(this)} />
         <br />
-        <CommonTextField floatingLabelText="房子订金有效期限/天" ref='houseSubscriptionValidityCount' style={styles.marginRight} value={mansion.houseSubscriptionValidityCount} onChange={this.commonTextFiledChange('houseSubscriptionValidityCount', true).bind(this)} />
+        <CommonTextField floatingLabelText="房子定金有效期限/天" ref='houseSubscriptionValidityCount' style={styles.marginRight} value={mansion.houseSubscriptionValidityCount} onChange={this.commonTextFiledChange('houseSubscriptionValidityCount', true).bind(this)} />
         <br />
         <br />
         <br />
@@ -168,7 +168,7 @@ class MansionsBase extends Component {
         <CommonTextField floatingLabelText="商铺最少用水量/月/吨" ref='shopWaterChargesMinimalTons' style={styles.marginRight} value={mansion.shopWaterChargesMinimalTons} onChange={this.commonTextFiledChange('shopWaterChargesMinimalTons', true).bind(this)} />
         <CommonTextField floatingLabelText="商铺最大水表读数/吨" ref='shopWaterMeterMax' style={styles.marginRight} value={mansion.shopWaterMeterMax} onChange={this.commonTextFiledChange('shopWaterMeterMax', true).bind(this)} />
         <br />
-        <CommonTextField floatingLabelText="商铺订金有效期限/天" ref='shopSubscriptionValidityCount' style={styles.marginRight} value={mansion.shopSubscriptionValidityCount} onChange={this.commonTextFiledChange('shopSubscriptionValidityCount', true).bind(this)} />
+        <CommonTextField floatingLabelText="商铺定金有效期限/天" ref='shopSubscriptionValidityCount' style={styles.marginRight} value={mansion.shopSubscriptionValidityCount} onChange={this.commonTextFiledChange('shopSubscriptionValidityCount', true).bind(this)} />
         <br />
         <br />
         <br />

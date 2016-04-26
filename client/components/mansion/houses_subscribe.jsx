@@ -67,7 +67,7 @@ class HousesSubscribe extends Component {
         disabled = true
         this.setState({calcDisable: true, okDisable: true, printDisabled: true})
       } else if (house.subscriberId) {
-        //如果已有订房，不许再编辑
+        //如果已有定房，不许再编辑
         disabled = true
         this.setState({calcDisable: true, okDisable: true, printDisabled: false})
       } else {
@@ -153,7 +153,7 @@ class HousesSubscribe extends Component {
     if (!utils.isMobileNumber(subscriber.mobile)) return openToast({msg: '手机号格式错误'})
     if (subscriber.idNo && !IDCard.IDIsValid(subscriber.idNo)) return openToast({msg: '身份证格式错误'})
 
-    if (!utils.parseDate(subscriber.subscribeDate)) return openToast({msg: '请选择订房时间'})
+    if (!utils.parseDate(subscriber.subscribeDate)) return openToast({msg: '请选择定房时间'})
     if (!utils.parseDate(subscriber.expiredDate)) return openToast({msg: '请选择定房失效日期'})
 
     if (subscriber.subscription==='' || subscriber.subscription===undefined) return openToast({msg: '请输入定金'})

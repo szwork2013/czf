@@ -48,12 +48,12 @@ function buildHtmlStr(mansion, house) {
   // log.info(house, charge, data)
   switch (charge.type) {
     case 'subscribe':
-      data.subTitle = '订金单'
+      data.subTitle = '定金单'
       data.day = getValue(utils.parseDate(charge.subscriberId.subscribeDate))
       retHtmlStr = buildSubscribeHtmlStr(data)
       break;
     case 'unsubscribe':
-      data.subTitle = '退订金单'
+      data.subTitle = '退定金单'
       data.day = getValue(new Date())
       retHtmlStr = buildUnsubscribeHtmlStr(data)
       break;
@@ -217,7 +217,7 @@ function generateCommonData(mansion, house, charge) {
 }
 
 /*
- * 订房
+ * 定房
  */
 import subscribe from './subscribe'
 function buildSubscribeHtmlStr(data) {
@@ -225,7 +225,7 @@ function buildSubscribeHtmlStr(data) {
 }
 
 /*
- * 退订房
+ * 退定房
  */
 import unsubscribe from './unsubscribe'
 function buildUnsubscribeHtmlStr(data) {

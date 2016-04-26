@@ -466,7 +466,7 @@ const importHistoryVersionData = async (req, res) => {
     if (_.isEmpty(hisObj)) {
       return res.handleResponse(400, {}, 'file is broken');
     }
-    //迁移旧的出租信息和订房
+    //迁移旧的出租信息和定房
     var oldHouses = await Houses.find({mansionId: mansionId}).exec()
     // var oldTenant = {}
     var oldHouse = {}

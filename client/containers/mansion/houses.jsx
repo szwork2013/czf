@@ -427,6 +427,7 @@ class Houses extends Component {
   }
 
   render() {
+    var now = new Date()
     var styles = this.getStyles()
     var props = this.props
     var state = this.state
@@ -550,7 +551,9 @@ class Houses extends Component {
               if (house.tenantId) {
                 if (house.tenantId.oweRental) {
                   state = '欠'
-                  remark = house.tenantId.remark + '（欠租' + house.tenantId.oweRental+'元）'
+                  remark = house.tenantId.remark + '（欠租' + house.tenantId.oweRental+'元'
+                  if (new Date(house.tenantId.oweRentalExpiredDate) < now) remark+='，过期'
+                  remark += ')'
                   actions.push(
                     <button key={house._id+'payrent'} style={styles.button} 
                       onTouchTap={this.repayClick(house.floor, house.room).bind(this)}>补租</button>
@@ -594,9 +597,9 @@ class Houses extends Component {
                 state = '定'
                 name = house.subscriberId.name
                 mobile = house.subscriberId.mobile
-                remark = house.subscriberId.remark + '(定金' + house.subscriberId.subscription+'元'
-                if (new Date(house.subscriberId.expiredDate) < new Date()) remark+='，过期'
-                remark += ')'
+                remark = house.subscriberId.remark + '（定金' + house.subscriberId.subscription+'元'
+                if (new Date(house.subscriberId.expiredDate) < now) remark+='，过期'
+                remark += '）'
                 contractEndDate = new moment(house.subscriberId.expiredDate).format('YYYY.MM.DD')
                 // actions.push(
                 //   <CommonRaisedButton label="入住" primary={true} key={house._id+'in'}
@@ -612,7 +615,7 @@ class Houses extends Component {
                 )
                 actions.push(
                   <button key={house._id+'out'} style={styles.button} 
-                    onTouchTap={this.unsubscribeClick(house.floor, house.room).bind(this)}>退订</button>
+                    onTouchTap={this.unsubscribeClick(house.floor, house.room).bind(this)}>退定</button>
                 )
                 // actions.push(
                 //   <button key={house._id+'print'} style={styles.button} 

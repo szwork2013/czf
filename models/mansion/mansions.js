@@ -99,13 +99,13 @@ const MansionsSchema = new Schema({
   //门卡
   doorCardSellCharges: Number,         //房子门卡单价
   doorCardRecoverCharges: Number,      //房子门卡回收单价
-  //订金
-  houseSubscriptionValidityUnit: {                 //订金有效期限单位
+  //定金
+  houseSubscriptionValidityUnit: {                 //定金有效期限单位
     type: String,
     enum: ['day', 'month', 'year'],
     default: 'day'
   },
-  houseSubscriptionValidityCount: Number,          //订金有效期限
+  houseSubscriptionValidityCount: Number,          //定金有效期限
 
   houseRentalEndNotifyBeforeDay: {          //将过期房租提醒时长
     type: Number,
@@ -151,13 +151,13 @@ const MansionsSchema = new Schema({
     type: Number,
     default: 1
   },
-  //订金
-  shopSubscriptionValidityUnit: {                 //订金有效期限单位
+  //定金
+  shopSubscriptionValidityUnit: {                 //定金有效期限单位
     type: String,
     enum: ['day', 'month', 'year'],
     default: 'day'
   },
-  shopSubscriptionValidityCount: Number,          //订金有效期限
+  shopSubscriptionValidityCount: Number,          //定金有效期限
   deleted: {
     type: Boolean,
     default: false
@@ -225,9 +225,9 @@ let mansions = [{
   //门卡
   doorCardSellCharges: 20,           //房子门卡单价
   doorCardRecoverCharges: 15,        //房子门卡回收单价
-  //订金
-  houseSubscriptionValidityUnit: 'day',            //订金有效期限单位
-  houseSubscriptionValidityCount: 15,            //订金有效期限
+  //定金
+  houseSubscriptionValidityUnit: 'day',            //定金有效期限单位
+  houseSubscriptionValidityCount: 15,            //定金有效期限
 }];
 
 

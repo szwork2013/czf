@@ -2,20 +2,20 @@
 
 var printStr = `<table class='print-table'>
   <tr>
-    <th class='print-th' style='width: 75%;'>订金详细</th>
+    <th class='print-th' style='width: 75%;'>定金详细</th>
     <th class='print-th'>备注</th>
   </tr>
   <tr>
     <td class='print-td'>
     <div class='print-cell print-text-center' style='height: 210px;'>
         <div class='print-text-l' style='margin: 20px 0px 5px;'>
-          收到订房，订金{subscription}元。
+          收到定房，定金{subscription}元。
         </div>
         <div class='print-text-s' style='margin-bottom: 10px'>
           {subscriptionChinese}
         </div>
         <div class='print-text-left' style=' text-indent: 2em;'>
-          订房者需于：{expiredDate}前（包含当日），凭此订金单到本楼管理处办理正式入住手续，房东退还本单订金费。如果订房者逾期未办理入住手续或放弃所订房间，本单订金费房东不予退还。
+          定房者需于：{expiredDate}前（包含当日），凭此定金单到本楼管理处办理正式入住手续，房东退还本单定金费。如果定房者逾期未办理入住手续或放弃所定房间，本单定金费房东不予退还。
         </div>
     </div>
     </td>

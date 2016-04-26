@@ -272,7 +272,7 @@ export function houseRepayClick(formData) {
 }
 
 /*
- * 退订房
+ * 退定房
  */
 function houseUnsubscribe(formData) {
 return {

@@ -67,7 +67,7 @@ class HousesUnsubscribe extends Component {
         disabled = true
         this.setState({calcDisable: true, okDisable: true, printDisabled: true})
       } else if (!house.subscriberId) {
-        //如果已退订，不许再编辑
+        //如果已退定，不许再编辑
         disabled = true
         this.setState({calcDisable: true, okDisable: true, printDisabled: false})
       }

@@ -12,7 +12,7 @@ const ObjectId = Schema.ObjectId;
 //  * 租金总计
 //  */
 // const TenantSummedModel = new Schema({
-//   subscription: Number,                 //订金
+//   subscription: Number,                 //定金
 //   deposit: Number,                    //押金
 //   rental: Number,                     //租金
 //   waterCharges: Number,               //水费
@@ -44,7 +44,7 @@ const TenantModel = new Schema({
   mobile: String,
   idNo: String,
 
-  subscription: Number,         //订金，作充抵用
+  subscription: Number,         //定金，作充抵用
   subscriberId: {
     type: ObjectId,
     ref: 'subscriber'
