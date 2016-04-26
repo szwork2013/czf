@@ -19,6 +19,7 @@ class HousesRepay extends Component {
     super(props, context);
     this.state = {
       disabled: false,
+      calcDisable: false,
       okDisable: false,
       printDisabled: true,
 
@@ -64,10 +65,10 @@ class HousesRepay extends Component {
       if (house.tenantId.oweRental) {
         //还欠上次租金
         disabled = false
-        this.setState({okDisable: false, printDisabled: true})
+        this.setState({calcDisable: false, okDisable: false, printDisabled: true})
       } else {
         disabled = true
-        this.setState({okDisable: true, printDisabled: false})
+        this.setState({calcDisable: true, okDisable: true, printDisabled: false})
       }
       if (_.isEmpty(tenant)) {
         stateHouse = _.cloneDeep(house)
@@ -78,12 +79,13 @@ class HousesRepay extends Component {
         tenant.contractEndDate = new Date(tenant.contractEndDate)
         tenant.oweRentalRepay = tenant.oweRental
         tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
+        this.setState({calcDisable: false, okDisable: true, printDisabled: true})
         this.calcAll(stateHouse)
       }
     } else {
       stateHouse = {}
       disabled = true
-      this.setState({okDisable: true, printDisabled: true})
+      this.setState({calcDisable: true, okDisable: true, printDisabled: true})
     }
     this.setState({house: stateHouse, houseLayout, disabled})
   }
@@ -106,7 +108,7 @@ class HousesRepay extends Component {
       if (isNumber && !utils.isPositiveNumber(value)) {
       } else {
         stateTenant[key] = value
-        this.setState({house: stateHouse, forceUpdate: true})
+        this.setState({house: stateHouse, okDisable: true, forceUpdate: true})
         this.calcAll()
       }
     }
@@ -121,6 +123,9 @@ class HousesRepay extends Component {
     }
   }
 
+  calc() {
+    this.setState({okDisable: false, forceUpdate: true})
+  }
   ok() {
     var openToast = this.props.openToast || function() {}
     var propsHouse = this.props.house || {}
@@ -205,8 +210,8 @@ class HousesRepay extends Component {
         </div>
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
-                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '260px'}}>
-          <div style={{height: '175px'}}>
+                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '262px'}}>
+          <div style={{height: '135px'}}>
           补交欠款：{stateTenant.oweRentalRepay}<br />
           
           </div>
@@ -214,6 +219,7 @@ class HousesRepay extends Component {
             总计：<span style={{color: 'red'}}>{stateTenant.summed}</span> 元
           </span>
 
+          <RaisedButton label="计算总费" primary={true} style={{width: '195px', marginBottom: '8px'}} onTouchTap={this.calc.bind(this)} disabled={state.calcDisable}/>
           <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>
           <RaisedButton label="打印单据" primary={true} style={{}} onTouchTap={this.print.bind(this)} disabled={state.printDisabled} />
         </div>

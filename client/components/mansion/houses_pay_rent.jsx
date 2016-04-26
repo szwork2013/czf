@@ -20,6 +20,7 @@ class HousesPayRent extends Component {
     super(props, context);
     this.state = {
       disabled: false,
+      calcDisable: false,
       okDisable: false,
       printDisabled: true,
 
@@ -72,7 +73,7 @@ class HousesPayRent extends Component {
           disabled = true
           tenant.isOweRental = true
           tenant.oweRentalExpiredDate = new Date(tenant.oweRentalExpiredDate)
-          this.setState({okDisable: true, printDisabled: true})
+          this.setState({calcDisable: true, okDisable: true, printDisabled: true})
         } else {
           var oldTenant = house.tenantId
           delete tenant._id
@@ -95,7 +96,7 @@ class HousesPayRent extends Component {
           if (houseLayout) {
             tenant.servicesCharges = houseLayout.servicesCharges
           }
-          this.setState({okDisable: false, printDisabled: true})
+          this.setState({calcDisable: false, okDisable: true, printDisabled: true})
         }
         this.state.house = stateHouse
         this.calcAll(stateHouse)
@@ -103,13 +104,13 @@ class HousesPayRent extends Component {
         if (new Date(house.lastUpdatedAt).getTime() !== new Date(stateHouse.lastUpdatedAt).getTime()) {
           //说明是保存过本次的交租信息，不能再修改信息
           disabled = true
-          this.setState({okDisable: true, printDisabled: false})
+          this.setState({calcDisable: true, okDisable: true, printDisabled: false})
         }
       }
     } else {
       stateHouse = {}
       disabled = props.disabled!==undefined? props.disabled: true
-      this.setState({okDisable: true, printDisabled: true})
+      this.setState({calcDisable: true, okDisable: true, printDisabled: true})
     }
     this.setState({house: stateHouse, houseLayout, disabled})
   }
@@ -121,7 +122,7 @@ class HousesPayRent extends Component {
       if (isNumber && !utils.isPositiveNumber(value)) {
       } else {
         tenant[key] = value
-        this.setState({house, forceUpdate: true})
+        this.setState({house, okDisable: true, forceUpdate: true})
         this.calcAll()
       }
     }
@@ -131,7 +132,7 @@ class HousesPayRent extends Component {
       var house = this.state.house || {}
       var tenant = house.tenantId || {}
       tenant[key] = new moment(value)[startOrEnd]('day').toDate()
-      this.setState({house, forceUpdate: true})
+      this.setState({house, okDisable: true, forceUpdate: true})
     }
   }
   checkboxChange(key) {
@@ -139,7 +140,7 @@ class HousesPayRent extends Component {
       var house = this.state.house || {}
       var tenant = house.tenantId || {}
       tenant[key] = value
-      this.setState({house, forceUpdate: true})
+      this.setState({house, okDisable: true, forceUpdate: true})
       this.calcAll()
     }
   }
@@ -209,6 +210,9 @@ class HousesPayRent extends Component {
     }
   }
 
+  calc() {
+    this.setState({okDisable: false, forceUpdate: true})
+  }
   ok() {
     var openToast = this.props.openToast || function() {}
     var house = this.state.house || {}
@@ -360,8 +364,8 @@ class HousesPayRent extends Component {
         </div>
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
-                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '485px'}}>
-          <div style={{height: '400px'}}>
+                     fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '488px'}}>
+          <div style={{height: '360px'}}>
           应收租金：{tenant.rental}<br />
           { tenant.isOweRental && (
             <span>欠租金：{-tenant.oweRental}<br /></span>
@@ -378,6 +382,7 @@ class HousesPayRent extends Component {
             总计：<span style={{color: 'red'}}>{tenant.summed}</span> 元
           </span>
 
+          <RaisedButton label="计算总费" primary={true} style={{width: '195px', marginBottom: '8px'}} onTouchTap={this.calc.bind(this)} disabled={state.calcDisable}/>
           <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>
           <RaisedButton label="打印单据" primary={true} style={{}} onTouchTap={this.print.bind(this)} disabled={state.printDisabled} />
         </div>

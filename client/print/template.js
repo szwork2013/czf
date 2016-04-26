@@ -42,7 +42,6 @@ function buildHtmlStr(mansion, house) {
   var house = house || {}
   var charge = house.charge || {}
   var tenant = charge.tenantId || {}
-  log.info(house, charge)
   if (!charge) return '';
   var retHtmlStr = '无支持的打印功能！'
   var data = generateCommonData(mansion, house, charge)

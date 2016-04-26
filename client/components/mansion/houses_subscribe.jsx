@@ -19,7 +19,8 @@ class HousesSubscribe extends Component {
     super(props, context);
     this.state = {
       disabled: false,
-      okDisable: false,
+      calcDisable: false,
+      okDisable: true,
       printDisabled: true,
 
       house: {},
@@ -64,14 +65,14 @@ class HousesSubscribe extends Component {
       if (house.tenantId) {
         //如果出租，不许再编辑
         disabled = true
-        this.setState({okDisable: true, printDisabled: true})
+        this.setState({calcDisable: true, okDisable: true, printDisabled: true})
       } else if (house.subscriberId) {
         //如果已有订房，不许再编辑
         disabled = true
-        this.setState({okDisable: true, printDisabled: false})
+        this.setState({calcDisable: true, okDisable: true, printDisabled: false})
       } else {
         disabled = false
-        this.setState({okDisable: false, printDisabled: true})
+        this.setState({calcDisable: false, okDisable: false, printDisabled: true})
       }
       if (_.isEmpty(subscriber)) {
         stateHouse = _.cloneDeep(house)
@@ -83,12 +84,13 @@ class HousesSubscribe extends Component {
         if (houseLayout) {
           subscriber.subscription = houseLayout.defaultSubscription
         }
+        this.setState({calcDisable: false, okDisable: true, printDisabled: true})
         this.calcAll(stateHouse)
       }
     } else {
       stateHouse = {}
       disabled = true
-      this.setState({okDisable: true, printDisabled: true})
+      this.setState({calcDisable: true, okDisable: true, printDisabled: true})
     }
     this.setState({house: stateHouse, houseLayout, disabled})
   }
@@ -101,7 +103,7 @@ class HousesSubscribe extends Component {
     var house = house || this.state.house
     var subscriber = house.subscriberId || {}
     subscriber.summed = Number(subscriber.subscription)
-    this.setState({house, forceUpdate: true})
+    this.setState({house, okDisable: true, forceUpdate: true})
   }
 
   /*
@@ -114,7 +116,7 @@ class HousesSubscribe extends Component {
       if (isNumber && !utils.isPositiveNumber(value)) {
       } else {
         subscriber[key] = value
-        this.setState({house, forceUpdate: true})
+        this.setState({house, okDisable: true, forceUpdate: true})
         this.calcAll()
       }
     }
@@ -124,7 +126,7 @@ class HousesSubscribe extends Component {
       var house = this.state.house || {}
       var subscriber = house.subscriberId || {}
       subscriber[key] = new moment(value)[startOrEnd]('day').toDate()
-      this.setState({house, forceUpdate: true})
+      this.setState({house, okDisable: true, forceUpdate: true})
     }
   }
 
@@ -138,6 +140,9 @@ class HousesSubscribe extends Component {
     }
   }
 
+  calc() {
+    this.setState({okDisable: false, forceUpdate: true})
+  }
   ok() {
     var openToast = this.props.openToast || function() {}
     var house = this.state.house || {}
@@ -219,7 +224,7 @@ class HousesSubscribe extends Component {
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
                      fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '265px'}}>
-          <div style={{height: '180px'}}>
+          <div style={{height: '140px'}}>
           定金：{subscriber.subscription}<br />
           
           </div>
@@ -227,6 +232,7 @@ class HousesSubscribe extends Component {
             总计：<span style={{color: 'red'}}>{subscriber.summed}</span> 元
           </span>
 
+          <RaisedButton label="计算总费" primary={true} style={{width: '195px', marginBottom: '8px'}} onTouchTap={this.calc.bind(this)} disabled={state.calcDisable}/>
           <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>
           <RaisedButton label="打印单据" primary={true} style={{}} onTouchTap={this.print.bind(this)} disabled={state.printDisabled} />
         </div>

@@ -20,6 +20,7 @@ class HousesCheckOut extends Component {
     super(props, context);
     this.state = {
       disabled: false,
+      calcDisable: false,
       okDisable: false,
       printDisabled: true,
 
@@ -65,10 +66,10 @@ class HousesCheckOut extends Component {
     if (!_.isEmpty(house)) {
       if (house.tenantId) {
         disabled = false
-        this.setState({okDisable: false, printDisabled: true})
+        this.setState({calcDisable: false, okDisable: false, printDisabled: true})
       } else {
         disabled = true
-        this.setState({okDisable: true, printDisabled: false})
+        this.setState({calcDisable: true, okDisable: true, printDisabled: false})
       }
       if (_.isEmpty(stateHouse)) {
         stateHouse = _.cloneDeep(house)
@@ -105,14 +106,14 @@ class HousesCheckOut extends Component {
         tenant.overdueCharges = tenant.overdueDays * tenant.overdueFinePerDay
         tenant.doorCardRecoverCount = tenant.doorCardCount || 0
         tenant.doorCardRecoverCharges = tenant.doorCardRecoverCount * mansion.doorCardRecoverCharges
-
+        this.setState({calcDisable: false, okDisable: true, printDisabled: true})
         // this.state.house = stateHouse
         this.calcAll(stateHouse)
       }
     } else {
       stateHouse = {}
       disabled = true
-      this.setState({okDisable: true, printDisabled: true})
+      this.setState({calcDisable: true, okDisable: true, printDisabled: true})
     }
     this.setState({house: stateHouse, houseLayout, disabled})
   }
@@ -124,7 +125,7 @@ class HousesCheckOut extends Component {
       if (isNumber && !utils.isPositiveNumber(value)) {
       } else {
         tenant[key] = value
-        this.setState({house, forceUpdate: true})
+        this.setState({house, okDisable: true, forceUpdate: true})
         this.calcAll()
       }
     }
@@ -193,6 +194,9 @@ class HousesCheckOut extends Component {
     }
   }
 
+  calc() {
+    this.setState({okDisable: false, forceUpdate: true})
+  }
   ok() {
     var openToast = this.props.openToast || function() {}
     var house = this.state.house || {}
@@ -303,7 +307,7 @@ class HousesCheckOut extends Component {
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
                      fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '410px'}}>
-          <div style={{height: '325px'}}>
+          <div style={{height: '285px'}}>
           电费：{tenant.electricCharges}<br />
           水费：{tenant.waterCharges}<br />
           退押金：{-tenant.deposit}<br />
@@ -325,6 +329,7 @@ class HousesCheckOut extends Component {
             总计：<span style={{color: 'red'}}>{tenant.summed}</span> 元
           </span>
 
+          <RaisedButton label="计算总费" primary={true} style={{width: '195px', marginBottom: '8px'}} onTouchTap={this.calc.bind(this)} disabled={state.calcDisable}/>
           <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>
           <RaisedButton label="打印单据" primary={true} style={{}} onTouchTap={this.print.bind(this)} disabled={state.printDisabled} />
         </div>

@@ -19,6 +19,7 @@ class HousesCheckIn extends Component {
     super(props, context);
     this.state = {
       disabled: false,
+      calcDisable: false,
       okDisable: false,
       printDisabled: true,
 
@@ -63,10 +64,10 @@ class HousesCheckIn extends Component {
     if (!_.isEmpty(house)) {
       if (house.tenantId) {
         disabled = true
-        this.setState({okDisable: true, printDisabled: false})
+        this.setState({calcDisable: true, okDisable: true, printDisabled: false})
       } else {
         disabled = false
-        this.setState({okDisable: false, printDisabled: true})
+        this.setState({calcDisable: false, okDisable: false, printDisabled: true})
       }
       if (_.isEmpty(tenant)) {
         stateHouse = _.cloneDeep(props.house)
@@ -110,14 +111,14 @@ class HousesCheckIn extends Component {
         tenant.oweRentalExpiredDate = new moment(tenant.rentalStartDate).add(7, 'day').endOf('day').toDate()
 
         tenant.summed = 0
-        this.setState({okDisable: false, printDisabled: true})
+        this.setState({calcDisable: false, okDisable: true, printDisabled: true})
         this.calcAll(stateHouse)
       }
     } else {
       disabled = true
       stateHouse = {}
       // stateHouse.tenantId = {}
-      this.setState({okDisable: true, printDisabled: true})
+      this.setState({calcDisable: true, okDisable: true, printDisabled: true})
     }
     this.setState({house: stateHouse, houseLayout, disabled})
 
@@ -172,7 +173,7 @@ class HousesCheckIn extends Component {
       if (isNumber && !utils.isPositiveNumber(value)) {
       } else {
         tenant[key] = value
-        this.setState({house, forceUpdate: true})
+        this.setState({house, okDisable: true, forceUpdate: true})
         this.calcAll()
       }
     }
@@ -182,7 +183,7 @@ class HousesCheckIn extends Component {
       var house = this.state.house
       var tenant = house.tenantId
       tenant[key] = new moment(value)[startOrEnd]('day').toDate()
-      this.setState({house, forceUpdate: true})
+      this.setState({house, okDisable: true, forceUpdate: true})
     }
   }
   checkboxChange(key) {
@@ -190,7 +191,7 @@ class HousesCheckIn extends Component {
       var house = this.state.house
       var tenant = house.tenantId
       tenant[key] = value
-      this.setState({house, forceUpdate: true})
+      this.setState({house, okDisable: true, forceUpdate: true})
     }
   }
 
@@ -204,6 +205,9 @@ class HousesCheckIn extends Component {
     }
   }
 
+  calc() {
+    this.setState({okDisable: false, forceUpdate: true})
+  }
   ok() {
     var openToast = this.props.openToast || function() {}
     var house = this.state.house
@@ -350,7 +354,7 @@ class HousesCheckIn extends Component {
 
         <div style={{textAlign: 'left', marginTop: '10px', paddingTop: '10px', padding: '10px', backgroundColor: '#e0e0e0', 
                      fontSize: '20px', display: 'inline-block', float: 'left', width: '200px', height: '410px'}}>
-          <div style={{height: '325px'}}>
+          <div style={{height: '285px'}}>
           { subscriberStr && (
               <span>{subscriberStr}<br /></span>
           )}
@@ -374,6 +378,7 @@ class HousesCheckIn extends Component {
             总计：<span style={{color: 'red'}}>{tenant.summed}</span> 元
           </span>
 
+          <RaisedButton label="计算总费" primary={true} style={{width: '195px', marginBottom: '8px'}} onTouchTap={this.calc.bind(this)} disabled={state.calcDisable}/>
           <RaisedButton label="确定" primary={true} style={styles.marginRight} onTouchTap={this.ok.bind(this)} disabled={state.okDisable}/>
           <RaisedButton label="打印单据" primary={true} style={{}} onTouchTap={this.print.bind(this)} disabled={state.printDisabled} />
         </div>
