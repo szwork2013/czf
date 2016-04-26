@@ -328,7 +328,7 @@ class Houses extends Component {
     var houseLayout = state.houseLayout
     var showHouse = state.showHouse
     var searchStr = state.searchStr
-    
+    this.props.actions.houseExportExcelClick({mansionId: mansion._id, floorIdx, houseIdx, houseLayout, showHouse, searchStr})
   }
 
   print(floorIdx, houseIdx) {

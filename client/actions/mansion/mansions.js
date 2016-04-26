@@ -309,6 +309,27 @@ export function houseCheckOutClick(formData) {
   return dispatch => dispatch(houseCheckOut(formData));
 }
 
-
+/*
+ * 退房
+ */
+function houseExportExcel(formData) {
+return {
+    [CALL_API_V1]: {
+      // actions: {
+      //   // successType: HOUSE_CHECK_OUT_SUCCESS
+      // },
+      url: '/mansion/house/export/excel',
+      method: 'GET',
+      headers: {
+        accept: '*'
+      },
+      data: formData,
+      downloadFile: true
+    }
+  }
+}
+export function houseExportExcelClick(formData) {
+  return dispatch => dispatch(houseExportExcel(formData));
+}
 
 

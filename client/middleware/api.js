@@ -10,7 +10,7 @@ import { openToast } from '../actions/master/toast';
 import { Storage } from '../utils/storage';
 
 import { browserHistory } from 'react-router';
-
+import download from '../utils/download.js'
 
 import { USER_RESTORE } from '../constants/actionTypes';
 
@@ -105,14 +105,15 @@ export default store => next => action => {
   //取参数
   if (callAPI) {
     callSymbol = CALL_API;
-    var { url, method, data, headers, actions, manualLoading, manualResponse, uploadFile } = callAPI;
+    var { url, method, data, headers, actions, manualLoading, manualResponse, uploadFile, downloadFile } = callAPI;
   } else if (callAPIV1) {
     callSymbol = CALL_API_V1;
-    var { url, method, data, headers, actions, manualLoading, manualResponse, uploadFile } = callAPIV1;
+    var { url, method, data, headers, actions, manualLoading, manualResponse, uploadFile, downloadFile } = callAPIV1;
     url = '/api/v1' + url;
   } else {
     return next(action);
   }
+  actions = actions || {}
   const { requestType, successType, failureType, responseType } = actions;
 
   //根据请求API为url加前缀
@@ -140,8 +141,10 @@ export default store => next => action => {
     }
     //treat response manual
     if (manualResponse) {
-      resObj.type = responseType;
-      next(actionWith(resObj, callSymbol));
+      if (responseType) {
+        resObj.type = responseType;
+        next(actionWith(resObj, callSymbol));
+      }
     } else {
       if (resObj.resStatus === 401) {
         window.defaultStore.dispatch({type: USER_RESTORE, token: '', expiresIn: new Date()})
@@ -151,8 +154,31 @@ export default store => next => action => {
         return
       }
       else if (resObj.resStatus === 200) {
-        resObj.type = successType;
-        next(actionWith(resObj, callSymbol));
+        if (resObj.resType==='blob' && downloadFile) {
+          var filename = ''
+          var contentDisposition = resObj.response.headers.get('content-disposition')
+          if (!_.isEmpty(contentDisposition)) {
+            var filenameRegExp = /filename=[\"]*(.*)[\"]*/gi;
+            filename = filenameRegExp.exec(contentDisposition);
+            if (filename && filename.length>1) {
+              filename = filename[1]
+            } else {
+              filename = ''
+            }
+          }
+          if (_.isEmpty(filename)) {
+            filename = (new Date()).getTime().toString()
+            var contentType = resObj.response.headers.get('content-type')
+            if (!_.isEmpty(contentType)) {
+              filename += '.'+contentType.split('/')[1]
+            }
+          }
+          download(resObj.resData, filename)
+        }
+        if (successType) {
+          resObj.type = successType;
+          next(actionWith(resObj, callSymbol));
+        }
       } else if (failureType) {
         resObj.type = failureType; 
         next(actionWith(resObj, callSymbol));
@@ -172,8 +198,10 @@ export default store => next => action => {
     }
     if (manualResponse) {
       //treat response manual
-      resObj.type = responseType;
-      next(actionWith(resObj, callSymbol));
+      if (responseType) {
+        resObj.type = responseType;
+        next(actionWith(resObj, callSymbol));
+      }
     } else if (failureType) {
       resObj.type = failureType; 
       next(actionWith(resObj, callSymbol));

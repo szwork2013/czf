@@ -6,7 +6,7 @@ import utils from '../../utils';
 import IDCard from '../../utils/identitycard'
 import config from '../../config';
 
-
+import nodeExcel from 'excel-export'
 
 import { Users, UsersOmit, Mansions, HouseLayouts, defaultHouseLayouts, 
         Houses, Tenant, Subscriber, Shops, Charges } from '../../models';
@@ -815,31 +815,163 @@ const houseCheckOut = async (req, res) => {
 exports.houseCheckOut = houseCheckOut;
 
 
+
+
 /*
- * 房间票据打印
+ * 房间信息下载
  */
-const print = async (req, res) => {
+const exportExcel = async (req, res) => {
   try{
     var query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
     var user = req.user
-    var houseId = query.houseId;
-    var house = await Houses.findOne({_id: houseId, isExist: true, deleted: false}).populate('tenantId subscriberId houseLayout').exec();
-    if (!house) {
-      return res.handleResponse(400, {}, 'house not found');
-    }
-    var mansionId = house.mansionId
+    var mansionId = query.mansionId
     var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
     if (!mansion) {
       return res.handleResponse(400, {}, 'mansion not found');
     }
-    var printType = query.type || 'all'
+    var floorIdx = query.floorIdx===undefined? -1: Number(query.floorIdx)
+    var houseIdx = query.houseIdx===undefined? -1: Number(query.houseIdx)
+    var houseLayout = query.houseLayout===undefined? 'all': query.houseLayout
+    var showHouse = query.showHouse===undefined? 'all': query.showHouse
+    var searchStr = query.searchStr
 
+    var housesCond = {
+      mansionId: mansionId, 
+      deleted: false, 
+      isExist: true
+    }
+    if (floorIdx!==-1) {
+      housesCond.floor = floorIdx
+      if (houseIdx!==-1) {
+        housesCond.room = houseIdx
+      }
+    }
+    if (houseLayout!=='all') {
+      housesCond.houseLayout = houseLayout
+    }
+    var houses = await Houses.find(housesCond).populate('tenantId subscriberId').exec()
+    var now = new Date()
+    if (showHouse !== 'all') {
+      switch (showHouse) {
+        case 'tenantable':
+          houses = houses.filter( house => {
+            return !house.tenantId && !house.subscriberId
+          })
+          break;
+        case 'tenanted':
+          houses = houses.filter( house => {
+            return house.tenantId
+          })
+          break;
+        case 'subscribed':
+          houses = houses.filter( house => {
+            return house.subscriberId
+          })
+          break;
+        case 'subscribedExpired':
+          houses = houses.filter( house => {
+            return house.subscriberId && house.subscriberId.expiredDate<now
+          })
+          break;
+        case 'oweRental':
+          houses = houses.filter( house => {
+            return house.tenantId && house.tenantId.oweRental>0
+          })
+          break;
+        case 'oweRentalEnd':
+          houses = houses.filter( house => {
+            return house.tenantId && house.tenantId.oweRental>0 && house.tenantId.oweRentalExpiredDate < now
+          })
+          break;
+        case 'rentalEndSoon':
+          var houseRentalEndNotifyBeforeDay = Number(mansion.houseRentalEndNotifyBeforeDay) || 3
+          var houseRentalEndNotifyBeforeMinSec = 1000*60*60*24*houseRentalEndNotifyBeforeDay
+          houses = houses.filter( house => {
+            if (house.tenantId) {
+              var diff = house.tenantId.rentalEndDate-now
+              return 0<diff && diff<houseRentalEndNotifyBeforeMinSec
+            }
+            return false
+          })
+          break;
+        case 'rentalEnd':
+          houses = houses.filter( house => {
+            return house.tenantId && house.tenantId.rentalEndDate<now
+          })
+          break;
+        case 'contractEndSoon':
+          var houseContractEndNotifyBeforeDay = Number(mansion.houseContractEndNotifyBeforeDay) || 3
+          var houseContractEndNotifyBeforeMinSec = 1000*60*60*24*houseContractEndNotifyBeforeDay
+          houses = houses.filter( house => {
+            if (house.tenantId) {
+              var diff = house.tenantId.contractEndDate-now
+              return 0<diff && diff<houseContractEndNotifyBeforeMinSec
+            }
+            return false
+          })
+          break;
+        case 'contractEnd':
+          houses = houses.filter( house => {
+            return house.tenantId && house.tenantId.contractEndDate<now
+          })
+          break;
+        default:
+          houses = []
+      }
+    } 
+    if (!_.isEmpty(searchStr)) {
+      var tenant = {}
+      houses = houses.filter( house => {
+        if(house.tenantId) {
+          tenant = house.tenantId
+          return (tenant.name && tenant.name.search(searchStr)!==-1) || 
+                 (tenant.mobile && tenant.mobile.search(searchStr)!==-1) || 
+                 (tenant.idNo && tenant.idNo.search(searchStr)!==-1) ||
+                 (tenant.remark && tenant.remark.search(searchStr)!==-1)
+        } else 
+          return false
+      })
+    }
+    var houseLayoutsArray = await HouseLayouts.find({mansionId: mansionId, deleted: false}).sort({order: 1}).exec()
+    var houseLayouts = {}
+    houseLayoutsArray.forEach(houseLayout => {
+      houseLayouts[houseLayout._id.toString()] = houseLayout.description
+    })
 
+    var conf ={};
+    // conf.stylesXmlFile = "styles.xml";
+    conf.name = "sheet1";
+    conf.cols = [{
+      caption: '索引',
+      type: 'string'
+    }, {
+      caption: '楼层',
+      type: 'string',
+    }, {
+      caption: '房间',
+      type: 'string',
+    }, {
+      caption: '户型',
+      type: 'string',
+    }]
+    conf.rows = []
 
+    houses.forEach( (house, idx) => {
+      var row = []
+      row.push(idx.toString())
+      row.push((house.floor+1).toString())
+      row.push((house.room+1).toString())
+      row.push(houseLayouts[house.houseLayout])
+      conf.rows.push(row)
+    })
+    var result = nodeExcel.execute(conf);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats');
+    res.setHeader("Content-Disposition", "attachment; filename=" + (new Date()).getTime() + ".xlsx");
+    res.end(result, 'binary');
   } catch(err) {
-    log.error(err.name, err.message)
+    log.error(err)
     return res.handleResponse(500, {});
   }
 }
-exports.print = print;
+exports.exportExcel = exportExcel;
 

@@ -11,7 +11,7 @@ import { getHouseLayoutPatterns } from '../controllers/mansion/house_layout_patt
 import { mansionsAll, mansionInfo, addMansion, deleteMansion, importHistoryVersionData,
          saveMansionBase, saveHouseLayouts, saveFloor, saveManagersInfo } from '../controllers/mansion/mansions';
 
-import { houseCheckIn, housePayRent, houseSubscribe, houseRepay, houseUnsubscribe, houseCheckOut } from '../controllers/mansion/houses';
+import { houseCheckIn, housePayRent, houseSubscribe, houseRepay, houseUnsubscribe, houseCheckOut, exportExcel } from '../controllers/mansion/houses';
 
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/temp/' })
@@ -38,7 +38,7 @@ router.post('/mansion/house/repay', jwtVerify, houseRepay);
 router.post('/mansion/house/unsubscribe', jwtVerify, houseUnsubscribe);
 router.post('/mansion/house/checkout', jwtVerify, houseCheckOut);
 
-
+router.get('/mansion/house/export/excel', jwtVerify, exportExcel);
 
 
 export default router;
