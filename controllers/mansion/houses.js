@@ -849,7 +849,7 @@ const exportExcel = async (req, res) => {
     if (houseLayout!=='all') {
       housesCond.houseLayout = houseLayout
     }
-    var houses = await Houses.find(housesCond).populate('tenantId subscriberId').exec()
+    var houses = await Houses.find(housesCond).sort({floor: 1, room: 1}).populate('tenantId subscriberId').exec()
     var now = new Date()
     if (showHouse !== 'all') {
       switch (showHouse) {
@@ -943,7 +943,7 @@ const exportExcel = async (req, res) => {
     conf.name = "sheet1";
     conf.cols = [{
       caption: '索引',
-      type: 'string'
+      type: 'string',
     }, {
       caption: '楼层',
       type: 'string',
@@ -953,15 +953,80 @@ const exportExcel = async (req, res) => {
     }, {
       caption: '户型',
       type: 'string',
+    }, {
+      caption: '状态',
+      type: 'string',
+    }, {
+      caption: '姓名',
+      type: 'string',
+    }, {
+      caption: '手机',
+      type: 'string',
+    }, {
+      caption: '电表',
+      type: 'string',
+    }, {
+      caption: '水表',
+      type: 'string',
+    }, {
+      caption: '下次交租',
+      type: 'string',
+    }, {
+      caption: '合同终止',
+      type: 'string',
+    }, {
+      caption: '备注',
+      type: 'string',
     }]
     conf.rows = []
 
     houses.forEach( (house, idx) => {
       var row = []
-      row.push(idx.toString())
+      var remarkExpand = ''
+      row.push((idx+1).toString())
       row.push((house.floor+1).toString())
       row.push((house.room+1).toString())
       row.push(houseLayouts[house.houseLayout])
+      if (house.tenantId) {
+        var tenant = house.tenantId
+        if (tenant.oweRental) {
+          row.push('欠')
+          remarkExpand += '（欠租' + tenant.oweRental+'元'
+          if (tenant.oweRentalExpiredDate < now) remarkExpand+='，过期'
+          remarkExpand += '）'
+        } else {
+          row.push('租')
+        }
+        row.push(tenant.name || '')
+        row.push(tenant.mobile || '')
+        row.push(house.electricMeterEndNumber.toString())
+        row.push(house.waterMeterEndNumber.toString())
+        row.push(new moment(tenant.rentalEndDate).format('YYYY.MM.DD'))
+        row.push(new moment(tenant.contractEndDate).format('YYYY.MM.DD'))
+        row.push((tenant.remark || '')+remarkExpand)
+      } else if (house.subscriberId) {
+        var subscriber = house.subscriberId
+        remarkExpand += '（定金' + subscriber.subscription+'元'
+        if (subscriber.expiredDate < now) remarkExpand+='，过期'
+        remarkExpand += '）'
+        row.push('定')
+        row.push(subscriber.name || '')
+        row.push(subscriber.mobile || '')
+        row.push(house.electricMeterEndNumber.toString())
+        row.push(house.waterMeterEndNumber.toString())
+        row.push('')
+        row.push(new moment(subscriber.expiredDate).format('YYYY.MM.DD'))
+        row.push((subscriber.remark || '')+remarkExpand)
+      } else {
+        row.push('空')
+        row.push('')
+        row.push('')
+        row.push(house.electricMeterEndNumber.toString())
+        row.push(house.waterMeterEndNumber.toString())
+        row.push('')
+        row.push('')
+        row.push(remarkExpand)
+      }
       conf.rows.push(row)
     })
     var result = nodeExcel.execute(conf);
