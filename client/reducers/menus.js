@@ -16,6 +16,11 @@ const menus = [
     type: 'DIVIDER',
   }, {
     type: 'MENU',
+    name: '房屋',
+    leftIcon: 'domain',
+    key: '/houses',
+  }, {
+    type: 'MENU',
     name: '配置',
     leftIcon: 'settings',
     key: '/settings',
@@ -24,11 +29,6 @@ const menus = [
       name: '私有资产',
       leftIcon: 'location_city',
       key: '/mansions',
-    }, {
-      type: 'MENU',
-      name: '房屋',
-      leftIcon: 'domain',
-      key: '/houses',
     }]
   }, {
     type: 'DIVIDER',

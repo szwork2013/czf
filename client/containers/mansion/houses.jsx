@@ -681,7 +681,7 @@ class Houses extends Component {
                   <td className='td'> 
                     { contractEndDate }
                   </td>
-                  <td className='td'> 
+                  <td className='td' style={{whiteSpace: 'normal'}}> 
                     { remark }
                   </td>
                   <td className='td'> 
