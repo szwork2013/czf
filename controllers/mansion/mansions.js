@@ -31,7 +31,7 @@ const mansionInfo = async (req, res) => {
     let query = req.query || querystring.parse(require('url').parse(req.url).query) || {};
     var user = req.user
     var mansionId = query.mansionId;
-    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
+    var mansion = await Mansions.findOne({_id: mansionId, deleted: false, '$or': [{ownerId: user._id}, {'managers.userId': user._id}]}).exec();
     if (!mansion) {
       return res.handleResponse(400, {}, 'mansion not found');
     }

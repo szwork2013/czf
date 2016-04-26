@@ -20,7 +20,7 @@ router.get('/mansions/houseLayoutPatterns', jwtVerify, getHouseLayoutPatterns);
 
 router.get('/mansions/all', jwtVerify, mansionsAll);
 
-router.get('/mansion/info', jwtVerify, mansionVerify, mansionInfo);
+router.get('/mansion/info', jwtVerify, mansionInfo);
 
 router.post('/mansion', jwtVerify, addMansion);
 router.delete('/mansion', jwtVerify, deleteMansion);
