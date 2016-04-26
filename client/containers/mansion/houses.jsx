@@ -319,6 +319,18 @@ class Houses extends Component {
     this.setState({checkoutHouseFloor: -1, checkoutHouseRoom: -1, checkoutOpen: false, print: null})
   }
 
+  exportToExcel() {
+    var state = this.state
+    var mansion = state.mansion;
+    var floor = state.floor
+    var floorIdx = state.floorIdx
+    var houseIdx = state.houseIdx
+    var houseLayout = state.houseLayout
+    var showHouse = state.showHouse
+    var searchStr = state.searchStr
+    
+  }
+
   print(floorIdx, houseIdx) {
     return function(e) {
       window.printArea.innerHTML = printTemplate.buildHtmlStr(this.state.mansion, this.state.floor[floorIdx][houseIdx])
@@ -435,7 +447,8 @@ class Houses extends Component {
           tenant = house.tenantId
           return (tenant.name && tenant.name.search(searchStr)!==-1) || 
                  (tenant.mobile && tenant.mobile.search(searchStr)!==-1) || 
-                 (tenant.idNo && tenant.idNo.search(searchStr)!==-1)
+                 (tenant.idNo && tenant.idNo.search(searchStr)!==-1) ||
+                 (tenant.remark && tenant.remark.search(searchStr)!==-1)
         } else 
           return false
       })
@@ -535,8 +548,10 @@ class Houses extends Component {
           <CommonSelectField value={state.showHouse} onChange={this.handleShowHouseChange.bind(this)} style={styles.marginRight}
               floatingLabelText='出租情况' forceUpdate={forceUpdate}
               items={showHousesItems} itemValue='_id' itemPrimaryText='description'/>
+          <br/>
           <CommonTextField onEnterKeyDown={this.handleSearchChange.bind(this)} style={styles.marginRight}
-              floatingLabelText='查找：姓名、手机号、身份证号' forceUpdate={forceUpdate}/>
+              floatingLabelText='查找：姓名、手机、身份证、备注' forceUpdate={forceUpdate}/>
+          <button style={styles.button} onTouchTap={this.exportToExcel.bind(this)}>导出Excel</button>
         </div>
         <div style={styles.tab}>
           <table className='table'>
