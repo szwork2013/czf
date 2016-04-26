@@ -107,6 +107,17 @@ const MansionsSchema = new Schema({
   },
   houseSubscriptionValidityCount: Number,          //订金有效期限
 
+  houseRentalEndNotifyBeforeDay: {          //将过期房租提醒时长
+    type: Number,
+    default: 3
+  },
+  houseContractEndNotifyBeforeDay: {          //将过期房租提醒时长
+    type: Number,
+    default: 3
+  },
+
+
+
   //商铺
   shopPropertyMaintenanceChargesType: {       //商铺物业费收取方式
     type: Number,

@@ -7,7 +7,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Colors from 'material-ui/lib/styles/colors';
 
-import { SelectField, MenuItem } from 'material-ui/lib'
+import { SelectField, MenuItem, Divider } from 'material-ui/lib'
 
 class CommonSelectField extends Component {
 
@@ -26,24 +26,39 @@ class CommonSelectField extends Component {
   getMenuItems(items, key, value, primaryText, excludeKey) {
     var retMenuItems = []
     var item = {}
-    if (key) {
-      for (let idx in items) {
-        if (excludeKey && excludeKey.indexOf(idx)!==-1) {
-          continue;
-        }
-        item = items[idx]
-        retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={item[key]}/>)
+    let now = (new Date()).getTime().toString()
+    for (let idx in items) {
+      if (excludeKey && excludeKey.indexOf(idx)!==-1) {
+        continue;
       }
-    } else {
-      let now = (new Date()).getTime().toString()
-      for (let idx in items) {
-        if (excludeKey && excludeKey.indexOf(idx)!==-1) {
-          continue;
-        }
-        item = items[idx]
-        retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={now+idx}/>)
+      item = items[idx]
+      if (item == 'divider' ) {
+        retMenuItems.push(<Divider key={now+idx}/>)
+      } else {
+        key? retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={item[key]}/>) : 
+           retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={now+idx}/>)
       }
     }
+
+
+    // if (key) {
+    //   for (let idx in items) {
+    //     if (excludeKey && excludeKey.indexOf(idx)!==-1) {
+    //       continue;
+    //     }
+    //     item = items[idx]
+    //     retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={item[key]}/>)
+    //   }
+    // } else {
+    //   let now = (new Date()).getTime().toString()
+    //   for (let idx in items) {
+    //     if (excludeKey && excludeKey.indexOf(idx)!==-1) {
+    //       continue;
+    //     }
+    //     item = items[idx]
+    //     retMenuItems.push(<MenuItem value={item[value]} primaryText={item[primaryText]} key={now+idx}/>)
+    //   }
+    // }
     return retMenuItems
   }
 

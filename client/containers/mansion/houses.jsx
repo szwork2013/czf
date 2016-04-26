@@ -227,6 +227,9 @@ class Houses extends Component {
     // this.state.forceUpdate = true
     this.setState({houseLayout: value})
   }
+  handleShowHouseChange(value) {
+    this.setState({showHouse: value})
+  }
   onShowHouseChange(value) {
     this.setState({showHouse: value})
   }
@@ -322,11 +325,14 @@ class Houses extends Component {
 
   getHouses() {
     var state = this.state
+    var mansion = state.mansion;
     var floor = state.floor
     var floorIdx = state.floorIdx
     var houseIdx = state.houseIdx
     var houseLayout = state.houseLayout
     var showHouse = state.showHouse
+
+    var now = new Date()
 
     // log.info(floorIdx, houseIdx, houseLayout, showHouse)
     var houses = []
@@ -353,7 +359,7 @@ class Houses extends Component {
       switch (showHouse) {
         case 'tenantable':
           houses = houses.filter( house => {
-            return !house.tenantId
+            return !house.tenantId && !house.subscriberId
           })
           break;
         case 'tenanted':
@@ -366,6 +372,50 @@ class Houses extends Component {
             return house.subscriberId
           })
           break;
+        case 'oweRental':
+          houses = houses.filter( house => {
+            return house.tenantId && house.tenantId.oweRental>0
+          })
+          break;
+        case 'oweRentalEnd':
+          houses = houses.filter( house => {
+            return house.tenantId && house.tenantId.oweRental>0 && new Date(house.tenantId.oweRentalExpiredDate) < now
+          })
+          break;
+        case 'rentalEndSoon':
+          var houseRentalEndNotifyBeforeDay = Number(mansion.houseRentalEndNotifyBeforeDay) || 3
+          var houseRentalEndNotifyBeforeMinSec = 1000*60*60*24*houseRentalEndNotifyBeforeDay
+          houses = houses.filter( house => {
+            if (house.tenantId) {
+              var diff = new Date(house.tenantId.rentalEndDate)-now
+              return 0<diff && diff<houseRentalEndNotifyBeforeMinSec
+            }
+            return false
+          })
+          break;
+        case 'rentalEnd':
+          houses = houses.filter( house => {
+            return house.tenantId && new Date(house.tenantId.rentalEndDate)<now
+          })
+          break;
+        case 'contractEndSoon':
+          var houseContractEndNotifyBeforeDay = Number(mansion.houseContractEndNotifyBeforeDay) || 3
+          var houseContractEndNotifyBeforeMinSec = 1000*60*60*24*houseContractEndNotifyBeforeDay
+          houses = houses.filter( house => {
+            if (house.tenantId) {
+              var diff = new Date(house.tenantId.contractEndDate)-now
+              return 0<diff && diff<houseContractEndNotifyBeforeMinSec
+            }
+            return false
+          })
+          break;
+        case 'contractEnd':
+          houses = houses.filter( house => {
+            return house.tenantId && new Date(house.tenantId.contractEndDate)<now
+          })
+          break;
+        default:
+          houses = []
       }
     } 
     return houses;
@@ -399,6 +449,12 @@ class Houses extends Component {
     })
     houseLayouts.unshift({_id: 'all', description: '全部'})
 
+    var showHousesItems = [{_id: 'all', description: '全部'}, {_id: 'tenantable', description: '可出租'}, {_id: 'subscribed', description: '已预定'}, 
+                       {_id: 'tenanted', description: '已出租'}, {_id: 'oweRental', description: '有欠款'}, 'divider', 
+                       {_id: 'oweRentalEnd', description: '欠款已过期'},
+                       {_id: 'rentalEndSoon', description: '租金将到期'}, {_id: 'rentalEnd', description: '租金已过期'}, 
+                       {_id: 'contractEndSoon', description: '合同将到期'}, {_id: 'contractEnd', description: '合同已过期'}, ]
+
     var houses = this.getHouses()
     var houseLayoutsObj = state.houseLayoutsObj
 
@@ -430,7 +486,13 @@ class Houses extends Component {
     if (state.checkoutOpen) {
       checkoutHouse = state.floor[state.checkoutHouseFloor][state.checkoutHouseRoom]
     }
-
+// <CommonRadioButtonGroup name='showHouse' valueSelected={this.state.showHouse} style={{display: 'inline-block', marginLeft: '20px'}}
+//             onChange={this.onShowHouseChange.bind(this)}>
+//             <RadioButton value='all' label='全部' style={styles.raidoButton}/>
+//             <RadioButton value='tenantable' label='可出租' style={styles.raidoButton}/>
+//             <RadioButton value='tenanted' label='已出租' style={styles.raidoButton}/>
+//             <RadioButton value='subscribed' label='已预定' style={styles.raidoButton}/>
+//           </CommonRadioButtonGroup>
     return (
       <div>
         <div style={{marginBottom: '20px'}}>
@@ -447,13 +509,9 @@ class Houses extends Component {
           <CommonSelectField value={state.houseLayout} onChange={this.handleHouseLayoutChange.bind(this)} style={styles.marginRight}
               floatingLabelText='户型' forceUpdate={forceUpdate}
               items={houseLayouts} itemValue='_id' itemPrimaryText='description'/>
-          <CommonRadioButtonGroup name='showHouse' valueSelected={this.state.showHouse} style={{display: 'inline-block', marginLeft: '20px'}}
-            onChange={this.onShowHouseChange.bind(this)}>
-            <RadioButton value='all' label='全部' style={styles.raidoButton}/>
-            <RadioButton value='tenantable' label='可出租' style={styles.raidoButton}/>
-            <RadioButton value='tenanted' label='已出租' style={styles.raidoButton}/>
-            <RadioButton value='subscribed' label='已预定' style={styles.raidoButton}/>
-          </CommonRadioButtonGroup>
+          <CommonSelectField value={state.showHouse} onChange={this.handleShowHouseChange.bind(this)} style={styles.marginRight}
+              floatingLabelText='出租情况' forceUpdate={forceUpdate}
+              items={showHousesItems} itemValue='_id' itemPrimaryText='description'/>
         </div>
         <div style={styles.tab}>
           <table className='table'>
