@@ -372,6 +372,11 @@ class Houses extends Component {
             return house.subscriberId
           })
           break;
+        case 'subscribedExpired':
+          houses = houses.filter( house => {
+            return house.subscriberId && new Date(house.subscriberId.expiredDate)<now
+          })
+          break;
         case 'oweRental':
           houses = houses.filter( house => {
             return house.tenantId && house.tenantId.oweRental>0
@@ -451,7 +456,7 @@ class Houses extends Component {
 
     var showHousesItems = [{_id: 'all', description: '全部'}, {_id: 'tenantable', description: '可出租'}, {_id: 'subscribed', description: '已预定'}, 
                        {_id: 'tenanted', description: '已出租'}, {_id: 'oweRental', description: '有欠款'}, 'divider', 
-                       {_id: 'oweRentalEnd', description: '欠款已过期'},
+                       {_id: 'subscribedExpired', description: '定房已过期'}, {_id: 'oweRentalEnd', description: '欠款已过期'},
                        {_id: 'rentalEndSoon', description: '租金将到期'}, {_id: 'rentalEnd', description: '租金已过期'}, 
                        {_id: 'contractEndSoon', description: '合同将到期'}, {_id: 'contractEnd', description: '合同已过期'}, ]
 
