@@ -24,7 +24,7 @@ import * as UsersActions from '../../actions/users';
 import CommonRadioButtonGroup from '../../components/common/common_radio_button_group'
 import CommonSelectField from '../../components/common/common_select_field'
 import CommonRaisedButton from '../../components/common/common_raised_button'
-
+import CommonTextField from '../../components/common/common_text_field'
 
 import HousesCheckIn from '../../components/mansion/houses_check_in'
 import HousesPayRent from '../../components/mansion/houses_pay_rent'
@@ -230,8 +230,11 @@ class Houses extends Component {
   handleShowHouseChange(value) {
     this.setState({showHouse: value})
   }
-  onShowHouseChange(value) {
-    this.setState({showHouse: value})
+  // onShowHouseChange(value) {
+  //   this.setState({showHouse: value})
+  // }
+  handleSearchChange(value) {
+    this.setState({searchStr: value})
   }
 
 
@@ -331,6 +334,7 @@ class Houses extends Component {
     var houseIdx = state.houseIdx
     var houseLayout = state.houseLayout
     var showHouse = state.showHouse
+    var searchStr = state.searchStr
 
     var now = new Date()
 
@@ -346,7 +350,7 @@ class Houses extends Component {
     } else {
       floor.forEach( h => { houses = houses.concat(h) } )
     }
-    // log.error(houses)
+    
     houses = houses.filter( house => {
       return house.isExist
     })
@@ -423,6 +427,19 @@ class Houses extends Component {
           houses = []
       }
     } 
+    // log.error(houses)
+    if (!_.isEmpty(searchStr)) {
+      var tenant = {}
+      houses = houses.filter( house => {
+        if(house.tenantId) {
+          tenant = house.tenantId
+          return (tenant.name && tenant.name.search(searchStr)!==-1) || 
+                 (tenant.mobile && tenant.mobile.search(searchStr)!==-1) || 
+                 (tenant.idNo && tenant.idNo.search(searchStr)!==-1)
+        } else 
+          return false
+      })
+    }
     return houses;
   }
 
@@ -518,6 +535,8 @@ class Houses extends Component {
           <CommonSelectField value={state.showHouse} onChange={this.handleShowHouseChange.bind(this)} style={styles.marginRight}
               floatingLabelText='出租情况' forceUpdate={forceUpdate}
               items={showHousesItems} itemValue='_id' itemPrimaryText='description'/>
+          <CommonTextField onEnterKeyDown={this.handleSearchChange.bind(this)} style={styles.marginRight}
+              floatingLabelText='查找：姓名、手机号、身份证号' forceUpdate={forceUpdate}/>
         </div>
         <div style={styles.tab}>
           <table className='table'>

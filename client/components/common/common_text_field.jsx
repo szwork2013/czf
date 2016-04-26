@@ -29,6 +29,9 @@ class CommonTextField extends Component {
   onChange(e) {
     if (this.props.onChange) this.props.onChange(this.refs['commonTextField'].getValue());
   }
+  onEnterKeyDown(e) {
+    if (this.props.onEnterKeyDown) this.props.onEnterKeyDown(this.refs['commonTextField'].getValue());
+  }
 
   render() {
     var props = this.props
@@ -36,13 +39,13 @@ class CommonTextField extends Component {
       return (
         <TextField floatingLabelText={props.floatingLabelText} hintText={props.hintText}
                    ref='commonTextField' onChange={this.onChange.bind(this)} defaultValue={props.defaultValue}
-                   style={props.style} value={props.value} disabled={props.disabled} fullWidth={props.fullWidth}/>
+                   style={props.style} value={props.value} disabled={props.disabled} fullWidth={props.fullWidth} onEnterKeyDown={this.onEnterKeyDown.bind(this)}/>
       )
     } else {
       return (
         <TextField floatingLabelText={props.floatingLabelText} 
                    ref='commonTextField' onChange={this.onChange.bind(this)} defaultValue={props.defaultValue}
-                   style={props.style} disabled={props.disabled} fullWidth={props.fullWidth}/>
+                   style={props.style} disabled={props.disabled} fullWidth={props.fullWidth} onEnterKeyDown={this.onEnterKeyDown.bind(this)}/>
       )
     }
   }
