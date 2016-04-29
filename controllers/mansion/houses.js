@@ -817,6 +817,106 @@ exports.houseCheckOut = houseCheckOut;
 
 
 
+
+
+
+
+/*
+ * 门卡
+ */
+const houseDoorCard = async (req, res) => {
+  // var pickArray = ['remark']
+  try{
+    var body = req.body || {};
+    var newHouse = body.house
+    var newTenant = newHouse.tenantId
+    // log.info(newTenant)
+    var mansionId = newHouse.mansionId
+    var user = req.user;
+    var mansion = await Mansions.findOne({_id: mansionId, '$or': [{ownerId: user._id}, {'managers.userId': user._id}], deleted: false}).exec();
+    if (!mansion) {
+      return res.handleResponse(400, {}, 'mansion not found');
+    }
+    var house = await Houses.findOne({_id: newHouse._id, isExist: true, deleted: false}).populate('tenantId').exec();
+    if (!house) {
+      return res.handleResponse(400, {}, 'house not found');
+    }
+    if (house.lastUpdatedAt.getTime() !==  (new Date(newHouse.lastUpdatedAt)).getTime()) {
+      return res.handleResponse(409, {}, 'old data');
+    }
+
+    var doorCard = newHouse.doorCard || {}
+    var charge = _.pick(house, ['mansionId', 'housesId', 'floor', 'room'])
+    charge.type = 'doorcard'
+    charge.doorCardCount = Number(doorCard.doorCardCount)
+    if (doorCard.sellOrRecover === 'sell') {
+      charge.doorCardCharges = charge.doorCardCount * mansion.doorCardSellCharges
+      charge.summed = charge.doorCardCharges
+    } else if (doorCard.sellOrRecover === 'recover') {
+      charge.doorCardRecoverCharges = charge.doorCardCount * mansion.doorCardRecoverCharges
+      charge.summed = -charge.doorCardRecoverCharges
+    }
+    charge.remark = doorCard.remark
+    var oldTenant = house.tenantId
+    if (!_.isEmpty(oldTenant)) {
+      // _.assign(charge, _.pick(oldTenant, ['tenantId']))
+      charge.tenantId = oldTenant._id
+    }
+
+    //保存计费信息
+    charge.createdBy = user._id
+    charge.createdAt = new Date()
+    charge = await Charges.create(charge)
+    charge = await Charges.findOne({_id: charge._id}).populate('tenantId').exec()
+
+    if (!_.isEmpty(oldTenant)) {
+      var oldTenantBackup = _.pick(oldTenant, ['doorCardCount'])
+      oldTenant.doorCardCount = oldTenant.doorCardCount? oldTenant.doorCardCount: 0
+      if (doorCard.sellOrRecover === 'sell') {
+        oldTenant.doorCardCount += charge.doorCardCount
+      } else if (doorCard.sellOrRecover === 'recover') {
+        oldTenant.doorCardCount -= charge.doorCardCount
+        oldTenant.doorCardCount = oldTenant.doorCardCount<0? 0: oldTenant.doorCardCount
+      }
+      oldTenant.lastUpdatedAt = new Date()
+      oldTenant = await oldTenant.save()
+    }
+
+    //修改房间相关信息
+    house.lastUpdatedAt = new Date()
+    house = await house.save()
+
+    house = await Houses.findOne({_id: house._id}).populate('tenantId').exec()
+    return res.handleResponse(200, {mansionId, house, charge})
+
+  } catch(err) {
+    log.error(err)
+    try {
+      await Charges.remove({_id: charge._id})
+    } catch(error) {}
+    if (oldTenant) {
+      //恢复Tenant
+      try {
+        _.assign(oldTenant, oldTenantBackup)
+        await oldTenant.save()
+      } catch(error) {}
+      //因为house.save()在最后才执行，如果报错的话，证明没保存成功，不需要还原
+    }
+    return res.handleResponse(500, {});
+  }
+}
+exports.houseDoorCard = houseDoorCard;
+
+
+
+
+
+
+
+
+
+
+
 /*
  * 房间信息下载
  */

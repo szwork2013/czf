@@ -108,6 +108,12 @@ function buildHtmlStr(mansion, house) {
         retHtmlStr += buildDoorCardHtmlStr(data)
       }
       break;
+    case 'doorcard':
+      log.info(data)
+      data.day = getValue(utils.parseDate(charge.createdAt))
+      // data.remark = getValue(charge.remark)
+      data.subTitle = '门卡单'
+      retHtmlStr = buildDoorCardHtmlStr(data)
       //, 'checkin', 'repay', 'rental', 'checkout'
   }
   return retHtmlStr
@@ -194,6 +200,7 @@ function generateCommonData(mansion, house, charge) {
     }
   }
   if (charge.doorCardCharges) {
+    // log.info(charge)
     retObj.doorCardCount = getValue(charge.doorCardCount)
     retObj.doorCardCharges = getValue(charge.doorCardCharges)
     retObj.doorCardChargesChinese = getNumberChinese(charge.doorCardCharges, 6, 1, false)
@@ -211,8 +218,8 @@ function generateCommonData(mansion, house, charge) {
   retObj.mobile = getValue(user.mobile)
   retObj.idNo = getValue(user.idNo)
   retObj.summed = getValue(user.summed)
-  retObj.summedChinese = retObj.summed
-  retObj.remark = getValue(user.remark)
+  retObj.summedChinese = getNumberChinese(retObj.summed, 6, 1, false)
+  retObj.remark = getValue(charge.remark)
   return retObj
 }
 

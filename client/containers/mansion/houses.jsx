@@ -32,6 +32,7 @@ import HousesSubscribe from '../../components/mansion/houses_subscribe'
 import HousesUnsubscribe from '../../components/mansion/houses_unsubscribe'
 import HousesCheckOut from '../../components/mansion/houses_check_out'
 import HousesRepay from '../../components/mansion/houses_repay'
+import HousesDoorCard from '../../components/mansion/houses_door_card'
 
 // import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
 
@@ -83,6 +84,10 @@ class Houses extends Component {
       checkoutHouseFloor: -1,
       checkoutHouseRoom: -1,
       checkoutOpen: false,
+
+      doorCardHouseFloor: -1, 
+      doorCardHouseRoom: -1,
+      doorCardOpen: false,
     }
   }
 
@@ -319,6 +324,20 @@ class Houses extends Component {
     this.setState({checkoutHouseFloor: -1, checkoutHouseRoom: -1, checkoutOpen: false, print: null})
   }
 
+  doorCardClick(floorIdx, houseIdx) {
+    return function() {
+      var print=this.print(floorIdx, houseIdx).bind(this)
+      this.setState({doorCardHouseFloor: floorIdx, doorCardHouseRoom: houseIdx, doorCardOpen: true, print})
+    }
+  }
+  doorCardOk(house) {
+    this.props.actions.houseDoorCardClick({house})
+  }
+  doorCardCancel() {
+    this.setState({doorCardHouseFloor: -1, doorCardHouseRoom: -1, doorCardOpen: false, print: null})
+  }
+
+
   exportToExcel() {
     var state = this.state
     var mansion = state.mansion;
@@ -522,6 +541,11 @@ class Houses extends Component {
     if (state.checkoutOpen) {
       checkoutHouse = state.floor[state.checkoutHouseFloor][state.checkoutHouseRoom]
     }
+
+    var doorCardHouse= {}
+    if (state.doorCardOpen) {
+      doorCardHouse = state.floor[state.doorCardHouseFloor][state.doorCardHouseRoom]
+    }
 // <CommonRadioButtonGroup name='showHouse' valueSelected={this.state.showHouse} style={{display: 'inline-block', marginLeft: '20px'}}
 //             onChange={this.onShowHouseChange.bind(this)}>
 //             <RadioButton value='all' label='全部' style={styles.raidoButton}/>
@@ -677,6 +701,10 @@ class Houses extends Component {
                 //     onTouchTap={this.print(house.floor, house.room).bind(this)}>打印</button>
                 // )
               }
+              actions.push(
+                <button key={house._id+'doorCard'} style={styles.button} 
+                  onTouchTap={this.doorCardClick(house.floor, house.room).bind(this)}>门卡</button>
+              )
               if (house.charge) {
                 actions.push(
                   <button key={house._id+'print'} style={styles.button} 
@@ -743,6 +771,9 @@ class Houses extends Component {
             ok={this.unsubscribeOk.bind(this)} cancel={this.unsubscribeCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
         <HousesCheckOut mansion={state.mansion} houseLayouts={state.houseLayouts} house={checkoutHouse} open={state.checkoutOpen} 
             ok={this.checkoutOk.bind(this)} cancel={this.checkoutCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
+        <HousesDoorCard mansion={state.mansion} houseLayouts={state.houseLayouts} house={doorCardHouse} open={state.doorCardOpen} 
+            ok={this.doorCardOk.bind(this)} cancel={this.doorCardCancel.bind(this)} openToast={props.actions.openToast} print={state.print}/>
+        
       </div>
     )
   }
@@ -805,9 +836,9 @@ class Houses extends Component {
         borderRadius: '2px',
         fontSize: '14px',
         color: 'white',
-        padding: '6px 10px',
-        marginLeft: '4px',
-        marginRight: '4px',
+        padding: '6px 6px',
+        marginLeft: '2px',
+        marginRight: '2px',
       },
     }
     styles.actionButtonRent = _.assign({}, styles.actionButton, {backgroundColor: '#2196f3'})

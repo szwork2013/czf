@@ -15,8 +15,6 @@ import { Tenant } from './mansion/tenant';
 import { Subscriber } from './mansion/subscriber'
 import { Charges } from './mansion/charges'
 
-// mongoose.Promise = require('bluebird');
-
 exports.connectDB = (env = {}) => {
   //connect database
   var database = config.database;
