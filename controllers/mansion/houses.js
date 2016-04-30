@@ -86,6 +86,7 @@ const houseSubscribe = async (req, res) => {
     var charge = _.pick(subscriber, ['mansionId', 'houseId', 'floor', 'room', 
       'subscription', 'summed', 'remark', 'createdBy'])
     charge.subscriberId = subscriber._id
+    charge.category = 'house'
     charge.type = 'subscribe'
     charge.createdAt = new Date()
     charge = await Charges.create(charge)
@@ -180,6 +181,7 @@ const houseUnsubscribe = async (req, res) => {
     var charge = _.pick(subscriber, ['mansionId', 'houseId', 'floor', 'room', 
       'subscription', 'refund', 'summed', 'remark'])
     charge.subscriberId = subscriber._id
+    charge.category = 'house'
     charge.type = 'unsubscribe'
     charge.createdBy = user._id
     charge.createdAt = new Date()
@@ -331,7 +333,9 @@ const houseCheckIn = async (req, res) => {
       'subscription', 'deposit', 'rental', 'oweRental', 'waterCharges', 'electricCharges', 
       'servicesCharges', 'doorCardCount', 'doorCardCharges', 'summed', 'remark',])
     charge.tenantId = tenant._id
+    charge.category = 'house'
     charge.type = 'checkin'
+    charge.refund = charge.subscription
     charge.createdBy = user._id
     charge.createdAt = new Date()
     charge = await Charges.create(charge)
@@ -441,6 +445,7 @@ const houseRepay = async (req, res) => {
       'oweRentalRepay', 'remark', ])
     charge.tenantId = oldTenant._id
     charge.summed = oldTenant.oweRentalRepay 
+    charge.category = 'house'
     charge.type = 'repay'
     charge.createdBy = user._id
     charge.createdAt = new Date()
@@ -613,6 +618,7 @@ const housePayRent = async (req, res) => {
       'rental','servicesCharges', 'waterCharges', 'electricCharges', 
       'oweRental', 'deposit', 'summed', 'remark',])
     charge.tenantId = tenant._id
+    charge.category = 'house'
     charge.type = 'rental'
     charge.changeDeposit = Number(tenant.deposit) - Number(oldTenant.deposit)
     charge.createdBy = user._id
@@ -778,6 +784,7 @@ const houseCheckOut = async (req, res) => {
       'doorCardRecoverCharges', 'overdueCharges', 'compensation',
       'oweRental', 'oweRentalRepay', 'summed', 'remark',])
     charge.tenantId = tenant._id
+    charge.category = 'house'
     charge.type = 'checkout'
     charge.doorCardCount = tenant.doorCardRecoverCount
     charge.createdBy = user._id
@@ -847,6 +854,7 @@ const houseDoorCard = async (req, res) => {
 
     var doorCard = newHouse.doorCard || {}
     var charge = _.pick(house, ['mansionId', 'housesId', 'floor', 'room'])
+    charge.category = 'house'
     charge.type = 'doorcard'
     charge.doorCardCount = Number(doorCard.doorCardCount)
     if (doorCard.sellOrRecover === 'sell') {
@@ -870,7 +878,7 @@ const houseDoorCard = async (req, res) => {
     charge = await Charges.findOne({_id: charge._id}).populate('tenantId').exec()
 
     if (!_.isEmpty(oldTenant)) {
-      var oldTenantBackup = _.pick(oldTenant, ['doorCardCount'])
+      var oldTenantBackup = _.pick(oldTenant, ['doorCardCount', 'lastUpdatedAt'])
       oldTenant.doorCardCount = oldTenant.doorCardCount? oldTenant.doorCardCount: 0
       if (doorCard.sellOrRecover === 'sell') {
         oldTenant.doorCardCount += charge.doorCardCount
@@ -894,7 +902,7 @@ const houseDoorCard = async (req, res) => {
     try {
       await Charges.remove({_id: charge._id})
     } catch(error) {}
-    if (oldTenant) {
+    if (!_.isEmpty(oldTenant)) {
       //恢复Tenant
       try {
         _.assign(oldTenant, oldTenantBackup)

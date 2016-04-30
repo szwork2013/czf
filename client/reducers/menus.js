@@ -21,6 +21,19 @@ const menus = [
     key: '/houses',
   }, {
     type: 'MENU',
+    name: '统计',
+    leftIcon: 'account_balance',
+    key: '/accountBalance',
+    menus: [{
+      type: 'MENU',
+      name: '房屋统计',
+      leftIcon: 'list',
+      key: '/statistics/houses',
+    }]
+  }, {
+    type: 'DIVIDER',
+  }, {
+    type: 'MENU',
     name: '配置',
     leftIcon: 'settings',
     key: '/settings',

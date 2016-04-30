@@ -37,7 +37,6 @@ import HousesDoorCard from '../../components/mansion/houses_door_card'
 // import CommonConfirmDialog from '../../components/common/common_confirm_dialog'
 
 import printTemplate from '../../print/template'
-import jQuery from 'jquery'
 
 
 

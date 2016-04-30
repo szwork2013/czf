@@ -44,25 +44,30 @@ const ChargesModel = new Schema({
   },
   floor: Number,                  //从0开始，0代表1楼
   room: Number,                   //从0开始，0代表01房
+
+  category: {
+    type: String,
+    enum: ['house', 'shop']
+  },
   type: {                         //类型
     type: String,
     enum: ['subscribe', 'unsubscribe', 'checkin', 'repay', 'rental', 'checkout', 'doorcard']
   },
 
-  subscription: Number,               //定金
-  refund: Number,                     //退定金
-  deposit: Number,                    //当前实际押金
-  changeDeposit: Number,              //补交或退还的押金
-  rental: Number,                     //租金
-  oweRental: Number,                  //欠租金
-  oweRentalRepay: Number,             //补欠租金
+  subscription: Number,               //定金，正数
+  refund: Number,                     //退定金，正数
+  deposit: Number,                    //当前实际押金，正数
+  changeDeposit: Number,              //补交或退还的押金，正数为增收，负数为减收
+  rental: Number,                     //租金，正数
+  oweRental: Number,                  //欠租金，正数
+  oweRentalRepay: Number,             //补欠租金，正数
   waterCharges: Number,               //水费
   electricCharges: Number,            //电费
   servicesCharges: Number,            //物业费
   doorCardCount: Number,              //门卡
   doorCardCharges: Number,            //门卡费
-  doorCardRecoverCharges: Number,     //门卡回收费
-  overdueCharges: Number,             //逾期罚款
+  doorCardRecoverCharges: Number,     //门卡回收费，正数
+  overdueCharges: Number,             //逾期罚款，正数
   compensation: Number,               //损坏赔偿
 
   summed: Number,                     //总计

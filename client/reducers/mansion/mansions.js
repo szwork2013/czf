@@ -10,7 +10,8 @@ import { SIGNOUT, GET_MANSIONS_SUCCESS, GET_MANSIONS_INFO_SUCCESS, ADD_MANSION_S
   SAVE_HOUSES_SUCCESS, SAVE_FLOOR_SUCCESS, SAVE_MANAGERS_INFO_SUCCESS,
   HOUSE_CHECK_IN_SUCCESS, HOUSE_PAY_RENT_SUCCESS, HOUSE_SUBSCRIBE_SUCCESS,
   HOUSE_REPAY_SUCCESS, HOUSE_UNSUBSCRIBE_SUCCESS, HOUSE_CHECK_OUT_SUCCESS,
-  HOUSE_DOORCARD_SUCCESS } from '../../constants/actionTypes';
+  HOUSE_DOORCARD_SUCCESS,
+  GET_CHARGES_SUCCESS } from '../../constants/actionTypes';
 
 
 
@@ -116,6 +117,12 @@ export default (state = initialState, action) => {
         mansion.houses[idx] = houseRet
         mansion.houses[idx].charge = charge
       }
+      return newMansions
+    case GET_CHARGES_SUCCESS:
+      newMansions = _.assign({}, state)
+      data = action.resData.data
+      mansion = newMansions[data.mansionId]
+      mansion.charges = data.charges
       return newMansions
 
     case SIGNOUT:
