@@ -21,7 +21,7 @@ class CommonTextField extends Component {
     if (nextProps.defaultValue === props.defaultValue &&
         nextProps.value === props.value &&
         nextProps.disabled === props.disabled) {
-      return true;
+      return false;
     }
     return true;
   }
